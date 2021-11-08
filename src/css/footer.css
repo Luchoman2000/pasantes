@@ -1,0 +1,26 @@
+.linea_pie {
+    position: relative;
+}
+
+.pin-to-bottom {
+    position: inherit;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+}
+
+.fo {
+
+    background-color: #000000;
+    box-shadow: 0 6px 6px 0 rgba(0, 0, 0, 0.12);
+    box-sizing: border-box;
+    width: 100%;
+    text-align: center;
+    font: bold 16px sans-serif;
+    padding: 35px 35px;
+    color: rgb(94, 94, 94);
+
+    /* position: static; */
+    /* position: initial; */
+
+}
