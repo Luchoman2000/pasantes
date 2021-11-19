@@ -34,7 +34,8 @@ if ($vistas == "login" || $vistas == "404" || $vistas == "logout") {
         <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/bulma.min.css">
         <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/font-awesome.min.css">
         <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/bulma-tootip.min.css">
-        <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/sweetalert2.min.css">
+        <!-- <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/sweetalert2.min.css"> -->
+        <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/sw.bulma.min.css">
         <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/dataTables.bulma.min.css">
         <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/fixedColumns.dataTables.min.css">
         <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-list/css/bulma-list.css"> -->
@@ -54,7 +55,20 @@ if ($vistas == "login" || $vistas == "404" || $vistas == "logout") {
         <!-- <script src="https://cdn.datatables.net/fixedcolumns/4.0.0/js/dataTables.fixedColumns.min.js"></script> -->
         <script src="<?php echo SERVERURL ?>src/js/sweetalert2.min.js"></script>
         <script src="<?php echo SERVERURL ?>src/js/nav.js"></script>
-        <script src="<?php echo SERVERURL ?>src/js/ajax-asistencia.js"></script>
+
+
+        <?php if ($_SESSION['rol'] == 'PASANTE') {
+        ?>
+            <script src="<?php echo SERVERURL ?>src/js/ajax-asistencia.js"></script>
+        <?php
+        } elseif ($_SESSION['rol'] == 'ADMINISTRADOR') {
+        ?>
+
+            <script src="<?php echo SERVERURL ?>src/js/ajax-asistencia-admin.js"></script>
+        <?php
+        } ?>
+
+
 
         <!-- <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/main.css"> -->
         <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/nav.css">

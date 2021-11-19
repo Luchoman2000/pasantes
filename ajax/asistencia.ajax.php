@@ -8,6 +8,9 @@ if (
     || isset($_POST['almuerzo_inicio'])
     || isset($_POST['almuerzo_fin'])
     || isset($_POST['salida'])
+    || (isset($_POST['id']) && $_POST['borrar_registro'] == true)
+    || (isset($_POST['asiId_u']) && isset($_POST['h_entrada_u']))
+    || (isset($_POST['per_id_C']) && isset($_POST['nueva_asistencia']))
     
 ) {
     require_once "./../controller/asistencia.controlador.php";
@@ -35,4 +38,24 @@ if (
         $MarcarSalida->CtrMarcarSalida();
     }
 
+    // =ADMIN=
+    // Para eliminar un registro de un pasante
+    if (isset($_POST['id']) && $_POST['borrar_registro'] == true) {
+        $EliminarRegistro = new AsistenciaControlador();
+        $EliminarRegistro->CtrEliminarRegistro();
+    }
+
+    // Para editar el registro de un pasante
+    if (isset($_POST['asiId_u']) && isset($_POST['h_entrada_u'])) {
+        $EditarRegistro = new AsistenciaControlador();
+        $EditarRegistro->CtrEditarRegistro();
+    }
+
+    // Para crear un registro de un pasante
+    if (isset($_POST['per_id_C']) && isset($_POST['nueva_asistencia'])) {
+        $CrearRegistro = new AsistenciaControlador();
+        $CrearRegistro->CtrCrearRegistro();
+    }
+}else{
+    echo "No se ha enviado ninguna información";
 }

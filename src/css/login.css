@@ -89,10 +89,10 @@ body :-ms-input-placeholder {
 }
 
 .container h1 {
-  font-size: 40px;
+  font-size: 60px;
   transition-duration: 1s;
   transition-timing-function: ease-in-put;
-  font-weight: 200;
+  font-weight: 300;
 }
 
 form {
@@ -108,13 +108,14 @@ form input {
   outline: 0;
   border: 1px solid rgba(255, 255, 255, 0.4);
   background-color: rgba(255, 255, 255, 0.2);
-  width: 250px;
+  width: 275px;
+  height: 45px;
   border-radius: 3px;
   padding: 10px 15px;
   margin: 0 auto 10px auto;
   display: block;
   text-align: center;
-  font-size: 18px;
+  font-size: 20px;
   color: white;
   transition-duration: 0.25s;
   font-weight: 300;
@@ -126,8 +127,9 @@ form input:hover {
 
 form input:focus {
   background-color: white;
-  width: 275px;
-  color: #53bae3;
+  width: 300px;
+  font-weight: 300;
+  color: #000000;
 }
 
 form button {
@@ -138,9 +140,9 @@ form button {
   background-color: white;
   border: 0;
   padding: 10px 15px;
-  color: #53bae3;
+  color: #000000;
   border-radius: 3px;
-  width: 250px;
+  width: 275px;
   cursor: pointer;
   font-size: 18px;
   transition-duration: 0.25s;

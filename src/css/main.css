@@ -7,16 +7,25 @@ html {
 }
 
 
+.tdMiddle {
+    vertical-align: middle !important;
+}
+
+table.dataTable td {
+    font-size: 5em;
+}
+
 .columns.is-vcentered {
     -webkit-box-align: center;
-       -ms-flex-align: center;
-          align-items: center;
-  }
+    -ms-flex-align: center;
+    align-items: center;
+}
+
 .swing {
     perspective: 100px;
 }
 
-#almuerzo{
+#almuerzo {
     display: none;
 }
 
@@ -33,6 +42,7 @@ div.almuerzo.box {
     transform: none;
     transition: all 0.5s cubic-bezier(.36, -0.64, .34, 1.76);
 }
+
 #almuerzo.show:hover {
     display: inherit;
 }

@@ -55,7 +55,6 @@ class AsistenciaModelo extends mainModel
     }
 
 
-
     // Para marcar inicio del almuerzo
     protected function MdlMarcarAlmuerzoInicio($datos)
     {
@@ -126,12 +125,12 @@ class AsistenciaModelo extends mainModel
         $sql0->execute();
         $a = $sql0;
         $sql0 = null;
-        
+
         // var_dump($a);
 
         //Validar si hay registros
 
-        
+
         if ($a->rowCount() >= 1) {
             $a = $a->fetch();
             if ($t_marcado == 'ingreso') {
@@ -175,7 +174,7 @@ class AsistenciaModelo extends mainModel
                     exit();
                 }
             }
-        }else{
+        } else {
             $res = true;
             return $res;
             exit();
@@ -213,6 +212,35 @@ class AsistenciaModelo extends mainModel
             ':per_id' => $id,
 
         ));
+        return $sql;
+        $sql = null;
+    }
+
+    // =ADMIN=
+    // Para editar registro de pasante
+    protected function MdlEditarRegistro($datos)
+    {
+        $id = $datos['asi_id'];
+        $dia = $datos['asi_dia'];
+        $h_ingreso = $datos['asi_hora_ingreso'];
+        $h_almuerzo_inicio = $datos['asi_hora_salida_a'];
+        $h_almuerzo_fin = $datos['asi_hora_regreso_a'];
+        $h_salida = $datos['asi_hora_salida'];
+
+        $sql = mainModel::conectar()->prepare("UPDATE asistencia SET 
+        asi_hora_ingreso = ?,
+        asi_hora_salida_a = ?,
+        asi_hora_regreso_a = ?,
+        asi_hora_salida = ?
+        WHERE asi_id = ?");
+        $sql->execute(array(
+            $h_ingreso,
+            $h_almuerzo_inicio,
+            $h_almuerzo_fin,
+            $h_salida,
+            $id,
+        ));
+
         return $sql;
         $sql = null;
     }
