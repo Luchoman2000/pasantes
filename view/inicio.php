@@ -31,13 +31,15 @@ if ($vistas == "login" || $vistas == "404" || $vistas == "logout") {
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- <link rel="stylesheet" href="https://unpkg.com/bulma-modal-fx/dist/css/modal-fx.min.css" /> -->
         <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/bulma.min.css">
         <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/font-awesome.min.css">
         <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/bulma-tootip.min.css">
         <!-- <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/sweetalert2.min.css"> -->
-        <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/sw.bulma.min.css">
+        <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/sweetalert2.min.css">
         <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/dataTables.bulma.min.css">
         <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/fixedColumns.dataTables.min.css">
+        <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/modal-fx.min.css">
         <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-list/css/bulma-list.css"> -->
         <!-- <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/dataTables.bulma.min.css"> -->
         <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css"> -->
@@ -53,8 +55,10 @@ if ($vistas == "login" || $vistas == "404" || $vistas == "logout") {
         <!-- <script src="https://cdn.datatables.net/1.11.3/js/dataTables.bulma.min.js"></script> -->
         <script src="<?php echo SERVERURL ?>src/js/dataTables.fixedColumns.min.js"></script>
         <!-- <script src="https://cdn.datatables.net/fixedcolumns/4.0.0/js/dataTables.fixedColumns.min.js"></script> -->
-        <script src="<?php echo SERVERURL ?>src/js/sweetalert2.min.js"></script>
+        
         <script src="<?php echo SERVERURL ?>src/js/nav.js"></script>
+        <!-- <script src="<?php echo SERVERURL ?>src/js/modal-fx.js"></script> -->
+
 
 
         <?php if ($_SESSION['rol'] == 'PASANTE') {
@@ -69,13 +73,14 @@ if ($vistas == "login" || $vistas == "404" || $vistas == "logout") {
         } ?>
 
 
-
+        <link rel="manifest" href="<?php echo SERVERURL?>manifest.json">
         <!-- <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/main.css"> -->
         <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/nav.css">
         <!-- <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/footer.css"> -->
         <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"> -->
         <!-- <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script> -->
-
+        <!-- <meta name="theme-color" content="#00000"> -->
+        <!-- <meta name=""> -->
         <title>Asistencias</title>
     </head>
     <!-- <header>

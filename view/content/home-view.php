@@ -43,8 +43,7 @@ if ($_SESSION['rol'] == 'PASANTE') {
     <div class="card-content">
       <div class="container mW alignCenter content">
         <h1 class="title has-text-success">Bienvenido</h1>
-        <h1 class="subtitle"><?php echo $_SESSION['nombre'] . " " . $_SESSION['apellido']; ?></h1>
-        <h1 class="subtitle"><?php echo $_SESSION['rol']; ?></h1>
+        <h1 class="subtitle"><?php $n = strtolower($_SESSION['nombre'] . " " . $_SESSION['apellido']); echo ucwords($n); ?></h1>
         <p>Registra tu asistencia a continuación:</p>
       </div>
     </div>
@@ -209,6 +208,8 @@ if ($_SESSION['rol'] == 'PASANTE') {
       </div>
     </div>
   </div>
+
+
   <br>
   <br>
 
@@ -219,7 +220,8 @@ if ($_SESSION['rol'] == 'PASANTE') {
 <?php
 } elseif ($_SESSION['rol'] == "ADMINISTRADOR") {
 ?>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-list/css/bulma-list.css">
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-list/css/bulma-list.css"> -->
+  <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/bulma-list.css">
   <div class="card">
     <div class="card-content">
       <div class="container mW alignCenter content">
@@ -254,7 +256,7 @@ if ($_SESSION['rol'] == 'PASANTE') {
             <div class="column">
               <div class="field has-addons">
                 <div class="control">
-                  <button id="nuevo_registros" class="button is-success modal-button" data-target="#nuevo_registro" data-toggle="modal">
+                  <button id="nuevo_registros" class="button is-success modal-button" data-target="nuevo_registro" data-toggle="modal">
                     <span class="icon is-small">
                       <i class="fa fa-plus"></i>
                     </span>
@@ -362,7 +364,7 @@ if ($_SESSION['rol'] == 'PASANTE') {
   </div>
   <!-- <button class="button is-dark is-inverted modal-button" data-toggle="modal" >Open modal</button> -->
 
-  <div class="modal" id="edit_hora">
+  <div class="modal modal-fx-fadeInScale" id="edit_hora">
     <div class="modal-background"></div>
     <div class="modal-content">
       <div class="modal-card">
@@ -435,7 +437,7 @@ if ($_SESSION['rol'] == 'PASANTE') {
   </div>
 
 
-  <div class="modal" id="nuevo_registro">
+  <div class="modal modal-fx-fadeInScale" id="nuevo_registro">
     <div class="modal-background"></div>
     <div class="modal-content">
       <div class="modal-card">
@@ -541,7 +543,7 @@ if ($_SESSION['rol'] == 'PASANTE') {
       window.location.href = "registro/" + id;
     })
   </script>
-  <script type="module">
+  <!-- <script type="module">
     import BulmaModal from './src/js/BulmaModal.js'
 
     // document.querySelector(".modal").addEventListener("modal:show", (event) => {
@@ -549,10 +551,11 @@ if ($_SESSION['rol'] == 'PASANTE') {
     // });
     const modals = document.querySelectorAll("[data-toggle='modal']");
     modals.forEach((modal) => new BulmaModal(modal));
-  </script>
+  </script> -->
 <?php
 }
 ?>
+
 <script>
   // if ($('#des_m_salida').text() != 'Sin marcar') {
   //   Swal.fire({

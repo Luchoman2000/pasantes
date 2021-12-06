@@ -6,7 +6,6 @@ html {
     overflow: hidden;
 }
 
-
 .tdMiddle {
     vertical-align: middle !important;
 }
@@ -130,3 +129,4 @@ div.container {
 td.nowrap {
     white-space: nowrap;
 }
+

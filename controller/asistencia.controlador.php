@@ -83,16 +83,20 @@ class AsistenciaControlador extends AsistenciaModelo
             "dia" => $today,
             "h_almuerzo_fin" => $h_almuerzo
         ];
-
-        $validar = AsistenciaModelo::MdlValidarAsistencia($datos, "almuerzo_fin");
-        if (!$validar) {
-            $res = 2;
+        $validar_a = AsistenciaModelo::MdlValidarAsistencia($datos, "validar_almuerzo_fin");
+        if (!$validar_a) {
+            $res = 3;
         } else {
-            $insertar = AsistenciaModelo::MdlMarcarAlmuerzoFin($datos);
-            if ($insertar->rowCount() >= 1) {
-                $res = 1;
+            $validar = AsistenciaModelo::MdlValidarAsistencia($datos, "almuerzo_fin");
+            if (!$validar) {
+                $res = 2;
             } else {
-                $res = 0;
+                $insertar = AsistenciaModelo::MdlMarcarAlmuerzoFin($datos);
+                if ($insertar->rowCount() >= 1) {
+                    $res = 1;
+                } else {
+                    $res = 0;
+                }
             }
         }
         echo $res;
@@ -190,7 +194,8 @@ class AsistenciaControlador extends AsistenciaModelo
                 $h_ingreso = $row['asi_hora_ingreso'];
                 $h_almuerzo_inicio = $row['asi_hora_salida_a'];
                 $h_almuerzo_fin = $row['asi_hora_regreso_a'];
-                $h_salida = $row['asi_hora_salida'];
+                // $h_salida = $row['asi_hora_salida'];
+                $h_salida = ($row['asi_hora_salida'] == "00:00:00") ? $row['asi_hora_ingreso'] : $row['asi_hora_salida'];
 
 
 
@@ -211,7 +216,7 @@ class AsistenciaControlador extends AsistenciaModelo
                 if ($h_almuerzo_fin == "00:00:00") {
                     $h_almuerzo_fin = "--:--:--";
                 }
-                if ($h_salida == "00:00:00") {
+                if ($h_salida == $h_ingreso) {
                     $h_salida = "--:--:--";
                 }
                 $horas[] = $total_horas;
@@ -478,6 +483,59 @@ class AsistenciaControlador extends AsistenciaModelo
         // echo "<script>console.log(" . json_encode($card) . ")</script>";
     }
 
+    //Mostrar calendario para FullCalendar
+    public function CtrMostrarCalendario()
+    {
+        $id_pasante = $_SESSION['p_id'];
+        $query = "SELECT * FROM asistencia WHERE per_id = '$id_pasante'";
+        $sql = mainModel::ejecutar_consulta_simple($query);
+        $datos = $sql->fetchAll();
+        $card = array();
+        $today = date("Y-m-d");
+        foreach ($datos as $key => $value) {
+            // $card[$key]['id'] = $value['asi_id'];
+            // $card[$key]['title'] = 'Valor de ' . $value['asi_id'];
+
+            //Si se conmpleto el dias de asistencia
+            if ($value['asi_hora_salida'] != "00:00:00" && $value['asi_hora_ingreso'] != "00:00:00") {
+                $card[$key]['id'] = $value['asi_id'];
+                $card[$key]['h_ingreso'] = $value['asi_hora_ingreso'];
+                $card[$key]['h_salida'] = $value['asi_hora_salida'];
+
+                $card[$key]['title'] = 'Completo';
+                $card[$key]['dia'] = $value['asi_dia'];
+                $card[$key]['start'] = $value['asi_dia'] . ' ' . $value['asi_hora_ingreso'];
+                $card[$key]['end'] = $value['asi_dia'] . ' ' . $value['asi_hora_salida'];
+                $card[$key]['color'] = '#00d1b2';
+            } elseif ($today == $value['asi_dia'] && $value['asi_hora_ingreso'] != "00:00:00" && $value['asi_hora_salida'] == "00:00:00") {
+                $card[$key]['id'] = $value['asi_id'];
+                $card[$key]['h_ingreso'] = $value['asi_hora_ingreso'];
+                $card[$key]['h_salida'] = $value['asi_hora_salida'];
+
+                $card[$key]['title'] = 'Pendiente';
+                $card[$key]['dia'] = $value['asi_dia'];
+                $card[$key]['start'] = $value['asi_dia'] . ' ' . $value['asi_hora_ingreso'];
+                $card[$key]['end'] = $value['asi_dia'] . ' ' . $value['asi_hora_salida'];
+                $card[$key]['color'] = '#ff7675';
+            } else {
+                // $value['asi_hora_salida'] = $value['asi_hora_ingreso'];
+                $card[$key]['id'] = $value['asi_id'];
+                $card[$key]['title'] = 'Incompleto';
+                $card[$key]['dia'] = $value['asi_dia'];
+
+                $card[$key]['h_ingreso'] = $value['asi_hora_ingreso'];
+                $card[$key]['h_salida'] = $value['asi_hora_salida'];
+                $card[$key]['start'] = $value['asi_dia'] . ' ' . $value['asi_hora_ingreso'];
+                $card[$key]['end'] = $value['asi_dia'] . ' ' . $value['asi_hora_salida'];
+                $card[$key]['color'] = '#ff0000';
+            }
+            // $card[$key]['start'] = $value['asi_dia'] . ' ' . $value['asi_hora_ingreso'];
+            // $card[$key]['end'] = $value['asi_dia'] . ' ' . $value['asi_hora_salida'];
+            // $card[$key]['color'] = '#00d1b2';
+        }
+        echo json_encode($card);
+    }
+
     // =ADMIN=
 
     // Mostrar el Home del Administrador
@@ -542,7 +600,7 @@ class AsistenciaControlador extends AsistenciaModelo
                                 </span>
                             </button>
 
-                            <button id="editar_registro" data-tooltip="Editar" class="button is-dark is-inverted modal-button" data-target="#edit_hora" data-toggle="modal">
+                            <button id="editar_registro" data-tooltip="Editar" class="button is-dark is-inverted modal-button" data-target="edit_hora" data-toggle="modal">
                                 <span class="icon">
                                     <i class="fa fa-pencil"></i>
                                 </span>
@@ -825,7 +883,7 @@ class AsistenciaControlador extends AsistenciaModelo
                 <th>Almuerzo fin</th>
                 <th>Salida</th>
                 <th>Horas</th>
-                <th>Acción</th>
+                <th style="text-align: center;">Acción</th>
             </tr>
         </thead>
         <tbody>';
@@ -870,21 +928,21 @@ class AsistenciaControlador extends AsistenciaModelo
 
                     $tabla .= '
                     <tr>
-                    <td>' . ucwords($nombre) . '</td>
-                    <td>' . $fecha . '</td>
-                    <td>' . $h_ingreso . '</td>
+                    <td style="vertical-align: middle;">' . ucwords($nombre) . '</td>
+                    <td style="vertical-align: middle;">' . $fecha . '</td>
+                    <td style="vertical-align: middle;">' . $h_ingreso . '</td>
                     <td colspan="2" class="has-text-centered">Sin almuerzo</td>
                     <td style="display: none;"></td>
-                    <td>' . $h_salida . '</td>
-                    <td>' . $total_horas . '</td>
-                    <td>
-                        <button id="' . mainModel::encryption($row['per_id']) . '" class="button is-info is-light is-small verRegistro" data-tooltip="Lista">
-                            <span class="icon is-small">
+                    <td style="vertical-align: middle;">' . $h_salida . '</td>
+                    <td style="vertical-align: middle;">' . $total_horas . '</td>
+                    <td style="vertical-align: middle;">
+                        <button style="height: fit-content;" id="' . mainModel::encryption($row['per_id']) . '" class="button is-info is-outlined verRegistro" data-tooltip="Lista">
+                            <span class="icon">
                                 <i class="fa fa-external-link"></i>
                             </span>
                         </button>
-                        <button id="' . mainModel::encryption($row['asi_id']) . '" class="button is-danger is-light is-small eliminarRegistro" data-tooltip="Eliminar" >
-                            <span class="icon is-small">
+                        <button style="height: fit-content;" id="' . mainModel::encryption($row['asi_id']) . '" class="button is-danger is-outlined eliminarRegistro" data-tooltip="Eliminar" >
+                            <span class="icon">
                                 <i class="fa fa-trash"></i>
                             </span>
                         </button>
@@ -894,21 +952,21 @@ class AsistenciaControlador extends AsistenciaModelo
                 } else {
                     $tabla .= '
                     <tr>
-                    <td>' . ucwords($nombre) . '</td>
-                    <td>' . $fecha . '</td>
-                    <td>' . $h_ingreso . '</td>
-                    <td>' . $h_almuerzo_inicio . '</td>
-                    <td>' . $h_almuerzo_fin . '</td>
-                    <td>' . $h_salida . '</td>
-                    <td>' . $total_horas . '</td>
-                    <td>
-                        <button id="' . mainModel::encryption($row['per_id']) . '" class="button is-info is-light is-small verRegistro" data-tooltip="Lista">
-                            <span class="icon is-small">
+                    <td style="vertical-align: middle;">' . ucwords($nombre) . '</td>
+                    <td style="vertical-align: middle;">' . $fecha . '</td>
+                    <td style="vertical-align: middle;">' . $h_ingreso . '</td>
+                    <td style="vertical-align: middle;">' . $h_almuerzo_inicio . '</td>
+                    <td style="vertical-align: middle;">' . $h_almuerzo_fin . '</td>
+                    <td style="vertical-align: middle;">' . $h_salida . '</td>
+                    <td style="vertical-align: middle;">' . $total_horas . '</td>
+                    <td style="vertical-align: middle;">
+                        <button style="height: fit-content;" id="' . mainModel::encryption($row['per_id']) . '" class="button is-info is-outlined verRegistro" data-tooltip="Lista">
+                            <span class="icon">
                                 <i class="fa fa-external-link"></i>
                             </span>
                         </button>
-                        <button id="' . mainModel::encryption($row['asi_id']) . '" class="button is-danger is-light is-small eliminarRegistro" data-tooltip="Eliminar" >
-                            <span class="icon is-small">
+                        <button style="height: fit-content;" id="' . mainModel::encryption($row['asi_id']) . '" class="button is-danger is-outlined eliminarRegistro" data-tooltip="Eliminar" >
+                            <span class="icon">
                                 <i class="fa fa-trash"></i>
                             </span>
                         </button>
@@ -943,13 +1001,14 @@ class AsistenciaControlador extends AsistenciaModelo
         }
         // @$persona_id = $_SESSION['p_id']; // ID de la persona
         // Obtener los registros del pasante
-        $sql = mainModel::ejecutar_consulta_simple("SELECT * FROM asistencia WHERE per_id = $persona_id ORDER BY asi_id DESC");
+        if (is_numeric($persona_id)) {
 
-        //Variable total de horas
-        $horas = array();
 
-        $tabla = "";
-        $tabla .= '<table id="example" class="table stripe row-border order-column nowrap" style="width:100%; box-sizing: inherit;">
+            $sql = mainModel::ejecutar_consulta_simple("SELECT * FROM asistencia WHERE per_id = $persona_id ORDER BY asi_id DESC");
+            //Variable total de horas
+            $horas = array();
+            $tabla = "";
+            $tabla .= '<table id="example" class="table stripe row-border order-column nowrap" style="width:100%; box-sizing: inherit;">
             <thead>
                 <tr>
                     <th>Fecha</th>
@@ -958,50 +1017,52 @@ class AsistenciaControlador extends AsistenciaModelo
                     <th>Almuerzo fin</th>
                     <th>Salida</th>
                     <th>Horas</th>
-                    <th>Acción</th>
+                    <th style="text-align: center;">Acción</th>
                 </tr>
             </thead>
             <tbody>';
-        if ($sql->rowCount() >= 1) {
+            echo $sql->errorInfo()[2];
+            if ($sql->errorCode() == "00000") {
+                if ($sql->rowCount() >= 1) {
 
-            $datos = $sql->fetchAll();
-            foreach ($datos as $row) {
+                    $datos = $sql->fetchAll();
+                    foreach ($datos as $row) {
 
-                // vars
-                $fecha = $row['asi_dia'];
-                $h_ingreso = $row['asi_hora_ingreso'];
-                $h_almuerzo_inicio = $row['asi_hora_salida_a'];
-                $h_almuerzo_fin = $row['asi_hora_regreso_a'];
-                $h_salida = $row['asi_hora_salida'];
-
-
-
-                //Diferencia entre horas entrada y salida
-                $diff = $this->getTimeDiff($h_ingreso, $h_salida);
-
-                //Diferencia entre horas almuerzo inicio y almuerzo fin
-                $diff_a = $this->getTimeDiff($h_almuerzo_inicio, $h_almuerzo_fin);
-
-                //Total de horas trabajadas
-                $total_horas = $this->getTimeDiff($diff_a, $diff);
+                        // vars
+                        $fecha = $row['asi_dia'];
+                        $h_ingreso = $row['asi_hora_ingreso'];
+                        $h_almuerzo_inicio = $row['asi_hora_salida_a'];
+                        $h_almuerzo_fin = $row['asi_hora_regreso_a'];
+                        $h_salida = $row['asi_hora_salida'];
 
 
 
-                if ($h_almuerzo_inicio == "00:00:00") {
-                    $h_almuerzo_inicio = "--:--:--";
-                }
-                if ($h_almuerzo_fin == "00:00:00") {
-                    $h_almuerzo_fin = "--:--:--";
-                }
-                if ($h_salida == "00:00:00") {
-                    $h_salida = "--:--:--";
-                }
-                $horas[] = $total_horas;
+                        //Diferencia entre horas entrada y salida
+                        $diff = $this->getTimeDiff($h_ingreso, $h_salida);
 
-                if ($h_almuerzo_inicio == "--:--:--" && $h_almuerzo_fin == "--:--:--" && $h_salida != "--:--:--") {
+                        //Diferencia entre horas almuerzo inicio y almuerzo fin
+                        $diff_a = $this->getTimeDiff($h_almuerzo_inicio, $h_almuerzo_fin);
+
+                        //Total de horas trabajadas
+                        $total_horas = $this->getTimeDiff($diff_a, $diff);
 
 
-                    $tabla .= '
+
+                        if ($h_almuerzo_inicio == "00:00:00") {
+                            $h_almuerzo_inicio = "--:--:--";
+                        }
+                        if ($h_almuerzo_fin == "00:00:00") {
+                            $h_almuerzo_fin = "--:--:--";
+                        }
+                        if ($h_salida == "00:00:00") {
+                            $h_salida = "--:--:--";
+                        }
+                        $horas[] = $total_horas;
+
+                        if ($h_almuerzo_inicio == "--:--:--" && $h_almuerzo_fin == "--:--:--" && $h_salida != "--:--:--") {
+
+
+                            $tabla .= '
                         <tr>
                         <td style="vertical-align: middle;">' . $fecha . '</td>
                         <td style="vertical-align: middle;">' . $h_ingreso . '</td>
@@ -1009,21 +1070,21 @@ class AsistenciaControlador extends AsistenciaModelo
                         <td style="display: none;"></td>
                         <td style="vertical-align: middle;">' . $h_salida . '</td>
                         <td style="vertical-align: middle;">' . $total_horas . '</td>
-                        <td style="vertical-align: middle;">
-                            <button id="' . mainModel::encryption($row['asi_id']) . '" class="button is-success is-light is-small editarRegistro" data-tooltip="Editar" data-target="#edit_hora" data-toggle="modal">
-                                <span class="icon is-medium">
+                        <td style="vertical-align: middle; text-align: center;">
+                            <button style="height: fit-content;" id="' . mainModel::encryption($row['asi_id']) . '" class="button is-success is-outlined editarRegistro modal-button" data-tooltip="Editar" data-target="edit_hora" data-toggle="modal">
+                                <span class="icon">
                                     <i class="fa fa-pencil"></i>
                                 </span>
                             </button>
-                            <button id="' . mainModel::encryption($row['asi_id']) . '" class="button is-danger is-light is-small eliminarRegistro" data-tooltip="Eliminar" >
-                                <span class="icon is-small">
+                            <button style="height: fit-content;" id="' . mainModel::encryption($row['asi_id']) . '" class="button is-danger is-outlined eliminarRegistro" data-tooltip="Eliminar" >
+                                <span class="icon">
                                     <i class="fa fa-trash"></i>
                                 </span>
                             </button>
                         </tr>
                         ';
-                } else {
-                    $tabla .= '
+                        } else {
+                            $tabla .= '
                         <tr>
                         <td style="vertical-align: middle;">' . $fecha . '</td>
                         <td style="vertical-align: middle;">' . $h_ingreso . '</td>
@@ -1031,36 +1092,45 @@ class AsistenciaControlador extends AsistenciaModelo
                         <td style="vertical-align: middle;">' . $h_almuerzo_fin . '</td>
                         <td style="vertical-align: middle;">' . $h_salida . '</td>
                         <td style="vertical-align: middle;">' . $total_horas . '</td>
-                        <td style="vertical-align: middle;">
+                        <td style="vertical-align: middle; text-align: center;">
                         
-                            <button id="' . mainModel::encryption($row['asi_id']) . '" class="button is-success is-light is-small modal-button editarRegistro" data-tooltip="Editar" data-target="#edit_hora" data-toggle="modal">
-                                <span class="icon is-medium">
+                            <button style="height: fit-content;" id="' . mainModel::encryption($row['asi_id']) . '" class="button is-success is-outlined modal-button editarRegistro" data-tooltip="Editar" data-target="edit_hora" data-toggle="modal">
+                                <span class="icon">
                                     <i class="fa fa-pencil"></i>
                                 </span>
                             </button>
-                            <button id="' . mainModel::encryption($row['asi_id']) . '" class="button is-danger is-light is-small eliminarRegistro" data-tooltip="Eliminar" >
-                                <span class="icon is-small">
+                            <button style="height: fit-content;" id="' . mainModel::encryption($row['asi_id']) . '" class="button is-danger is-outlined eliminarRegistro" data-tooltip="Eliminar" >
+                                <span class="icon">
                                     <i class="fa fa-trash"></i>
                                 </span>
                             </button>
 
                         </tr>
                         ';
-                }
-            }
-        } else {
-            $tabla .= '
+                        }
+                    }
+                } else {
+                    $tabla .= '
                 <tr>
                     <td colspan="6">No hay registros</td>
                 </tr>
                 ';
-        }
-
-        $tabla .= '</tbody>
+                }
+            } else {
+                $tabla .= '<tr>
+                <td colspan="6">No hay registros</td>
+            </tr>';
+            }
+            $tabla .= '</tbody>
             </table>
             <input class="total_horas" value="' . $this->getSumHours($horas) . '" hidden></input>
             
             ';
+        } else {
+            $tabla = '<tr>
+            <td colspan="6">No hay registros</td>
+            </tr>';
+        }
         echo $tabla;
     }
 
@@ -1068,12 +1138,19 @@ class AsistenciaControlador extends AsistenciaModelo
     //Obtener nombre del pasante
     public function CtrGetNombrePasante($id)
     {
-        $sql = mainModel::conectar()->prepare("SELECT CONCAT(per_pri_nombre, ' ', per_seg_nombre, ' ', per_pri_apellido, ' ', per_seg_apellido) as nombre FROM personal WHERE per_id = ?");
-        $sql->execute(array(mainModel::decryption($id)));
-        $row = $sql->fetch();
-        $nombre = strtolower($row['nombre']);
+        $id = mainModel::decryption($id);
+        if (is_numeric($id)) {
 
-        return ucwords($nombre);
+
+            $sql = mainModel::conectar()->prepare("SELECT CONCAT(per_pri_nombre, ' ', per_seg_nombre, ' ', per_pri_apellido, ' ', per_seg_apellido) as nombre FROM personal WHERE per_id = ?");
+            $sql->execute(array($id));
+            $row = $sql->fetch();
+            @$nombre = strtolower($row['nombre']);
+
+            return ucwords($nombre);
+        } else {
+            return "NO NAME";
+        }
     }
 
     // Funcion para obtener la diferencia de horas

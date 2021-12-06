@@ -174,6 +174,15 @@ class AsistenciaModelo extends mainModel
                     exit();
                 }
             }
+            if ($t_marcado == 'validar_almuerzo_fin') {
+                if ($a['asi_hora_salida_a'] != '00:00:00' && $a['asi_hora_regreso_a'] == '00:00:00') {
+                    $res = true;
+                    return $res;
+
+                    exit();
+                }
+            }
+
         } else {
             $res = true;
             return $res;

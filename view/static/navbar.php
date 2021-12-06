@@ -11,13 +11,19 @@ if ($_SESSION['rol'] == 'PASANTE') {
             <nav id="navigation">
                 <div id="navigationBox">
                     <div class="call">
-                        <a href="registro" title="Registros"><i class="fa fa-calendar"></i><span>Registros</span></a>
+                        <a href="registro" title="Registros">
+                            <i class="fa fa-calendar"></i>
+                            <span>Registros</span>
+                        </a>
                     </div>
                     <div class="nav-trigger">
                         Menu
                     </div>
                     <div class="email">
-                        <a href="perfil" title="Perfil"><i class="fa fa-user"></i><span>Perfil</span></a>
+                        <a href="home" title="Perfil">
+                            <i class="fa fa-home"></i>
+                            <span>Home</span>
+                        </a>
                     </div>
                 </div>
                 <ul class="menu">
@@ -41,22 +47,29 @@ if ($_SESSION['rol'] == 'PASANTE') {
         </a> -->
             <!--Where the magic happens-->
             <nav id="navigation">
-                <div id="navigationBox">
-                    <div class="call">
-                        <a href="registro" title="Registros"><i class="fa fa-calendar"></i><span>Registros</span></a>
-                    </div>
-                    <div class="nav-trigger">
-                        Menu
-                    </div>
-                    <div class="email">
-                        <a href="perfil" title="Perfil"><i class="fa fa-user"></i><span>Perfil</span></a>
-                    </div>
-                </div>
+
                 <?php
                 $ruta = explode("/", $_GET["views"]);
                 if (isset($ruta[1])) {
-                    ?>
-                        <ul class="menu">
+                ?>
+                    <div id="navigationBox">
+                        <div class="call">
+                            <a href="../registro" title="Registros">
+                                <i class="fa fa-calendar"></i>
+                                <span>Registros</span>
+                            </a>
+                        </div>
+                        <div class="nav-trigger">
+                            Menu
+                        </div>
+                        <div class="email">
+                            <a href="../home" title="Perfil">
+                                <i class="fa fa-home"></i>
+                                <span>Home</span>
+                            </a>
+                        </div>
+                    </div>
+                    <ul class="menu">
                         <li><a href="../home" title="Home">🏠 Home</a></li>
                         <li><a href="../registro" title="Registros">📝 Registros</a></li>
                         <li><a href="../admin" title="Administrador">⚙ Admin</a></li>
@@ -64,9 +77,26 @@ if ($_SESSION['rol'] == 'PASANTE') {
                         <li><a href="../logout" title="Salir">❌Salir</a></li>
                         <!-- <li><a href="#" title="Blog">Blog</a></li> -->
                     </ul>
-                    <?php
+                <?php
                 } else {
                 ?>
+                    <div id="navigationBox">
+                        <div class="call">
+                            <a href="registro" title="Registros">
+                                <i class="fa fa-calendar"></i>
+                                <span>Registros</span>
+                            </a>
+                        </div>
+                        <div class="nav-trigger">
+                            Menu
+                        </div>
+                        <div class="email">
+                            <a href="home" title="Perfil">
+                                <i class="fa fa-home"></i>
+                                <span>Home</span>
+                            </a>
+                        </div>
+                    </div>
                     <ul class="menu">
                         <li><a href="home" title="Home">🏠 Home</a></li>
                         <li><a href="registro" title="Registros">📝 Registros</a></li>

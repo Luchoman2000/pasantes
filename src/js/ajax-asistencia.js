@@ -122,11 +122,11 @@ $(document).on('click', '.m_entrada', function () {
 // Para marcar el inicio del almuerzo
 $(document).on('click', '#m_almuerzo_inicio', function () {
     // Do click stuff here
-    console.log('IS CLICKEEEEED almuerzo inicio');
+    // console.log('IS CLICKEEEEED almuerzo inicio');
     // $('.m_entrada').removeClass('is-success');
+
     $('#m_almuerzo_inicio').removeClass('is-light');
     $('#m_almuerzo_inicio').addClass('is-loading');
-
     $.ajax({
         type: "POST",
         url: SERVERURL + "/pasantes/ajax/asistencia.ajax.php",
@@ -190,67 +190,109 @@ $(document).on('click', '#m_almuerzo_inicio', function () {
 // Para marcar el fin del almuerzo
 $(document).on('click', '#m_almuerzo_fin', function () {
     // Do click stuff here
-    console.log('IS CLICKEEEEED almuerzo fin');
+    // console.log('IS CLICKEEEEED almuerzo fin');
     // $('.m_entrada').removeClass('is-success');
-    $('#m_almuerzo_fin').removeClass('is-light');
-    $('#m_almuerzo_fin').addClass('is-loading');
 
-    $.ajax({
-        type: "POST",
-        url: SERVERURL + "/pasantes/ajax/asistencia.ajax.php",
-        data: "almuerzo_fin=1",
-        success: function (response) {
-            console.log(response);
-            if (response == 1) {
-                $('#m_almuerzo_fin').addClass('is-light');
-                $('#m_almuerzo_fin').removeClass('is-loading');
-                $('#m_almuerzo_fin').removeClass('is-success');
-                // $('.m_entrada').children('#text_m_entrada').html('✔ Marcado ')
-                $('#m_almuerzo_fin').children('span').remove();
-                $('#des_m_almuerzo_fin').text('Marcado a la hora: ' + moment().format('HH:mm:ss'));
-                $('#m_almuerzo_fin').html('<span>✔ Marcado</span>')
-                $('#m_almuerzo_fin').prop("disabled", true);
-
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: "top-end",
-                    showConfirmButton: false,
-                    timer: 2000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener("mouseenter", Swal.stopTimer)
-                        toast.addEventListener("mouseleave", Swal.resumeTimer)
-                    }
-                })
-
-                Toast.fire({
-                    icon: "success",
-                    title: "Almuerzo finalizado ✔"
-                })
-            } else if (response == 2) {
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: "top-end",
-                    showConfirmButton: false,
-                    timer: 1000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener("mouseenter", Swal.stopTimer)
-                        toast.addEventListener("mouseleave", Swal.resumeTimer)
-                    },
-                    willClose: () => {
-                        location.reload();
-                    }
-
-                });
-
-                Toast.fire({
-                    icon: "error",
-                    title: "Ya marcó su regreso del almuerzo 🤐 "
-                });
+    if (!$('#m_almuerzo_inicio').is(':disabled')) {
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 1000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener("mouseenter", Swal.stopTimer)
+                toast.addEventListener("mouseleave", Swal.resumeTimer)
             }
-        }
-    });
+
+        });
+
+        Toast.fire({
+            icon: "error",
+            title: "Debe marcar primero el inicio del almuerzo 😑 "
+        });
+    } else {
+        $('#m_almuerzo_fin').removeClass('is-light');
+        $('#m_almuerzo_fin').addClass('is-loading');
+
+        $.ajax({
+            type: "POST",
+            url: SERVERURL + "/pasantes/ajax/asistencia.ajax.php",
+            data: "almuerzo_fin=1",
+            success: function (response) {
+                console.log(response);
+                if (response == 1) {
+                    $('#m_almuerzo_fin').addClass('is-light');
+                    $('#m_almuerzo_fin').removeClass('is-loading');
+                    $('#m_almuerzo_fin').removeClass('is-success');
+                    // $('.m_entrada').children('#text_m_entrada').html('✔ Marcado ')
+                    $('#m_almuerzo_fin').children('span').remove();
+                    $('#des_m_almuerzo_fin').text('Marcado a la hora: ' + moment().format('HH:mm:ss'));
+                    $('#m_almuerzo_fin').html('<span>✔ Marcado</span>')
+                    $('#m_almuerzo_fin').prop("disabled", true);
+
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: "top-end",
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener("mouseenter", Swal.stopTimer)
+                            toast.addEventListener("mouseleave", Swal.resumeTimer)
+                        }
+                    })
+
+                    Toast.fire({
+                        icon: "success",
+                        title: "Almuerzo finalizado ✔"
+                    })
+                } else if (response == 2) {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: "top-end",
+                        showConfirmButton: false,
+                        timer: 1000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener("mouseenter", Swal.stopTimer)
+                            toast.addEventListener("mouseleave", Swal.resumeTimer)
+                        },
+                        willClose: () => {
+                            location.reload();
+                        }
+
+                    });
+
+                    Toast.fire({
+                        icon: "error",
+                        title: "Ya marcó su regreso del almuerzo 🤐 "
+                    });
+                } else if (response == 3) {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: "top-end",
+                        showConfirmButton: false,
+                        timer: 1000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener("mouseenter", Swal.stopTimer)
+                            toast.addEventListener("mouseleave", Swal.resumeTimer)
+                        },
+                        willClose: () => {
+                            location.reload();
+                        }
+                    });
+
+                    Toast.fire({
+                        icon: "error",
+                        title: "Debe marcar primero el inicio del almuerzo 🤐 "
+                    });
+                }
+
+            }
+        });
+    }
 });
 
 // Para marcar la salida
@@ -402,3 +444,70 @@ $(document).on('click', '#m_salida', function () {
         });
     }
 })
+
+
+//Para exportar asistencia a word
+$(document).on('click', '#exportarWorda', function (e) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    // console.log(datos);
+
+    var form = $(this);
+    var url = form.attr('action');
+    var data = form.serialize();
+    // data = data + '&reporte_asistencia=1';
+    // var data = new FormData(form);
+    // data.append('datos', datos);
+    // data.append('exportar_asistencia', true);
+    // Swal.fire({
+    //     title: 'Exportar a Word',
+    //     html: '<span>¿Desea exportar a Word?</span>',
+    //     icon: 'question',
+    //     showCancelButton: true,
+    //     confirmButtonColor: '#3085d6',
+    //     cancelButtonColor: '#d33',
+    //     confirmButtonText: 'Si, exportar!',
+    //     cancelButtonText: 'Cancelar'
+    // }).then((result) => {
+    //     if (result.isConfirmed) {
+
+    // ajax para exportar a word y descargarlo
+
+
+
+    $.ajax({
+        type: 'POST',
+        url: SERVERURL + "/pasantes/ajax/reporte.ajax.php",
+        url: url,
+        data: form.serialize(),
+        data: data,
+        // dataType: 'json',
+        success: function (data) {
+            //download data
+
+
+
+            console.log(data);
+            Swal.fire({
+                title: 'Exito!',
+                text: 'Se ha exportado correctamente',
+                icon: 'success',
+                confirmButtonText: 'Ok'
+            })
+        },
+        error: function (data) {
+            console.log(data);
+            Swal.fire({
+                title: 'Error!',
+                text: 'No se ha podido exportar',
+                icon: 'error',
+                confirmButtonText: 'Ok'
+            })
+        }
+    });
+    //     }
+    // })
+
+});
+
+//Show Advanced options toggler

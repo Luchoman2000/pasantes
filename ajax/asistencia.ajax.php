@@ -8,6 +8,7 @@ if (
     || isset($_POST['almuerzo_inicio'])
     || isset($_POST['almuerzo_fin'])
     || isset($_POST['salida'])
+    || isset($_POST['mostrar_calendario'])
     || (isset($_POST['id']) && $_POST['borrar_registro'] == true)
     || (isset($_POST['asiId_u']) && isset($_POST['h_entrada_u']))
     || (isset($_POST['per_id_C']) && isset($_POST['nueva_asistencia']))
@@ -36,6 +37,12 @@ if (
     if (isset($_POST['salida'])) {
         $MarcarSalida = new AsistenciaControlador();
         $MarcarSalida->CtrMarcarSalida();
+    }
+
+    // Para mostrar el calendario
+    if (isset($_POST['mostrar_calendario'])) {
+        $MostrarCalendario = new AsistenciaControlador();
+        $MostrarCalendario->CtrMostrarCalendario();
     }
 
     // =ADMIN=

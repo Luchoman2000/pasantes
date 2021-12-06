@@ -4,7 +4,7 @@ let SERVERURL = document.location.origin;
 
 jQuery(document).ready(function ($) {
 
-    
+
 
     $('#almuerzo').fadeIn("slow");
     $('#registros').DataTable();
@@ -27,7 +27,7 @@ $(document).ready(function () {
         //     targets: 0
         // }],
         "language": {
-            "url": SERVERURL+"/pasantes/src/es_es.json"
+            "url": SERVERURL + "/pasantes/src/es_es.json"
         },
         "order": [
             [
