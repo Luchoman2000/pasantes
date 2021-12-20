@@ -1,11 +1,8 @@
-//Mobile Menu
-
 let SERVERURL = document.location.origin;
-
-jQuery(document).ready(function ($) {
-
+localStorage.setItem('serverurl', SERVERURL);
 
 
+$(document).ready(function ($) {
     $('#almuerzo').fadeIn("slow");
     $('#registros').DataTable();
     var navigation = $('#navigation'),
@@ -16,33 +13,3 @@ jQuery(document).ready(function ($) {
     });
 });
 
-// DataTables Bulma
-$(document).ready(function () {
-
-
-    var table = $('#example').removeAttr('width').DataTable({
-        // scrollY: "300px",
-        // columnDefs: [{
-        //     width: 6200,
-        //     targets: 0
-        // }],
-        "language": {
-            "url": SERVERURL + "/pasantes/src/es_es.json"
-        },
-        "order": [
-            [
-                0, "desc"
-            ]
-        ],
-        searching: false,
-        pagin: false,
-        "pagingType": "simple",
-        lengthChange: false,
-        // responsive: true,
-        scrollCollapse: true,
-        scroller: true,
-        // deferRender: true,
-        fixedColumns: true,
-    });
-
-});

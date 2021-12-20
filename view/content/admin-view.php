@@ -1,4 +1,7 @@
 <?php if ($_SESSION['rol'] == "PASANTE") {
+    require_once './controller/login.controlador.php';
+    $logout = new LoginControlador();
+    echo $logout->CtrCerrarSesion();
 ?>
     <script>
         alert("No tienes permisos para acceder a esta página");
@@ -7,6 +10,7 @@
 <?php
 
 } elseif ($_SESSION['rol'] == "ADMINISTRADOR") {
+
 ?>
     <div class="card">
         <div class="card-content">
@@ -48,12 +52,6 @@
                                 <span>Horarios</span>
                             </a>
                         </li>
-                        <!-- <li>
-                                <a>
-                                    <span class="icon is-small"><i class="fa fa-file-alt" aria-hidden="true"></i></span>
-                                    <span>Documents</span>
-                                </a>
-                            </li> -->
                     </ul>
                 </div>
 
@@ -99,46 +97,6 @@
                         <div class="card-content">
                             <!-- Tabla de usuarios -->
                             <div class="table-container">
-
-                                <!-- <table id="listaPersonal" class="table stripe row-border order-column nowrap" style="width:100%; box-sizing: inherit;">
-                                    <thead>
-                                        <tr>
-                                            <th>Nombre completo</th>
-                                            <th>Cedula</th>
-                                            <th>telefono</th>
-                                            <th>Email</th>
-                                            <th>Fecha nacimiento</th>
-                                            <th>Rol</th>
-                                            <th>Estado</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td style="vertical-align: middle;">Estacio Sabando Luis Angel</td>
-                                            <td style="vertical-align: middle;">1314147552</td>
-                                            <td style="vertical-align: middle;">0878279968</td>
-                                            <td style="vertical-align: middle;">asd@asd.com</td>
-                                            <td style="vertical-align: middle;">2000-09-28</td>
-                                            <td style="vertical-align: middle;">PASANTE</td>
-                                            <td style="vertical-align: middle;">Activo</td>
-                                            <td style="vertical-align: middle;">
-                                                <button style="height: fit-content;" class="button is-success is-outlined ">
-                                                    <span class="icon">
-                                                        <i class="fa fa-pencil" aria-hidden="true"></i>
-                                                    </span>
-                                                </button>
-                                                <button style="height: fit-content;" class="button is-danger is-outlined ">
-                                                    <span class="icon">
-                                                        <i class="fa fa-trash" aria-hidden="true"></i>
-                                                    </span>
-                                                </button>
-
-
-
-                                        </tr>
-                                    </tbody>
-                                </table> -->
                                 <?php
                                 require_once './controller/admin.controlador.php';
                                 $Personal = new AdminControlador();
@@ -151,29 +109,25 @@
 
                 <div class="content-tab" id="horarios" style="display: none;">
                     <div class="card">
+                        <!-- Nuevo horario -->
+                        <button id="nuevo_horario" class="button is-success is-outlined mt-4 ml3 modal-button" data-target="horarioForm" data-toggle="modal">
+                            <span class="icon is-small">
+                                <i class="fa fa-calendar-plus-o" aria-hidden="true"></i>
+                            </span>
+                            <span>Nuevo horario</span>
+                        </button>
                         <div class="card-content">
 
 
                             <!-- Tabla de usuarios -->
-                            <table id="listaHorarios" class="table is-fullwidth is-striped is-hoverable">
-                                <thead>
-                                    <tr>
-                                        <th>Nombre</th>
-                                        <th>Apellido</th>
-                                        <th>Rol</th>
-                                        <th>Email</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Luasdis</td>
-                                        <td>Perez</td>
-                                        <td>Admin</td>
-                                        <td>asd@asd.com</td>
 
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="table-container">
+                                <?php
+                                require_once './controller/admin.controlador.php';
+                                $Personal = new AdminControlador();
+                                echo $Personal->CtrMostrarHorarios();
+                                ?>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -204,9 +158,6 @@
                                     <select name="uPersonal" class="euNombre">
                                     </select>
                                 </span>
-                                <!-- <span class="icon is-small is-left">
-                                    <i class="fa fa-users"></i>
-                                </span> -->
                             </div>
                         </div>
 
@@ -258,8 +209,6 @@
                                     <div class="control">
                                         <div class="select">
                                             <select name="uRol" class="euRol">
-                                                <!-- <option>Administrador</option>
-                                            <option>Pasante</option> -->
                                             </select>
                                         </div>
                                     </div>
@@ -271,8 +220,22 @@
                                     <div class="control">
                                         <div class="select">
                                             <select name="uEstado" class="euEstado">
-                                                <!-- <option>Activo</option>
-                                            <option>Inactivo</option> -->
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- horario -->
+                        <div class="columns">
+                            <div class="column">
+                                <div class="field">
+                                    <label class="label">Horario</label>
+                                    <div class="control">
+                                        <div class="select">
+                                            <select name="uHorario" class="euHorario">
+
                                             </select>
                                         </div>
                                     </div>
@@ -286,7 +249,6 @@
 
                     <footer class="modal-card-foot">
                         <button type="submit" class="button is-success btnUsuarioForm"></button>
-                        <!-- <button class="button modal-button-close">Cancelar</button> -->
                     </footer>
                 </form>
 
@@ -368,17 +330,7 @@
                                 <input class="input pFechaNacimiento" type="date" name="pFechaNacimiento" placeholder="Fecha nacimiento">
                             </div>
                         </div>
-                        <!-- <div class="field">
-                        <label class="label">Rol</label>
-                        <div class="control">
-                            <div class="select">
-                                <select>
-                                    <option>Administrador</option>
-                                    <option>Pasante</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div> -->
+
                         <div class="field">
                             <label class="label">Estado</label>
                             <div class="control">
@@ -401,6 +353,64 @@
 
         </div>
         <button class="modal-close is-large" aria-label="close"></button>
+    </div>
+
+    <div class="modal modal-fx-fadeInScale" id="horarioForm">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <div class="modal-card">
+                <form id="mHorario" novalidate>
+                    <header class="modal-card-head">
+                        <p class="modal-card-title"><strong class="mHorarioTitle"></strong> </p>
+                    </header>
+                    <section class="modal-card-body">
+                        <div class="columns">
+                            <div class="column">
+                                <div class="field">
+                                    <label class="label">Hora entrada*</label>
+                                    <div class="control">
+                                        <input class="input hInicio" type="time" name="hInicio" placeholder="Hora Inicio">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="column">
+                                <div class="field">
+                                    <label class="label">Hora Salida*</label>
+                                    <div class="control">
+                                        <input class="input hFin" type="time" name="hFin" placeholder="Hora Fin">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="columns">
+                            <!-- almuerzo inicio -->
+                            <div class="column">
+                                <div class="field">
+                                    <label class="label">Hora Almuerzo Inicio*</label>
+                                    <div class="control">
+                                        <input class="input hAlmuerzoInicio" type="time" name="hAlmuerzoInicio" placeholder="Hora Almuerzo Inicio">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- almuerzo fin -->
+                            <div class="column">
+                                <div class="field">
+                                    <label class="label">Hora Almuerzo Fin*</label>
+                                    <div class="control">
+                                        <input class="input hAlmuerzoFin" type="time" name="hAlmuerzoFin" placeholder="Hora Almuerzo Fin">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </section>
+                    <footer class="modal-card-foot">
+                        <button class="button is-success btnHorarioForm">Guardar</button>
+                    </footer>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script src="<?php echo SERVERURL ?>src/js/ajax-admin.js"></script>
@@ -427,7 +437,7 @@
             $('#listaUsuarios').removeAttr('width').DataTable({
 
                 "language": {
-                    "url": "../src/es_es.json"
+                    "url": "../pasantes/src/es_es.json"
                 },
                 columnDefs: [{
                         width: 200,
@@ -438,10 +448,7 @@
                         targets: 4
                     },
                 ],
-                scrollY: "400px",
                 pagin: false,
-                "pagingType": "simple",
-                // lengthChange: false,
                 scrollCollapse: true,
                 scroller: true,
                 fixedColumns: true,
@@ -449,13 +456,10 @@
 
             });
             $('#listaPersonal').removeAttr('width').DataTable({
-                // scrollY: "400px",
                 "language": {
-                    "url": "../src/es_es.json"
+                    "url": "../pasantes/src/es_es.json"
                 },
                 pagin: false,
-                "pagingType": "simple",
-                // lengthChange: false,
                 scrollCollapse: true,
                 scroller: true,
                 fixedColumns: true,
@@ -463,24 +467,13 @@
             });
             $('#listaHorarios').DataTable({
                 "language": {
-                    "url": "../src/es_es.json"
-                }
+                    "url": "../pasantes/src/es_es.json"
+                },
+                pagin: false,
+                searching: false,
             });
         });
     </script>
-
-
-    <!-- <script type="module">
-        import BulmaModal from '../src/js/BulmaModal.js'
-
-        // document.querySelector(".modal").addEventListener("modal:show", (event) => {
-        //   console.log(event)
-        // });
-        const modals = document.querySelectorAll("[data-toggle='modal']");
-        modals.forEach((modal) => new BulmaModal(modal));
-    </script> -->
-
-
 
 
 <?php

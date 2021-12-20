@@ -25,9 +25,10 @@ class mainModel
     }
 
 
-    protected function insertar_auditoria($datos){
+    protected function insertar_auditoria($datos)
+    {
         $date = date('Y-m-d H:i:s');
-        $sql = self::conectar()->prepare('INSERT INTO `tbl_auditoria`(
+        $sql = self::conectar()->prepare('INSERT INTO `auditoria`(
         `aud_responsable`, `aud_accion`, `aud_descripcion`, `aud_valor_antes`, `aud_valor_ahora`,`aud_fecha_hora`) 
         VALUES (:responsable,:accion,:descripcion,:valorantes,:valordespues,:fecha)');
         $sql->execute(array(
@@ -64,16 +65,28 @@ class mainModel
         $cadena = stripslashes($cadena);
         $cadena = str_ireplace("<script>", "", $cadena);
         $cadena = str_ireplace("</script>", "", $cadena);
-        $cadena = str_ireplace("<script src>", "", $cadena);
-        $cadena = str_ireplace("<script type=>", "", $cadena);
+        $cadena = str_ireplace("<script src", "", $cadena);
+        $cadena = str_ireplace("<script type=", "", $cadena);
         $cadena = str_ireplace("SELECT * FROM", "", $cadena);
         $cadena = str_ireplace("DELETE FROM", "", $cadena);
         $cadena = str_ireplace("INSERT INTO", "", $cadena);
+        $cadena = str_ireplace("DROP TABLE", "", $cadena);
+        $cadena = str_ireplace("DROP DATABASE", "", $cadena);
+        $cadena = str_ireplace("TRUNCATE TABLE", "", $cadena);
+        $cadena = str_ireplace("SHOW TABLES;", "", $cadena);
+        $cadena = str_ireplace("SHOW DATABASES;", "", $cadena);
+        $cadena = str_ireplace("<?php", "", $cadena);
+        $cadena = str_ireplace("?>", "", $cadena);
         $cadena = str_ireplace("--", "", $cadena);
         $cadena = str_ireplace("^", "", $cadena);
+        $cadena = str_ireplace("<", "", $cadena);
+        $cadena = str_ireplace(">", "", $cadena);
         $cadena = str_ireplace("[", "", $cadena);
         $cadena = str_ireplace("]", "", $cadena);
         $cadena = str_ireplace("==", "", $cadena);
+        $cadena = str_ireplace(";", "", $cadena);
+        $cadena = str_ireplace("::", "", $cadena);
+        $cadena = stripslashes($cadena);
         return $cadena;
     }
 
@@ -107,45 +120,4 @@ class mainModel
         }
     } /*--  Fin Funcion - End Function --*/
 
-    // protected function sweet_alert($datos)
-    // {
-    //     if ($datos['alerta'] == "simple") {
-    //         $alerta = "<script>
-    //         swal.fire(
-    //             '" . $datos['Titulo'] . "',
-    //             '" . $datos['Texto'] . "',
-    //             '" . $datos['Tipo'] . "',
-    //         )
-    //         </script>";
-    //     } elseif ($datos['alerta' == "recargar"]) {
-    //         $alerta = "
-    //         <script>
-    //         swal.fire({
-    //             title:'" . $datos['Titulo'] . "',
-    //             text:'" . $datos['Texto'] . "',
-    //             icon:'" . $datos['Tipo'] . "',
-    //             confirmButtonColor:'#3085d6',
-    //             confirmButtonText:'Aceptar'
-    //         }). then((function){
-    //                 location.reload();
-
-    //         });
-    //         </script>";
-    //     } elseif ($datos['alerta' == "limpiar"]) {
-    //         $alerta = "
-    //         <script>
-    //         swal.fire({
-    //             title:'" . $datos['Titulo'] . "',
-    //             text:'" . $datos['Texto'] . "',
-    //             icon:'" . $datos['Tipo'] . "',
-    //             confirmButtonColor:'#3085d6',
-    //             confirmButtonText:'Aceptar'
-    //         }). then((function){
-    //                 $('.FormularioAjax')[0].reset();
-
-    //         });
-    //         </script>";
-    //     }
-    //     return $alerta;
-    // }
 }

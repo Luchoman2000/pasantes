@@ -22,7 +22,6 @@ class AdminControlador extends AdminModelo
                     <tr>
                         <th>Nombre</th>
                         <th>Usuario</th>
-                        <th>Clave</th>
                         <th>Estado</th>
                         <th>Rol</th>
                         <th style="text-align: center;">Acciones</th>
@@ -40,8 +39,7 @@ class AdminControlador extends AdminModelo
                 $tabla .= '
                     <tr>
                         <td style="vertical-align: middle;">' . $nombre . '</td>
-                        <td style="vertical-align: middle;">' . $row['usu_usuario'] . '</td>
-                        <td style="vertical-align: middle;">' . $row['usu_clave'] . '</td>';
+                        <td style="vertical-align: middle;">' . $row['usu_usuario'] . '</td>';
                 if ($row['usu_estado'] == 1) {
                     $tabla .= '
                         <td style="vertical-align: middle;">Activo</td>';
@@ -50,9 +48,20 @@ class AdminControlador extends AdminModelo
                         <td style="vertical-align: middle;">Inactivo</td>';
                 }
 
+
+
                 $tabla .= '<td style="vertical-align: middle;">' . $row['rol'] . '</td>
-                        <td style="vertical-align: middle; text-align: center;">
-                            <button estado="' . $row['usu_estado'] . '"  rol="' . mainModel::encryption($row['rol_id']) . '" id="' . mainModel::encryption($row['usu_id']) . '" style="height: fit-content;" class="button is-success is-outlined editarUsuario modal-button"  data-target="usuarioForm" data-toggle="modal">
+                        <td style="vertical-align: middle; text-align: center;">';
+                if ($row['rol'] != "ADMINISTRADOR" && $row['usu_estado'] != 0) {
+                    $tabla .= '
+                                <button style="height: fit-content;" class="button is-info is-outlined" onclick="window.location.href=\'' . SERVERURL . 'registro/' . mainModel::encryption($row['per_id']) . '\'">
+                                    <span class="icon">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </button>
+                                ';
+                }
+                $tabla .= '<button estado="' . $row['usu_estado'] . '"  rol="' . mainModel::encryption($row['rol_id']) . '" id="' . mainModel::encryption($row['usu_id']) . '" style="height: fit-content;" class="button is-success is-outlined editarUsuario modal-button"  data-target="usuarioForm" data-toggle="modal">
                                 <span class="icon">
                                     <i class="fa fa-pencil" aria-hidden="true"></i>
                                 </span>
@@ -135,10 +144,64 @@ class AdminControlador extends AdminModelo
                             </td>
                         </tr>';
             }
-        }else {
+        } else {
             $tabla .= '
                 <tr>
                     <td colspan="6" style="text-align:center;">No hay personal 😥</td>
+                </tr>
+            ';
+        }
+        $tabla .= '
+                </tbody>
+            </table>';
+        echo $tabla;
+    }
+
+    // Para mostrar os horarios
+    public function CtrMostrarHorarios()
+    {
+        $sql = mainModel::ejecutar_consulta_simple('SELECT * FROM horario WHERE hor_id > 1');
+        $tabla = '
+           
+            <table id="listaHorarios" class="table is-fullwidth is-striped is-hoverable">
+                <thead>
+                    <tr>
+                        <th>Hora de entrada</th>
+                        <th>Hora de salida almuerzo</th>
+                        <th>Hora de regreso almuerzo</th>
+                        <th>Hora de salida</th>
+                        <th style="text-align: center;">Acciones</th>
+                    </tr>
+                </thead>
+            <tbody>
+        ';
+        if ($sql->rowCount() > 0) {
+            $datos = $sql->fetchAll();
+            foreach ($datos as $row) {
+                $tabla .= '
+                        <tr>
+                            <td style="vertical-align: middle;">' . date('H:i a', strtotime($row['hor_entrada'])) . '</td>
+                            <td style="vertical-align: middle;">' . date('H:i a', strtotime($row['hor_salida_a'])) . '</td>
+                            <td style="vertical-align: middle;">' . date('H:i a', strtotime($row['hor_regreso_a'])) . '</td>
+                            <td style="vertical-align: middle;">' . date('H:i a', strtotime($row['hor_salida'])) . '</td>';
+                $tabla .= '<td style="vertical-align: middle; text-align: center;">
+                                <button id="' . mainModel::encryption($row['hor_id']) . '" style="height: fit-content;" class="button is-success is-outlined editarHorario modal-button"  data-target="horarioForm" data-toggle="modal">
+                                    <span class="icon">
+                                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                                    </span>
+                                </button>
+                                <button id="' . mainModel::encryption($row['hor_id']) . '" style="height: fit-content;" class="button is-danger is-outlined eliminarHorario">
+                                    <span class="icon">
+                                        <i class="fa fa-trash" aria-hidden="true"></i>
+                                    </span>
+                                </button>
+                            </td>
+                        </tr>';
+            }
+        } else {
+            $tabla .= '
+                <tr>
+                    <td colspan="5" style="text-align:center;">No hay horarios 😥</td>
                 </tr>
             ';
         }
@@ -152,11 +215,55 @@ class AdminControlador extends AdminModelo
     //Para eliminar usuarios
     public function CtrEliminarUsuario()
     {
-        if (isset($_POST['id'])) {
-            $idUsuario = mainModel::decryption($_POST['id']);
-            $sql = mainModel::ejecutar_consulta_simple("DELETE FROM usuario WHERE usu_id = $idUsuario");
+        if (!($_SESSION['id'] == mainModel::decryption($_POST['id']))) {
+            if (isset($_POST['id'])) {
+                $idUsuario = mainModel::decryption($_POST['id']);
+                $sql = mainModel::ejecutar_consulta_simple("DELETE FROM usuario WHERE usu_id = $idUsuario");
+                if ($sql->rowCount() > 0) {
+                    $res = "ok";
+                    //Auditoria
+                    $datos_a = [
+                        "responsable" => $_SESSION['nombre'] . " " . $_SESSION['apellido'],
+                        "accion" => "Eliminar",
+                        "descripcion" => "Eliminó un usuario",
+                        "valorantes" => $idUsuario,
+                        "valordespues" => "",
+                    ];
+                    mainModel::insertar_auditoria($datos_a);
+                } else {
+                    $res = "error";
+                }
+            } else {
+                $res = "error";
+            }
+            echo $res;
+        } else {
+            echo "error_s";
+        }
+    }
+
+    //Para eliminar personal
+    public function CtrEliminarPersonal()
+    {
+        if ($_SESSION['p_id'] == mainModel::decryption($_POST['id_personal'])) {
+            $res = "error_s";
+            echo $res;
+            exit();
+        }
+        if (isset($_POST['id_personal'])) {
+            $idPersonal = mainModel::decryption($_POST['id_personal']);
+            $sql = mainModel::ejecutar_consulta_simple("DELETE FROM personal WHERE per_id = $idPersonal");
             if ($sql->rowCount() > 0) {
                 $res = "ok";
+                //Auditoria
+                $datos_a = [
+                    "responsable" => $_SESSION['nombre'] . " " . $_SESSION['apellido'],
+                    "accion" => "Eliminar",
+                    "descripcion" => "Eliminó un personal",
+                    "valorantes" => $idPersonal,
+                    "valordespues" => "",
+                ];
+                mainModel::insertar_auditoria($datos_a);
             } else {
                 $res = "error";
             }
@@ -166,14 +273,23 @@ class AdminControlador extends AdminModelo
         echo $res;
     }
 
-    //Para eliminar personal
-    public function CtrEliminarPersonal()
+    //Para eliminar horarios
+    public function CtrEliminarHorario()
     {
-        if (isset($_POST['id_personal'])) {
-            $idPersonal = mainModel::decryption($_POST['id_personal']);
-            $sql = mainModel::ejecutar_consulta_simple("DELETE FROM personal WHERE per_id = $idPersonal");
+        if (isset($_POST['id_horario'])) {
+            $idHorario = mainModel::decryption($_POST['id_horario']);
+            $sql = mainModel::ejecutar_consulta_simple("DELETE FROM horario WHERE hor_id = $idHorario");
             if ($sql->rowCount() > 0) {
                 $res = "ok";
+                //Auditoria
+                $datos_a = [
+                    "responsable" => $_SESSION['nombre'] . " " . $_SESSION['apellido'],
+                    "accion" => "Eliminar",
+                    "descripcion" => "Eliminó un horario",
+                    "valorantes" => $idHorario,
+                    "valordespues" => "",
+                ];
+                mainModel::insertar_auditoria($datos_a);
             } else {
                 $res = "error";
             }
@@ -186,20 +302,29 @@ class AdminControlador extends AdminModelo
     //Para editar usuarios
     public function CtrEditarUsuario()
     {
+        // if (!($_SESSION['id'] == mainModel::decryption($_POST['id_usuario']))) {
         $idUsuario = mainModel::decryption($_POST['id_usuario']);
         $idPersonal = mainModel::decryption($_POST['uPersonal']);
         $usuario = mainModel::limpiar_cadena($_POST['uUsuario']);
         $idRol = mainModel::decryption($_POST['uRol']);
         $estado = mainModel::limpiar_cadena($_POST['uEstado']);
+
+        if (isset($_POST['uHorario'])) {
+            $idHorario = $_POST['uHorario'];
+        }
+
         $isEditPass = false;
 
+        // var_dump($_POST);
         $datos = [
             "idUsuario" => $idUsuario,
             "idPersonal" => $idPersonal,
             "usuario" => $usuario,
             "idRol" => $idRol,
             "estado" => $estado,
+            "idHorario" => $idHorario
         ];
+        // echo json_encode($datos);
 
         $chekUser = mainModel::ejecutar_consulta_simple("SELECT * FROM usuario WHERE usu_usuario = '$usuario' AND usu_id != $idUsuario");
         if ($chekUser->rowCount() > 0) {
@@ -223,6 +348,15 @@ class AdminControlador extends AdminModelo
             // var_dump($sql->errorCode());
             if ($sql->errorCode() == "00000") {
                 $res = 1;
+                //Auditoria
+                $datos_a = [
+                    "responsable" => $_SESSION['nombre'] . " " . $_SESSION['apellido'],
+                    "accion" => "Editar",
+                    "descripcion" => "Editó un usuario",
+                    "valorantes" => $idUsuario,
+                    "valordespues" => "",
+                ];
+                mainModel::insertar_auditoria($datos_a);
             } else {
                 $res = 0;
             }
@@ -233,11 +367,20 @@ class AdminControlador extends AdminModelo
             // }
         }
         echo $res;
+        // } 
+        // else {
+        //     echo "error_s";
+        // }
     }
 
     //Para editar personal
     public function CtrEditarPersonal()
     {
+        // if ($_SESSION['p_id'] == mainModel::decryption($_POST['id_personal'])) {
+        //     $res = "error_s";
+        //     echo $res;
+        //     exit();
+        // }
         $idPersonal = mainModel::decryption($_POST['id_personal']);
         $nombre = mainModel::limpiar_cadena($_POST['pNombre']);
         $nombre2 = isset($_POST['pNombre2']) ? mainModel::limpiar_cadena($_POST['pNombre2']) : "";
@@ -269,9 +412,57 @@ class AdminControlador extends AdminModelo
             $sql = AdminModelo::MdlEditarPersonal($datos);
             if ($sql->errorCode() == "00000") {
                 $res = 1;
+                //Auditoria
+                $datos_a = [
+                    "responsable" => $_SESSION['nombre'] . " " . $_SESSION['apellido'],
+                    "accion" => "Editar",
+                    "descripcion" => "Editó un personal",
+                    "valorantes" => $idPersonal,
+                    "valordespues" => "N/A",
+                ];
+                mainModel::insertar_auditoria($datos_a);
             } else {
                 $res = 0;
             }
+        }
+        echo $res;
+    }
+
+    //Para editar horario
+    public function CtrEditarHorario()
+    {
+        // if ($_SESSION['p_id'] == mainModel::decryption($_POST['id_personal'])) {
+        //     $res = "error_s";
+        //     echo $res;
+        //     exit();
+        // }
+        $idHorario = mainModel::decryption($_POST['id_horario']);
+        $hora_inicio = mainModel::limpiar_cadena($_POST['hInicio']);
+        $hora_inicio_almuerzo = mainModel::limpiar_cadena($_POST['hAlmuerzoInicio']);
+        $hora_fin_almuerzo = mainModel::limpiar_cadena($_POST['hAlmuerzoFin']);
+        $hora_fin = mainModel::limpiar_cadena($_POST['hFin']);
+        $datos = [
+            "id_horario" => $idHorario,
+            "hora_inicio" => $hora_inicio,
+            "hora_inicio_almuerzo" => $hora_inicio_almuerzo,
+            "hora_fin_almuerzo" => $hora_fin_almuerzo,
+            "hora_fin" => $hora_fin,
+        ];
+
+        $sql = AdminModelo::MdlEditarHorario($datos);
+        if ($sql->errorCode() == "00000") {
+            $res = 1;
+            //Auditoria
+            $datos_a = [
+                "responsable" => $_SESSION['nombre'] . " " . $_SESSION['apellido'],
+                "accion" => "Editar",
+                "descripcion" => "Editó un horario",
+                "valorantes" => $idHorario,
+                "valordespues" => "N/A",
+            ];
+            mainModel::insertar_auditoria($datos_a);
+        } else {
+            $res = 0;
         }
         echo $res;
     }
@@ -285,6 +476,8 @@ class AdminControlador extends AdminModelo
         $estado = mainModel::limpiar_cadena($_POST['uEstado']);
         $clave = mainModel::limpiar_cadena($_POST['uNClave']);
         $clave2 = mainModel::limpiar_cadena($_POST['uSNClave']);
+        $idHorario =  $_POST['uHorario'];
+
 
         $datos = [
             "idPersonal" => $idPersonal,
@@ -293,8 +486,9 @@ class AdminControlador extends AdminModelo
             "estado" => $estado,
             "clave" => $clave,
             "clave2" => $clave2,
+            "idHorario" => $idHorario,
         ];
-
+        // var_dump($datos);
         $chekUser = mainModel::ejecutar_consulta_simple("SELECT * FROM usuario WHERE usu_usuario = '$usuario'");
         if ($chekUser->rowCount() > 0) {
             $res = 2;
@@ -351,12 +545,106 @@ class AdminControlador extends AdminModelo
         echo $res;
     }
 
+    //Para crear horario
+    public function CtrCrearHorario()
+    {
+        $hora_inicio = mainModel::limpiar_cadena($_POST['hInicio']);
+        $hora_inicio_almuerzo = mainModel::limpiar_cadena($_POST['hAlmuerzoInicio']);
+        $hora_fin_almuerzo = mainModel::limpiar_cadena($_POST['hAlmuerzoFin']);
+        $hora_fin = mainModel::limpiar_cadena($_POST['hFin']);
+        $datos = [
+            "hora_inicio" => $hora_inicio,
+            "hora_inicio_almuerzo" => $hora_inicio_almuerzo,
+            "hora_fin_almuerzo" => $hora_fin_almuerzo,
+            "hora_fin" => $hora_fin,
+        ];
+        $sql = AdminModelo::MdlCrearHorario($datos);
+        if ($sql->rowCount() > 0) {
+            $res = 1;
+        } else {
+            $res = 0;
+        }
+        echo $res;
+    }
+
+    //Para crear nuevo registro pasante
+    public function CtrNuevoRegistroPasante()
+    {
+
+        $fecha = mainModel::limpiar_cadena($_POST['fecha']);
+        $h_inicio = mainModel::limpiar_cadena($_POST['h_entrada_u']);
+        $h_almuerzo_start_u = isset($_POST['h_almuerzo_start_u']) ?  mainModel::limpiar_cadena($_POST['h_almuerzo_start_u']) : "00:00:00";
+        $h_almuerzo_end_u = isset($_POST['h_almuerzo_end_u']) ?  mainModel::limpiar_cadena($_POST['h_almuerzo_end_u']) : "00:00:00";
+        $h_salida = isset($_POST['h_salida_u']) ?  mainModel::limpiar_cadena($_POST['h_salida_u']) : "00:00:00";
+
+        $id_personal = mainModel::decryption($_POST['id_personal']);
+
+
+        $datetime1 = new DateTime($h_almuerzo_start_u);
+        $datetime2 = new DateTime($h_almuerzo_end_u);
+
+        $interval = $datetime1->diff($datetime2);
+        $v_hora =  $interval->format('%R%H:%i:%s') . ' ';
+
+        // validar que las horas ingresadas sean secuenciales
+        if (
+            // ((strtotime($h_ingreso) > strtotime($h_almuerzo_start)) 
+            // || (((strtotime($h_almuerzo_end) > strtotime($h_salida))) && ($h_almuerzo_start != '00:00:00' || $h_almuerzo_end != '00:00:00')))
+            // || ((strtotime($h_ingreso) > strtotime($h_salida)) && $h_salida != '00:00:00')
+            ((strtotime($h_inicio) > strtotime($h_almuerzo_start_u)) && $h_almuerzo_start_u != '00:00:00')
+            || ((strtotime($h_almuerzo_end_u) > strtotime($h_salida)) && $h_salida != '00:00:00')
+            || ((strtotime($h_inicio) > strtotime($h_salida)) && $h_salida != '00:00:00')
+            || ((strtotime($h_almuerzo_start_u) > strtotime($h_almuerzo_end_u)) && $h_almuerzo_end_u != '00:00:00')
+            || ((strtotime($h_almuerzo_start_u) > strtotime($h_salida)) && $h_salida != '00:00:00')
+
+
+        ) {
+            $res =  'error_s';
+        } else {
+
+            if (strpos($v_hora, '-') && ($h_almuerzo_start_u != '00:00:00' && $h_almuerzo_end_u != '00:00:00')) {
+                $res = 'error_h';
+            } elseif ($h_almuerzo_start_u == '00:00:00' && $h_almuerzo_end_u != '00:00:00') {
+                $res = 'error_a';
+            } else {
+
+                if (($h_almuerzo_start_u == '00:00:00' || $h_almuerzo_end_u == '00:00:00') && $h_salida != '00:00:00') {
+                    $h_almuerzo_start_u = '00:00:00';
+                    $h_almuerzo_end_u = '00:00:00';
+                }
+
+                $datos = [
+                    "fecha" => $fecha,
+                    "h_inicio" => $h_inicio,
+                    "h_almuerzo_start_u" => $h_almuerzo_start_u,
+                    "h_almuerzo_end_u" => $h_almuerzo_end_u,
+                    "h_salida" => $h_salida,
+                    "id_personal" => $id_personal,
+                ];
+                //validar si ya se ingreso el registro ese dia
+                $chekDate = mainModel::ejecutar_consulta_simple("SELECT * FROM asistencia WHERE asi_dia = '$fecha' AND per_id = '$id_personal'");
+                if ($chekDate->rowCount() > 0) {
+                    $res = 2;
+                } else {
+                    $sql = AdminModelo::MdlNuevoRegistroPasante($datos);
+                    if ($sql->rowCount() > 0) {
+                        $res = 1;
+                    } else {
+                        $res = 0;
+                    }
+                }
+            }
+        }
+
+        echo $res;
+    }
+
     //Para mostrar personal para <select>
     public function CtrMostrarPersonalSelect()
     {
         $select = '';
-        $sql = mainModel::ejecutar_consulta_simple("SELECT u.*, p.* FROM usuario u RIGHT JOIN personal p ON u.per_id = p.per_id");
-        if (isset($_POST['Uid'])) {
+        $sql = mainModel::ejecutar_consulta_simple("SELECT u.*, p.* FROM usuario u RIGHT JOIN personal p ON u.per_id = p.per_id ORDER BY usu_id DESC");
+        if (isset($_POST['Uid'])) {  // Para editar usuario
             $id = mainModel::decryption($_POST['Uid']);
             if ($sql->rowCount() > 0) {
                 $datos = $sql->fetchAll();
@@ -380,26 +668,30 @@ class AdminControlador extends AdminModelo
                 //     ';
                 // }
             }
-        } else {
+        } else { // Para crear usuario
             if ($sql->rowCount() > 0) {
                 $select = '
                 <option value="">Seleccione un personal</option>
                 ';
-
+                $a = 0;
                 $datos = $sql->fetchAll();
                 foreach ($datos as $row) {
                     if (is_null($row['usu_id'])) {
-                        # code...
-
+                        $a++;
                         $select .= '
                         <option value="' . mainModel::encryption($row['per_id']) . '">' . $row['per_pri_nombre'] . ' ' . $row['per_seg_nombre'] . ' ' . $row['per_pri_apellido'] . ' ' . $row['per_seg_apellido'] . '</option>
                     ';
-                    } else {
-                        $select = '
-                            <option value="">No hay personal disponible</option>
-                        ';
                     }
+                    // if ($a > 0) {
+                    //     $select .= '
+                    //         <option value="">Seleccione un personal</option>
+                    //     ';
+                    // }
                 }
+            } else {
+                $select = '
+                    <option value="">No hay personal disponible</option>
+                ';
             }
         }
 
@@ -473,6 +765,75 @@ class AdminControlador extends AdminModelo
                     $select .= '
                         <option value="' . mainModel::encryption($row['usu_estado']) . '">' . $row['usu_estado'] . '</option>
                     ';
+                }
+            }
+        }
+
+        echo $select;
+    }
+
+    //Para mostrar horario para <select>
+    public function CtrMostrarHorarioSelect()
+    {
+        $select = '';
+        $sql = mainModel::ejecutar_consulta_simple("SELECT u.*, h.* FROM horario h LEFT JOIN usuario u
+        ON h.hor_id = u.hor_id
+        WHERE h.hor_id > 1
+        GROUP BY h.hor_id
+        ORDER BY h.hor_id
+        ");
+
+        if (isset($_POST['Uid'])) {
+
+            $id = mainModel::decryption($_POST['Uid']);
+            $fila_usuario = mainModel::ejecutar_consulta_simple("SELECT * FROM usuario WHERE usu_id='" . $id . "'");
+            $fila_u = $fila_usuario->fetch();
+            // var_dump($fila_u);
+            if ($sql->rowCount() > 0) {
+                $datos = $sql->fetchAll();
+                $a = 0;
+                if ($fila_u['hor_id'] != 1) {
+                    foreach ($datos as $row) {
+                        // if (!is_null($row['hor_id'])) {
+
+                        $select .= '<option value="' . $row['hor_id'] . '"';
+                        if (isset($_POST['editar_usuario_select_horario'])) {
+                            if ($row['hor_id'] == $fila_u['hor_id']) {
+                                $select .= 'selected';
+                                $a++;
+                            }
+                        }
+                        $select .= '>' . date('H:i a', strtotime($row['hor_entrada'])) . ' - ' . date('H:i a', strtotime($row['hor_salida'])) . '</option>';
+
+                        // }    
+                    }
+                    $select .= '
+                    <option value="1">Sin Horario</option>
+                    ';
+                } else {
+                    $select = '
+                        <option value="1">Sin Horario</option>
+                    ';
+                    foreach ($datos as $row) {
+
+                        $select .= '<option value="' . $row['hor_id'] . '"';
+                        $select .= '>' . date('H:i a', strtotime($row['hor_entrada'])) . ' - ' . date('H:i a', strtotime($row['hor_salida'])) . '</option>';
+                        // }    
+                    }
+                }
+            }
+        } else {
+            $select = '
+            <option value="1">Sin Horario</option>
+            ';
+            if ($sql->rowCount() > 0) {
+                $datos = $sql->fetchAll();
+                foreach ($datos as $row) {
+                    // if (!is_null($row['hor_id'])) {
+                    $select .= '
+                        <option value="' . $row['hor_id'] . '">' .  date('H:i a', strtotime($row['hor_entrada'])) . ' - ' . date('H:i a', strtotime($row['hor_salida'])) . '</option>
+                    ';
+                    // }
                 }
             }
         }

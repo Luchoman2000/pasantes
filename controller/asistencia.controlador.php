@@ -163,11 +163,14 @@ class AsistenciaControlador extends AsistenciaModelo
 
 
         $persona_id = $_SESSION['p_id'];
+        $hor_id = $_SESSION['hor_id'];
 
         // @$persona_id = $_SESSION['p_id']; // ID de la persona
         // Obtener los registros del pasante
         $sql = mainModel::ejecutar_consulta_simple("SELECT * FROM asistencia WHERE per_id = $persona_id ORDER BY asi_id DESC");
-
+        $hor = mainModel::ejecutar_consulta_simple("SELECT * FROM horario WHERE hor_id = '$hor_id'");
+        $hors = $hor->fetch();
+        // var_dump($hors);
         //Variable total de horas
         $horas = array();
 
@@ -208,7 +211,31 @@ class AsistenciaControlador extends AsistenciaModelo
                 //Total de horas trabajadas
                 $total_horas = $this->getTimeDiff($diff_a, $diff);
 
+                if ($hor_id != 1) {
 
+                    $h_i = new DateTime($h_ingreso);
+                    $h_a_i = new DateTime($h_almuerzo_inicio);
+                    $h_a_f = new DateTime($h_almuerzo_fin);
+                    $h_s = new DateTime($h_salida);
+
+                    $hor_ingreso = new DateTime($hors['hor_entrada']);
+                    $hor_salida_a = new DateTime($hors['hor_salida_a']);
+                    $hor_regreso_a = new DateTime($hors['hor_regreso_a']);
+                    $hor_salida = new DateTime($hors['hor_salida']);
+                    // $datetime2 = new DateTime($h_almuerzo_end);
+
+                    // $interval = $h_a_i->diff($h_a_f);
+                    // $v_hora =  $interval->format('%R%H:%i') . ' ';
+                    //Hora adelantada o retrasada
+                    $hor_dif_ingreso = $h_i->diff($hor_ingreso);
+                    $hor_dif_ingreso_n = $hor_dif_ingreso->format('%R%H:%I');
+
+                    $hor_dif_salida = $hor_salida->diff($h_s);
+                    $hor_dif_salida_n = $hor_dif_salida->format('%R%H:%I');
+                } else {
+                    $hor_dif_ingreso_n = "";
+                    $hor_dif_salida_n = "";
+                }
 
                 if ($h_almuerzo_inicio == "00:00:00") {
                     $h_almuerzo_inicio = "--:--:--";
@@ -217,32 +244,32 @@ class AsistenciaControlador extends AsistenciaModelo
                     $h_almuerzo_fin = "--:--:--";
                 }
                 if ($h_salida == $h_ingreso) {
-                    $h_salida = "--:--:--";
+                    $h_salida = "00:00:00";
                 }
                 $horas[] = $total_horas;
 
-                if ($h_almuerzo_inicio == "--:--:--" && $h_almuerzo_fin == "--:--:--" && $h_salida != "--:--:--") {
+                if ($h_almuerzo_inicio == "--:--:--" && $h_almuerzo_fin == "--:--:--" && $h_salida != "00:00:00") {
 
 
                     $tabla .= '
                     <tr>
-                    <td>' . $fecha . '</td>
-                    <td>' . $h_ingreso . '</td>
-                    <td colspan="2" class="has-text-centered">Sin almuerzo</td>
+                    <td style="vertical-align: middle;">' . $fecha . '</td>
+                    <td style="vertical-align: middle;">' . $h_ingreso . ' <span class="h_diff is-small tag">' . $hor_dif_ingreso_n . '</span></td>
+                    <td style="vertical-align: middle;" colspan="2" class="has-text-centered">Sin almuerzo</td>
                     <td style="display: none;"></td>
-                    <td>' . $h_salida . '</td>
-                    <td>' . $total_horas . '</td>
+                    <td style="vertical-align: middle;">' . $h_salida . ' <span class="h_diff is-small tag">' . $hor_dif_salida_n . '</span></td>
+                    <td style="vertical-align: middle;">' . $total_horas . '</td>
                     </tr>
                     ';
                 } else {
                     $tabla .= '
                     <tr>
-                    <td>' . $fecha . '</td>
-                    <td>' . $h_ingreso . '</td>
-                    <td>' . $h_almuerzo_inicio . '</td>
-                    <td>' . $h_almuerzo_fin . '</td>
-                    <td>' . $h_salida . '</td>
-                    <td>' . $total_horas . '</td>
+                    <td style="vertical-align: middle;">' . $fecha . '</td>
+                    <td style="vertical-align: middle;">' . $h_ingreso . '  <span class="h_diff is-small tag">' . $hor_dif_ingreso_n . '</span></td>
+                    <td style="vertical-align: middle;">' . $h_almuerzo_inicio . '</td>
+                    <td style="vertical-align: middle;">' . $h_almuerzo_fin . '</td>
+                    <td style="vertical-align: middle;">' . $h_salida . ' <span class="h_diff is-small tag">' . $hor_dif_salida_n . '</span></td>
+                    <td style="vertical-align: middle;">' . $total_horas . '</td>
                     </tr>
                     ';
                 }
@@ -486,7 +513,8 @@ class AsistenciaControlador extends AsistenciaModelo
     //Mostrar calendario para FullCalendar
     public function CtrMostrarCalendario()
     {
-        $id_pasante = $_SESSION['p_id'];
+        $id_pasante = (isset($_POST['id_p'])) ?  mainModel::decryption($_POST['id_p']) : $_SESSION['p_id'];
+
         $query = "SELECT * FROM asistencia WHERE per_id = '$id_pasante'";
         $sql = mainModel::ejecutar_consulta_simple($query);
         $datos = $sql->fetchAll();
@@ -534,6 +562,20 @@ class AsistenciaControlador extends AsistenciaModelo
             // $card[$key]['color'] = '#00d1b2';
         }
         echo json_encode($card);
+    }
+
+    public function CtrGetDatesById($id)
+    {
+        $id = mainModel::decryption($id);
+        $query = "SELECT * FROM asistencia WHERE per_id = '$id' ORDER BY asi_dia DESC";
+        $sql = mainModel::ejecutar_consulta_simple($query);
+        $datos = $sql->fetchAll();
+        $fechas = "";
+        foreach ($datos as $key => $value) {
+
+            $fechas .= '\'' . $value['asi_dia'] . '\',';
+        }
+        echo $fechas;
     }
 
     // =ADMIN=
@@ -646,17 +688,31 @@ class AsistenciaControlador extends AsistenciaModelo
         $v_hora =  $interval->format('%R%H:%i:%s') . ' ';
 
         // validar que las horas ingresadas sean secuenciales
-        if (strtotime($h_ingreso) < strtotime($h_almuerzo_start) || strtotime($h_almuerzo_end) > strtotime($h_salida) || strtotime($h_ingreso) > strtotime($h_salida)) {
+        if (
+            // ((strtotime($h_ingreso) > strtotime($h_almuerzo_start)) 
+            // || (((strtotime($h_almuerzo_end) > strtotime($h_salida))) && ($h_almuerzo_start != '00:00:00' || $h_almuerzo_end != '00:00:00')))
+            // || ((strtotime($h_ingreso) > strtotime($h_salida)) && $h_salida != '00:00:00')
+            ((strtotime($h_ingreso) > strtotime($h_almuerzo_start)) && $h_almuerzo_start != '00:00:00')
+            || ((strtotime($h_almuerzo_end) > strtotime($h_salida)) && $h_salida != '00:00:00')
+            || ((strtotime($h_ingreso) > strtotime($h_salida)) && $h_salida != '00:00:00')
+            || ((strtotime($h_almuerzo_start) > strtotime($h_almuerzo_end)) && $h_almuerzo_end != '00:00:00')
+            || ((strtotime($h_almuerzo_start) > strtotime($h_salida)) && $h_salida != '00:00:00')
+
+
+        ) {
             $res =  'error_s';
         } else {
 
-            if (strpos($v_hora, '-') !== false) {
+            if (strpos($v_hora, '-') && ($h_almuerzo_start != '00:00:00' && $h_almuerzo_end != '00:00:00')) {
                 $res = 'error_h';
             } elseif ($h_almuerzo_start == '00:00:00' && $h_almuerzo_end != '00:00:00') {
                 $res = 'error_a';
             } else {
 
-
+                if (($h_almuerzo_start == '00:00:00' || $h_almuerzo_end == '00:00:00') && $h_salida != '00:00:00') {
+                    $h_almuerzo_start = '00:00:00';
+                    $h_almuerzo_end = '00:00:00';
+                }
 
                 $datos = [
                     "asi_id" => $id_asistencia,
@@ -672,6 +728,15 @@ class AsistenciaControlador extends AsistenciaModelo
                 // var_dump($sql->errorInfo());
                 if ($sql->rowCount() >= 1) {
                     $res = 'ok';
+                    //Auditoria
+                    $datos_a = [
+                        "responsable" => $_SESSION['nombre'] . " " . $_SESSION['apellido'],
+                        "accion" => "Editar",
+                        "descripcion" => "Editó un registro de asistencia",
+                        "valorantes" => $id_asistencia,
+                        "valordespues" => "",
+                    ];
+                    mainModel::insertar_auditoria($datos_a);
                 } else {
                     $res = 'error';
                 }
@@ -685,23 +750,23 @@ class AsistenciaControlador extends AsistenciaModelo
     {
         $today = date("Y-m-d");
 
-        $pasantes = mainModel::ejecutar_consulta_simple('SELECT p.per_id,CONCAT(p.per_pri_nombre, " ", p.per_seg_nombre, " ", p.per_pri_apellido, " ", p.per_seg_apellido) AS nombre FROM personal AS p
+        $pasantes = mainModel::ejecutar_consulta_simple('SELECT p.per_estado, p.per_id,CONCAT(p.per_pri_nombre, " ", p.per_seg_nombre, " ", p.per_pri_apellido, " ", p.per_seg_apellido) AS nombre FROM personal AS p
         INNER	JOIN usuario AS u
         ON p.per_id = u.per_id
         INNER JOIN rol AS r
         ON u.rol_id = r.rol_id
-        WHERE r.rol_nombre = "PASANTE" ');
+        WHERE r.rol_nombre = "PASANTE" AND p.per_estado = "1"');
 
 
 
-        $pasantes_con_registro = mainModel::ejecutar_consulta_simple('SELECT p.per_id,CONCAT(p.per_pri_nombre, " ", p.per_seg_nombre, " ", p.per_pri_apellido, " ", p.per_seg_apellido) AS nombre FROM personal AS p
+        $pasantes_con_registro = mainModel::ejecutar_consulta_simple('SELECT p.per_estado, p.per_id,CONCAT(p.per_pri_nombre, " ", p.per_seg_nombre, " ", p.per_pri_apellido, " ", p.per_seg_apellido) AS nombre FROM personal AS p
         INNER	JOIN usuario AS u
         ON p.per_id = u.per_id
         INNER JOIN rol AS r
         ON u.rol_id = r.rol_id
         INNER JOIN asistencia AS a
         ON a.per_id = p.per_id
-        WHERE r.rol_nombre = "PASANTE" AND a.asi_dia = "' . $today . '"');
+        WHERE r.rol_nombre = "PASANTE" AND p.per_estado = "1" AND a.asi_dia = "' . $today . '"');
 
         $pasantes_sin_registro_id = [];
         $pasantes_sin_registro_nombre = [];
@@ -837,6 +902,15 @@ class AsistenciaControlador extends AsistenciaModelo
         $sql = mainModel::ejecutar_consulta_simple("DELETE FROM asistencia WHERE asi_id = '$id_asistencia'");
         if ($sql->rowCount() >= 1) {
             $res = "ok";
+            //Auditoria
+            $datos_a = [
+                "responsable" => $_SESSION['nombre'] . " " . $_SESSION['apellido'],
+                "accion" => "Eliminar",
+                "descripcion" => "Eliminó un registro de asistencia",
+                "valorantes" => $id_asistencia,
+                "valordespues" => "",
+            ];
+            mainModel::insertar_auditoria($datos_a);
         } else {
             $res = "error";
         }
@@ -867,7 +941,7 @@ class AsistenciaControlador extends AsistenciaModelo
 
         // $persona_id = $_SESSION['p_id']; // ID de la persona
         // Obtener los registros del pasante
-        $sql = mainModel::ejecutar_consulta_simple("SELECT a.*, p.per_id,  CONCAT(p.per_pri_nombre, ' ', p.per_pri_apellido) as nombre FROM asistencia a INNER JOIN personal p ON a.per_id = p.per_id ORDER BY asi_id DESC");
+        $sql = mainModel::ejecutar_consulta_simple("SELECT a.*, p.per_id,p.per_estado,   CONCAT(p.per_pri_nombre, ' ', p.per_pri_apellido) as nombre FROM asistencia a INNER JOIN personal p ON a.per_id = p.per_id WHERE p.per_estado = 1 ORDER BY asi_id DESC");
 
         //Variable total de horas
         $horas = array();
@@ -936,9 +1010,10 @@ class AsistenciaControlador extends AsistenciaModelo
                     <td style="vertical-align: middle;">' . $h_salida . '</td>
                     <td style="vertical-align: middle;">' . $total_horas . '</td>
                     <td style="vertical-align: middle;">
+                        
                         <button style="height: fit-content;" id="' . mainModel::encryption($row['per_id']) . '" class="button is-info is-outlined verRegistro" data-tooltip="Lista">
                             <span class="icon">
-                                <i class="fa fa-external-link"></i>
+                                <i class="fa fa-calendar"></i>
                             </span>
                         </button>
                         <button style="height: fit-content;" id="' . mainModel::encryption($row['asi_id']) . '" class="button is-danger is-outlined eliminarRegistro" data-tooltip="Eliminar" >
@@ -962,7 +1037,7 @@ class AsistenciaControlador extends AsistenciaModelo
                     <td style="vertical-align: middle;">
                         <button style="height: fit-content;" id="' . mainModel::encryption($row['per_id']) . '" class="button is-info is-outlined verRegistro" data-tooltip="Lista">
                             <span class="icon">
-                                <i class="fa fa-external-link"></i>
+                                <i class="fa fa-calendar"></i>
                             </span>
                         </button>
                         <button style="height: fit-content;" id="' . mainModel::encryption($row['asi_id']) . '" class="button is-danger is-outlined eliminarRegistro" data-tooltip="Eliminar" >
@@ -992,7 +1067,7 @@ class AsistenciaControlador extends AsistenciaModelo
     }
 
     // Mostrar horas de ingreso y salida
-    public function CtrMostrarAsistenciaPasanteAdmin()
+    public function CtrMostrarAsistenciaPasanteAdmin($h_id = null)
     {
 
         $ruta = explode("/", $_GET["views"]);
@@ -1001,10 +1076,12 @@ class AsistenciaControlador extends AsistenciaModelo
         }
         // @$persona_id = $_SESSION['p_id']; // ID de la persona
         // Obtener los registros del pasante
-        if (is_numeric($persona_id)) {
+        if (is_numeric($persona_id) && isset($h_id)) {
 
-
+            $hor_id = $h_id;
             $sql = mainModel::ejecutar_consulta_simple("SELECT * FROM asistencia WHERE per_id = $persona_id ORDER BY asi_id DESC");
+            $hor = mainModel::ejecutar_consulta_simple("SELECT * FROM horario WHERE hor_id = '$hor_id'");
+            $hors = $hor->fetch();
             //Variable total de horas
             $horas = array();
             $tabla = "";
@@ -1021,7 +1098,7 @@ class AsistenciaControlador extends AsistenciaModelo
                 </tr>
             </thead>
             <tbody>';
-            echo $sql->errorInfo()[2];
+            // echo $sql->errorInfo()[2];
             if ($sql->errorCode() == "00000") {
                 if ($sql->rowCount() >= 1) {
 
@@ -1033,7 +1110,9 @@ class AsistenciaControlador extends AsistenciaModelo
                         $h_ingreso = $row['asi_hora_ingreso'];
                         $h_almuerzo_inicio = $row['asi_hora_salida_a'];
                         $h_almuerzo_fin = $row['asi_hora_regreso_a'];
-                        $h_salida = $row['asi_hora_salida'];
+                        // $h_salida = $row['asi_hora_salida'];
+                        $h_salida = ($row['asi_hora_salida'] == "00:00:00") ? $row['asi_hora_ingreso'] : $row['asi_hora_salida'];
+
 
 
 
@@ -1046,7 +1125,31 @@ class AsistenciaControlador extends AsistenciaModelo
                         //Total de horas trabajadas
                         $total_horas = $this->getTimeDiff($diff_a, $diff);
 
+                        if ($hor_id != 1) {
 
+                            $h_i = new DateTime($h_ingreso);
+                            $h_a_i = new DateTime($h_almuerzo_inicio);
+                            $h_a_f = new DateTime($h_almuerzo_fin);
+                            $h_s = new DateTime($h_salida);
+
+                            $hor_ingreso = new DateTime($hors['hor_entrada']);
+                            $hor_salida_a = new DateTime($hors['hor_salida_a']);
+                            $hor_regreso_a = new DateTime($hors['hor_regreso_a']);
+                            $hor_salida = new DateTime($hors['hor_salida']);
+                            // $datetime2 = new DateTime($h_almuerzo_end);
+
+                            // $interval = $h_a_i->diff($h_a_f);
+                            // $v_hora =  $interval->format('%R%H:%i') . ' ';
+                            //Hora adelantada o retrasada
+                            $hor_dif_ingreso = $h_i->diff($hor_ingreso);
+                            $hor_dif_ingreso_n = $hor_dif_ingreso->format('%R%H:%I');
+
+                            $hor_dif_salida = $hor_salida->diff($h_s);
+                            $hor_dif_salida_n = $hor_dif_salida->format('%R%H:%I');
+                        } else {
+                            $hor_dif_ingreso_n = "";
+                            $hor_dif_salida_n = "";
+                        }
 
                         if ($h_almuerzo_inicio == "00:00:00") {
                             $h_almuerzo_inicio = "--:--:--";
@@ -1054,21 +1157,21 @@ class AsistenciaControlador extends AsistenciaModelo
                         if ($h_almuerzo_fin == "00:00:00") {
                             $h_almuerzo_fin = "--:--:--";
                         }
-                        if ($h_salida == "00:00:00") {
-                            $h_salida = "--:--:--";
+                        if ($h_salida == $h_ingreso) {
+                            $h_salida = "00:00:00";
                         }
                         $horas[] = $total_horas;
 
-                        if ($h_almuerzo_inicio == "--:--:--" && $h_almuerzo_fin == "--:--:--" && $h_salida != "--:--:--") {
+                        if ($h_almuerzo_inicio == "--:--:--" && $h_almuerzo_fin == "--:--:--" && $h_salida != "00:00:00") {
 
 
                             $tabla .= '
                         <tr>
                         <td style="vertical-align: middle;">' . $fecha . '</td>
-                        <td style="vertical-align: middle;">' . $h_ingreso . '</td>
+                        <td style="vertical-align: middle;">' . $h_ingreso . ' <span class="h_diff is-small tag">' . $hor_dif_ingreso_n . '</span></td>
                         <td style="vertical-align: middle;" colspan="2" class="has-text-centered">Sin almuerzo</td>
                         <td style="display: none;"></td>
-                        <td style="vertical-align: middle;">' . $h_salida . '</td>
+                        <td style="vertical-align: middle;">' . $h_salida . ' <span class="h_diff is-small tag">' . $hor_dif_salida_n . '</span></td>
                         <td style="vertical-align: middle;">' . $total_horas . '</td>
                         <td style="vertical-align: middle; text-align: center;">
                             <button style="height: fit-content;" id="' . mainModel::encryption($row['asi_id']) . '" class="button is-success is-outlined editarRegistro modal-button" data-tooltip="Editar" data-target="edit_hora" data-toggle="modal">
@@ -1087,10 +1190,10 @@ class AsistenciaControlador extends AsistenciaModelo
                             $tabla .= '
                         <tr>
                         <td style="vertical-align: middle;">' . $fecha . '</td>
-                        <td style="vertical-align: middle;">' . $h_ingreso . '</td>
+                        <td style="vertical-align: middle;">' . $h_ingreso . '  <span class="h_diff is-small tag">' . $hor_dif_ingreso_n . '</span></td>
                         <td style="vertical-align: middle;">' . $h_almuerzo_inicio . '</td>
                         <td style="vertical-align: middle;">' . $h_almuerzo_fin . '</td>
-                        <td style="vertical-align: middle;">' . $h_salida . '</td>
+                        <td style="vertical-align: middle;">' . $h_salida . ' <span class="h_diff is-small tag">' . $hor_dif_salida_n . '</span></td>
                         <td style="vertical-align: middle;">' . $total_horas . '</td>
                         <td style="vertical-align: middle; text-align: center;">
                         
@@ -1152,6 +1255,23 @@ class AsistenciaControlador extends AsistenciaModelo
             return "NO NAME";
         }
     }
+
+    // Otener id del pasante
+    public function CtrGetIdUsuario($id)
+    {
+        $id_n = mainModel::decryption($id);
+        if (is_numeric($id_n)) {
+            $sql = mainModel::conectar()->prepare("SELECT per_id, usu_id FROM usuario WHERE per_id = ?");
+            $sql->execute(array($id_n));
+            $row = $sql->fetch();
+            @$id_na = $row['usu_id'];
+
+            return mainModel::encryption($id_na);
+        } else {
+            return "NO NAME";
+        }
+    }
+
 
     // Funcion para obtener la diferencia de horas
     function getTimeDiff($dtime, $atime)

@@ -1,21 +1,20 @@
-/*=============MENU STARTS HERE=============*/
-
-
-
 nav#navigation {
 
     -webkit-box-sizing: unset;
+
     -moz-box-sizing: unset;
+
     box-sizing: unset;
 
     float: right;
+
     position: relative;
-    margin-top: 5px
+
+    margin-top: 5px;
 }
 
 nav#navigation .nav-trigger {
     display: none;
-
     position: absolute;
     top: -3px;
     left: 50%;
@@ -28,41 +27,34 @@ nav#navigation .nav-trigger {
     z-index: 11;
     cursor: pointer;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-
     /* -moz-text-indent: -9999px;
     -moz-white-space: nowrap;
     -moz-zindez: 11;
     -moz-cursor: pointer;
     -moz-box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     -moz-background: #bcebdd65; */
-
-    -webkit-animation-name: bounce;
-    -moz-animation-name: bounce;
+    /* -webkit-animation-name: bounce;
+    -moz-animation-name: bounce; */
     animation-name: bounce;
-
-    -webkit-animation-duration: 2s;
-    -moz-animation-duration: 2s;
+    /* -webkit-animation-duration: 2s;
+    -moz-animation-duration: 2s; */
     animation-duration: 2s;
-
-    -webkit-animation-fill-mode: both;
-    -moz-animation-fill-mode: both;
+    /* -webkit-animation-fill-mode: both;
+    -moz-animation-fill-mode: both; */
     animation-fill-mode: both;
-
-    -webkit-animation-timing-function: ease-in-out;
-    -moz-animation-timing-function: ease-in-out;
+    /* -webkit-animation-timing-function: ease-in-out;
+    -moz-animation-timing-function: ease-in-out; */
     animation-timing-function: ease-in-out;
-
-    -webkit-animation-iteration-count: 2;
-    -moz-animation-iteration-count: 2;
+    /* -webkit-animation-iteration-count: 2;
+    -moz-animation-iteration-count: 2; */
     animation-iteration-count: 2;
-
-    -webkit-animation-delay: 3s;
-    -moz-animation-delay: 3s;
+    /* -webkit-animation-delay: 3s;
+    -moz-animation-delay: 3s; */
     animation-delay: 3s;
-
-    -webkit-transition: all .3s;
-    -moz-transition: all .3s;
-    transition: all .3s
+    /* -webkit-transition: all .3s;
+    -moz-transition: all .3s; */
+    transition: all .3s;
+    height: 47px;
 }
 
 nav#navigation ul.is-hidden {
@@ -75,6 +67,11 @@ nav#navigation ul.is-hidden {
     -webkit-transition: 0 .5s;
     -moz-transition: 0 .5s;
     transition: transform .5s
+}
+
+nav#navigation .menu {
+    display: flex;
+    justify-content: center;
 }
 
 nav#navigation ul li {
@@ -94,7 +91,8 @@ nav#navigation ul li a {
 }
 
 nav#navigation ul li a:hover {
-    background: #b2cce9
+    background: #ffffffb9;
+    color: #46474c;
 }
 
 .call .fa,
@@ -117,26 +115,6 @@ nav#navigation ul li a:hover {
 }
 
 
-/*=============LAYOUT STARTS HERE=============*/
-
-
-/* html,
-body,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p,
-ul,
-ol,
-li,
-form {
-    margin: 0;
-    padding: 0;
-    border: none
-}  */
 
 a,
 a:link,
@@ -145,20 +123,6 @@ a:hover,
 a:active {
     text-decoration: none
 }
-
-/* article,
-aside,
-details,
-figcaption,
-figure,
-footer,
-header,
-hgroup,
-menu,
-nav,
-section {
-    display: block
-} */
 
 .alignCenter {
     text-align: center
@@ -253,6 +217,7 @@ html {
 }
 
 body {
+    padding-right: 0 !important;
     margin: 0;
     padding: 0;
     min-height: 100vh;
@@ -316,7 +281,14 @@ footer {
     padding: 25px 0;
 }
 
+@media only screen and (max-width: 769px) {
 
+    .modal-card,
+    .modal-content {
+        margin: 0;
+        padding: 15px;
+    }
+}
 
 @media only screen and (max-width : 900px) {
 
@@ -335,7 +307,7 @@ footer {
         margin: 0;
         background: rgb(67, 142, 204);
         z-index: 7777;
-        box-shadow: 0 0 3px rgba(0, 0, 0, 0.5)
+        box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
     }
 
     nav#navigation ul li {
@@ -390,7 +362,14 @@ footer {
 
 
     /*=============NAVIGATION STARTS HERE=============*/
+    nav#navigation .menu {
+        display: initial;
+    }
 
+    nav#navigation ul li a:hover {
+        background: #ffffff;
+        color: #46474c;
+    }
 
     nav#navigation .nav-trigger:before {
         font-family: 'FontAwesome';
@@ -403,22 +382,18 @@ footer {
         padding: 10px 11px;
         font-size: 24px;
         line-height: 20px;
-
         /* -webkit-backface-visibility: visible;
         -moz-backface-visibility: visible; */
         backface-visibility: visible;
-
-
         /* -webkit-transition: -webkit-transform .3s;
         -moz-transition: transform .3s; */
         transition: transform .3s;
-
         text-indent: 0;
-        float: left;
-
+        /* float: right; */
         /* -webkit-transform: rotateX(0deg);
         -moz-transform: rotateX(0deg); */
-        transform: rotateX(0deg)
+        transform: rotateX(0deg);
+        /* height: 47px; */
     }
 
     nav#navigation .nav-trigger.open:before {
@@ -529,7 +504,7 @@ footer {
         width: 100%;
         position: absolute;
         bottom: -340px;
-        background: #8e909e;
+        background: #46474c;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
         z-index: 1111;
         /* -webkit-transition: all .5s ease-in-out;

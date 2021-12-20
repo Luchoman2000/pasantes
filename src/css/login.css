@@ -25,6 +25,10 @@
   font-weight: 300;
 }
 
+html {
+    overflow-y: hidden;
+}
+
 body {
   font-family: 'Source Sans Pro', sans-serif;
   color: white;
@@ -63,7 +67,7 @@ body :-ms-input-placeholder {
 
 .wrapper {
   background: #50a3a2;
-  background: linear-gradient(to bottom right, #50a3a2 0%, #53e3a6 100%);
+  background: linear-gradient(to bottom right, #02374b 0%, #9ff1ce 100%);
   position: absolute;
   /* top: 50%; */
   top: 0;

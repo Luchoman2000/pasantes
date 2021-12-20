@@ -1,3 +1,184 @@
+var u_valid = true;
+var p_valid = true;
+var u_valid_array = [];
+var p_valid_array = [];
+$(function () {
+
+    // Validacion de formulario de usuario
+
+    //Check Usuario
+    $('.uUsuario').on('keyup', function () {
+        var usuario = $('.uUsuario').val();
+        var pattern = /^[a-zA-Z0-9]*$/;
+        if (pattern.test(usuario) && usuario.length > 0 && usuario.length < 30) {
+            $(this).removeClass('is-danger');
+            $(this).addClass('is-success');
+            u_valid_array[0] = true;
+        } else {
+            $(this).removeClass('is-success');
+            $(this).addClass('is-danger');
+            u_valid_array[0] = false;
+        }
+    });
+
+    //Check Clave1
+    $('.uNClave').on('keyup', function () {
+        var clave1 = $('.uNClave').val();
+        var pattern = /^[a-zA-Z0-9]*$/;
+        if (pattern.test(clave1) && clave1.length > 0 && clave1.length < 30) {
+            $(this).removeClass('is-danger');
+            $(this).addClass('is-success');
+            u_valid_array[1] = true;
+        } else {
+            $(this).removeClass('is-success');
+            $(this).addClass('is-danger');
+            u_valid_array[1] = false;
+        }
+    });
+
+    //Check Clave2
+    $('.uSNClave').on('keyup', function () {
+        var clave2 = $('.uSNClave').val();
+        var pattern = /^[a-zA-Z0-9]*$/;
+        if (pattern.test(clave2) && clave2.length > 0 && clave2.length < 30) {
+            $(this).removeClass('is-danger');
+            $(this).addClass('is-success');
+            u_valid_array[2] = true;
+        } else {
+            $(this).removeClass('is-success');
+            $(this).addClass('is-danger');
+            u_valid_array[2] = false;
+        }
+    });
+
+    //Fin Validacion de formulario de usuario
+
+    //Validacion de formulario de personal
+
+    //Check Nombre1
+    $('.pNombre').on('keyup', function () {
+        var nombre1 = $(this).val();
+        var pattern = /^[a-zA-Z]*$/;
+        if (pattern.test(nombre1) && nombre1.length > 0 && nombre1.length < 30) {
+            $(this).removeClass('is-danger');
+            $(this).addClass('is-success');
+            p_valid_array[0] = true;
+        } else {
+            $(this).removeClass('is-success');
+            $(this).addClass('is-danger');
+            p_valid_array[0] = false;
+        }
+    });
+
+    //Check Nombre2
+    $('.pNombre2').on('keyup', function () {
+        var nombre2 = $(this).val();
+        var pattern = /^[a-zA-Z]*$/;
+        if (pattern.test(nombre2) && (nombre2.length > 1 && nombre2.length < 30) || nombre2 == "") {
+            $(this).removeClass('is-danger');
+            $(this).addClass('is-success');
+            p_valid_array[1] = true;
+        } else {
+            $(this).removeClass('is-success');
+            $(this).addClass('is-danger');
+            p_valid_array[1] = false;
+        }
+    });
+
+    //Check Apellido1
+    $('.pApellido').on('keyup', function () {
+        var apellido1 = $(this).val();
+        var pattern = /^[a-zA-Z]*$/;
+        if (pattern.test(apellido1) && apellido1.length > 0 && apellido1.length < 30) {
+            $(this).removeClass('is-danger');
+            $(this).addClass('is-success');
+            p_valid_array[2] = true;
+        } else {
+            $(this).removeClass('is-success');
+            $(this).addClass('is-danger');
+            p_valid_array[2] = false;
+        }
+    });
+
+    //Check Apellido2
+    $('.pApellido2').on('keyup', function () {
+        var apellido2 = $(this).val();
+        var pattern = /^[a-zA-Z]*$/;
+        if (pattern.test(apellido2) && (apellido2.length > 1 && apellido2.length < 30) || apellido2 == "") {
+            $(this).removeClass('is-danger');
+            $(this).addClass('is-success');
+            p_valid_array[3] = true;
+        } else {
+            $(this).removeClass('is-success');
+            $(this).addClass('is-danger');
+            p_valid_array[3] = false;
+        }
+    });
+
+    //Check cedula
+    $('.pCedula').on('keyup', function () {
+        var cedula = $(this).val();
+        var pattern = /^[0-9]*$/;
+        if (pattern.test(cedula) && cedula.length > 0 && cedula.length < 10) {
+            $(this).removeClass('is-danger');
+            $(this).addClass('is-success');
+            p_valid_array[4] = true;
+        } else {
+            $(this).removeClass('is-success');
+            $(this).addClass('is-danger');
+            p_valid_array[4] = false;
+        }
+    });
+
+    //Check telefono
+    $('.pTelefono').on('keyup', function () {
+        var telefono = $(this).val();
+        var pattern = /^[0-9]*$/;
+        if (pattern.test(telefono) && telefono.length == 10 || telefono == "") {
+            $(this).removeClass('is-danger');
+            $(this).addClass('is-success');
+            p_valid_array[5] = true;
+        } else {
+            $(this).removeClass('is-success');
+            $(this).addClass('is-danger');
+            p_valid_array[5] = false;
+        }
+    });
+
+    //Check email
+    $('.pEmail').on('keyup', function () {
+        var email = $(this).val();
+        var pattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+        if (pattern.test(email) && email.length > 0 && email.length < 30 || email == "") {
+            $(this).removeClass('is-danger');
+            $(this).addClass('is-success');
+            p_valid_array[6] = true;
+        } else {
+            $(this).removeClass('is-success');
+            $(this).addClass('is-danger');
+            p_valid_array[6] = false;
+        }
+    });
+
+    //Check direccion
+    // $('.pDireccion').on('keyup', function () {
+    //     var direccion = $(this).val();
+    //     var pattern = /^[a-zA-Z0-9]*$/;
+    //     if (pattern.test(direccion) && direccion.length > 0 && direccion.length < 30) {
+    //         $(this).removeClass('is-danger');
+    //         $(this).addClass('is-success');
+    //         p_valid_array[7] = true;
+    //     } else {
+    //         $(this).removeClass('is-success');
+    //         $(this).addClass('is-danger');
+    //         p_valid_array[7] = false;
+    //     }
+    // });
+
+    //Fin Validacion de formulario de personal
+
+})
+
 //Para borrar registro de pasante
 $(document).on('click', '.eliminarUsuario', function () {
     // console.log($(this).parent().parent().parent().attr('id'));
@@ -24,7 +205,7 @@ $(document).on('click', '.eliminarUsuario', function () {
                     if (data == 'ok') {
                         Swal.fire(
                             '¡Eliminado!',
-                            'El usuario eliminado.',
+                            'El usuario se ha eliminado.',
                             'success'
                         ).then(function () {
                             location.reload();
@@ -39,6 +220,13 @@ $(document).on('click', '.eliminarUsuario', function () {
                         ).then(function () {
                             location.reload();
                         });
+                    } else if (data = "error_s") {
+                        Swal.fire(
+                            '¡Error!',
+                            'No puedes eliminar tu mismo usuario',
+                            'error'
+                        )
+
                     }
 
                 }
@@ -46,8 +234,6 @@ $(document).on('click', '.eliminarUsuario', function () {
         }
     });
 });
-
-
 
 //Para eliminar personal
 $(document).on('click', '.eliminarPersonal', function () {
@@ -87,6 +273,63 @@ $(document).on('click', '.eliminarPersonal', function () {
                         ).then(function () {
                             location.reload();
                         });
+                    } else if (data == 'error_s') {
+                        Swal.fire(
+                            '¡Error!',
+                            'No puedes eliminar tu mismo personal',
+                            'error'
+                        )
+                    }
+                }
+            });
+        }
+    });
+});
+
+// Para eliminar horario
+$(document).on('click', '.eliminarHorario', function () {
+    // console.log($(this).parent().parent().parent().attr('id'));
+    var id = $(this).attr('id');
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "Barrarás este horario, ¡No podrás revertir esto!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: '¡Sí, bórralo!',
+        cancelButtonText: '¡No, cancelar!',
+    }).then((result) => {
+        if (result.isConfirmed) {
+
+            $.ajax({
+                url: SERVERURL + "/pasantes/ajax/admin.ajax.php",
+                method: "POST",
+                data: 'id_horario=' + id + '&borrar_horario=true',
+                success: function (data) {
+                    console.log(data);
+                    if (data == 'ok') {
+                        Swal.fire(
+                            '¡Eliminado!',
+                            'El horario se ha eliminado.',
+                            'success'
+                        ).then(function () {
+                            location.reload();
+                        });
+                    } else if (data == 'error') {
+                        Swal.fire(
+                            '¡Error!',
+                            'Ha ocurrido un error, intente de nuevo mas tarde',
+                            'error'
+                        ).then(function () {
+                            location.reload();
+                        });
+                    } else if (data == 'error_s') {
+                        Swal.fire(
+                            '¡Error!',
+                            'No puedes eliminar tu mismo horario',
+                            'error'
+                        )
                     }
                 }
             });
@@ -141,6 +384,20 @@ $(document).on('click', '.editarUsuario', function () {
 
         }
     });
+
+    // llenar slect de horario
+    $.ajax({
+        url: SERVERURL + "/pasantes/ajax/admin.ajax.php",
+        method: "POST",
+        data: 'Uid=' + id_usuario + '&editar_usuario_select_horario=true',
+        success: function (data) {
+            // console.log(data);
+            $('.euHorario').html('');
+            $('.euHorario').append(data);
+
+        }
+    });
+
     $('.euEstado').html('');
     $('.uNClave').val("");
     $('.uSNClave').val("");
@@ -174,6 +431,8 @@ $(document).on('click', '.editarUsuario', function () {
 
 //Para editar personal
 $(document).on('click', '.editarPersonal', function () {
+    $('.mPersonTitle').text('');
+    $('.mPersonTitle').text('Editar personal');
     let id_personal = $(this).attr('id');
     // var id_rol = $(this).attr('rol');
     var estado = $(this).attr('estado');
@@ -191,13 +450,13 @@ $(document).on('click', '.editarPersonal', function () {
 
     $('.pNombre2').val("");
     $('.pNombre2').val(nombre[1].toUpperCase());
-    
+
     $('.pApellido').val("");
     $('.pApellido').val(nombre[2].toUpperCase());
 
     $('.pApellido2').val("");
     $('.pApellido2').val(nombre[3].toUpperCase());
-    
+
 
     $('.pCedula').val("");
     $('.pCedula').val(cedula);
@@ -216,7 +475,6 @@ $(document).on('click', '.editarPersonal', function () {
         $('.pEstado').append('<option value="0" selected>Inactivo</option>');
         $('.pEstado').append('<option value="1">Activo</option>');
 
-        
     }
     $('.btnPersonalForm').html('');
     $('.btnPersonalForm').append('Guardar cambios');
@@ -226,6 +484,39 @@ $(document).on('click', '.editarPersonal', function () {
     $('.btnPersonalForm').addClass('editarPersonalF');
 
 });
+
+//Para editar horario
+$(document).on('click', '.editarHorario', function () {
+    $('.mHorarioTitle').text('');
+    $('.mHorarioTitle').text('Editar horario');
+    let id_horario = $(this).attr('id');
+    var row = $(this).closest('tr');
+    var hora_inicio = row.children().eq(0).text();
+    var hora_inicio_almuerzo = row.children().eq(1).text();
+    var hora_fin_almuerzo = row.children().eq(2).text();
+    var hora_fin = row.children().eq(3).text();
+
+    $('.hInicio').val("");
+    $('.hInicio').val(moment(hora_inicio, 'HH:mm').format('HH:mm'));
+
+    $('.hAlmuerzoInicio').val("");
+    $('.hAlmuerzoInicio').val(moment(hora_inicio_almuerzo, 'HH:mm').format('HH:mm'));
+
+    $('.hAlmuerzoFin').val("");
+    $('.hAlmuerzoFin').val(moment(hora_fin_almuerzo, 'HH:mm').format('HH:mm'));
+
+    $('.hFin').val("");
+    $('.hFin').val(moment(hora_fin, 'HH:mm').format('HH:mm'));
+
+    $('.btnHorarioForm').html('');
+    $('.btnHorarioForm').append('Guardar cambios');
+    $('.btnHorarioForm').attr('id', id_horario);
+
+    $('.btnHorarioForm').removeClass('nuevoHorario');
+    $('.btnHorarioForm').addClass('editarHorarioF');
+
+
+})
 
 
 
@@ -255,6 +546,19 @@ $(document).on('click', '#nuevo_usuario', function () {
             // console.log(data);
             $('.euRol').html('');
             $('.euRol').append(data);
+
+        }
+    });
+
+    // llenar select de horario
+    $.ajax({
+        url: SERVERURL + "/pasantes/ajax/admin.ajax.php",
+        method: "POST",
+        data: 'editar_usuario_select_horario=true',
+        success: function (data) {
+            // console.log(data);
+            $('.euHorario').html('');
+            $('.euHorario').append(data);
 
         }
     });
@@ -294,7 +598,7 @@ $(document).on('click', '#nuevo_personal', function () {
     $('.pEmail').val("");
     $('.pTelefono').val("");
     $('.pCedula').val("");
-    
+
     $('.pFechaNacimiento').val("")
 
 
@@ -313,124 +617,187 @@ $(document).on('click', '#nuevo_personal', function () {
 
 });
 
+//Para nuevo horario
+$(document).on('click', '#nuevo_horario', function () {
+    $('.mHorarioTitle').text('Nuevo horario');
+    $('.hInicio').val("");
+    $('.hAlmuerzoInicio').val("");
+    $('.hAlmuerzoFin').val("");
+    $('.hFin').val("");
+
+    $('.btnHorarioForm').html('');
+    $('.btnHorarioForm').append('Guardar');
+    $('.btnHorarioForm').removeAttr('id');
+
+    $('.btnHorarioForm').removeClass('editarHorarioF');
+    $('.btnHorarioForm').addClass('nuevoHorario');
 
 
-//Guardar cambios del usuario Nuevo / Editar
-
-
-// $(document).on('click', '.nuevoUsuario', function () {
-//     validar();
-
-// });
-// $(document).on('click', '.editarUsuarioF', function () {
-//     validar();
-// });
+})
 
 //Submit Usuario
-$('#mUsuario').submit(function (e) {
+$(document).on('submit', '#mUsuario', function (e) {
     // debugger;
     e.stopImmediatePropagation();
     e.preventDefault();
     // e.stopPropagation();
     // console.log(e);
 
-    console.log($('.btnUsuarioForm').attr('id'));
+    u_valid = !u_valid_array.includes(false);
+    if (u_valid) {
+
+        console.log($('.btnUsuarioForm').attr('id'));
 
 
-    var formData = new FormData(document.getElementById("mUsuario"));
+        var formData = new FormData(document.getElementById("mUsuario"));
 
-    if ($('.nuevoUsuario').length != 0) {
-        var accion = 'nuevo_usuario';
-    } else if ($('.editarUsuarioF').length != 0) {
-        var accion = 'editar_usuario';
-        // formData.append('id_usuario', $('.btnUsuarioForm').attr('id'));
-        formData.append('id_usuario', $('.btnUsuarioForm').attr('id'));
-    }
-    valido = validar(accion);
-    // if (!valido) return true;
-    // 
-    console.log(valido);
-    if (valido) {
-        // debugger;
-        var clave = $('.uNClave').val();
-        var clave2 = $('.uSNClave').val();
-        if (accion == 'editar_usuario') {
-            if (clave.length != 0 || clave2.length != 0) {
-                if (clave == "") {
-                    Swal.fire(
-                        '¡Error!',
-                        'Ingrese una clave',
-                        'error'
-                    )
+        if ($('.nuevoUsuario').length != 0) {
+            var accion = 'nuevo_usuario';
+        } else if ($('.editarUsuarioF').length != 0) {
+            var accion = 'editar_usuario';
+            // formData.append('id_usuario', $('.btnUsuarioForm').attr('id'));
+            formData.append('id_usuario', $('.btnUsuarioForm').attr('id'));
+        }
+        valido = validar(accion);
+        // if (!valido) return true;
+        // 
+        console.log(valido);
+        if (valido) {
+            // debugger;
+            var clave = $('.uNClave').val();
+            var clave2 = $('.uSNClave').val();
+            if (accion == 'editar_usuario') {
+                if (clave.length != 0 || clave2.length != 0) {
+                    if (clave == "") {
+                        Swal.fire(
+                            '¡Error!',
+                            'Ingrese una clave',
+                            'error'
+                        )
 
-                } else if (clave2 == "") {
-                    Swal.fire(
-                        '¡Error!',
-                        'Repita la clave',
-                        'error'
-                    )
+                    } else if (clave2 == "") {
+                        Swal.fire(
+                            '¡Error!',
+                            'Repita la clave',
+                            'error'
+                        )
 
-                } else if (clave == clave2) {
-                    Swal.fire({
-                        title: '¿Esta seguro de cambiar la clave?',
-                        text: "Usted va a modificar la clave de este usuario, ¿Continuar?",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Si, cambiar!',
-                        cancelButtonText: 'No, cancelar!'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            formData.append(accion, true);
+                    } else if (clave == clave2) {
+                        Swal.fire({
+                            title: '¿Esta seguro de cambiar la clave?',
+                            text: "Usted va a modificar la clave de este usuario, ¿Continuar?",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Si, cambiar!',
+                            cancelButtonText: 'No, cancelar!'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                formData.append(accion, true);
 
-                            // console.log(formData);
-                            $.ajax({
-                                url: SERVERURL + "/pasantes/ajax/admin.ajax.php",
-                                method: "POST",
-                                data: formData,
-                                cache: false,
-                                contentType: false,
-                                processData: false,
-                                success: function (data) {
-                                    console.log(data);
-                                    if (data == 1) {
-                                        Swal.fire(
-                                            '¡Guardado!',
-                                            'El usuario ha sido guardado.',
-                                            'success'
-                                        ).then(function () {
-                                            location.reload();
-                                        });
+                                // console.log(formData);
+                                $.ajax({
+                                    url: SERVERURL + "/pasantes/ajax/admin.ajax.php",
+                                    method: "POST",
+                                    data: formData,
+                                    cache: false,
+                                    contentType: false,
+                                    processData: false,
+                                    success: function (data) {
+                                        console.log(data);
+                                        if (data == 1) {
+                                            Swal.fire(
+                                                '¡Guardado!',
+                                                'El usuario ha sido guardado.',
+                                                'success'
+                                            ).then(function () {
+                                                location.reload();
+                                            });
 
-                                    } else if (data == 0) {
-                                        Swal.fire(
-                                            '¡Error!',
-                                            'Ha ocurrido un error, intente de nuevo mas tarde',
-                                            'error'
-                                        ).then(function () {
-                                            location.reload();
-                                        });
-                                    } else if (data == 2) {
-                                        Swal.fire(
-                                            '¡Error!',
-                                            'El usuario ya existe!',
-                                            'error'
-                                        )
+                                        } else if (data == 0) {
+                                            Swal.fire(
+                                                '¡Error!',
+                                                'Ha ocurrido un error, intente de nuevo mas tarde',
+                                                'error'
+                                            ).then(function () {
+                                                location.reload();
+                                            });
+                                        } else if (data == 2) {
+                                            Swal.fire(
+                                                '¡Error!',
+                                                'El usuario ya existe!',
+                                                'error'
+                                            )
+                                        } else if (data = "error_s") {
+                                            Swal.fire(
+                                                '¡Error!',
+                                                'No puedes editar la informacion de este usuaio',
+                                                'error'
+                                            )
+
+                                        }
+
                                     }
+                                });
+                            }
+                        });
 
-                                }
-                            });
+                    } else {
+                        Swal.fire(
+                            '¡Error!',
+                            'Las claves no coinciden',
+                            'error'
+                        )
+                        valido = false;
+                    }
+                } else {
+                    formData.append(accion, true);
+
+                    // console.log(formData);
+                    $.ajax({
+                        url: SERVERURL + "/pasantes/ajax/admin.ajax.php",
+                        method: "POST",
+                        data: formData,
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        success: function (data) {
+                            console.log(data);
+                            if (data == 1) {
+                                Swal.fire(
+                                    '¡Guardado!',
+                                    'El usuario ha sido guardado.',
+                                    'success'
+                                ).then(function () {
+                                    location.reload();
+                                });
+
+                            } else if (data == 0) {
+                                Swal.fire(
+                                    '¡Error!',
+                                    'Ha ocurrido un error, intente de nuevo mas tarde',
+                                    'error'
+                                ).then(function () {
+                                    location.reload();
+                                });
+                            } else if (data == 2) {
+                                Swal.fire(
+                                    '¡Error!',
+                                    'El usuario ya existe!',
+                                    'error'
+                                )
+                            } else if (data = "error_s") {
+                                Swal.fire(
+                                    '¡Error!',
+                                    'No puedes editar la informacion de este usuaio',
+                                    'error'
+                                )
+
+                            }
+
                         }
                     });
-
-                } else {
-                    Swal.fire(
-                        '¡Error!',
-                        'Las claves no coinciden',
-                        'error'
-                    )
-                    valido = false;
                 }
             } else {
                 formData.append(accion, true);
@@ -473,87 +840,133 @@ $('#mUsuario').submit(function (e) {
                     }
                 });
             }
-        } else {
-            formData.append(accion, true);
 
-            // console.log(formData);
-            $.ajax({
-                url: SERVERURL + "/pasantes/ajax/admin.ajax.php",
-                method: "POST",
-                data: formData,
-                cache: false,
-                contentType: false,
-                processData: false,
-                success: function (data) {
-                    console.log(data);
-                    if (data == 1) {
-                        Swal.fire(
-                            '¡Guardado!',
-                            'El usuario ha sido guardado.',
-                            'success'
-                        ).then(function () {
-                            location.reload();
-                        });
-
-                    } else if (data == 0) {
-                        Swal.fire(
-                            '¡Error!',
-                            'Ha ocurrido un error, intente de nuevo mas tarde',
-                            'error'
-                        ).then(function () {
-                            location.reload();
-                        });
-                    } else if (data == 2) {
-                        Swal.fire(
-                            '¡Error!',
-                            'El usuario ya existe!',
-                            'error'
-                        )
-                    }
-
-                }
-            });
         }
-
-        // } else {}
-
+    } else {
+        Swal.fire(
+            '¡Error!',
+            'Revisa los campos en rojo',
+            'error'
+        );
     }
-    // else {
-    //     Swal.fire(
-    //         '¡Error!',
-    //         'Ha ocurrido un error, intente de nuevo mas tarde',
-    //         'error'
-    //     ).then(function () {
-    //         location.reload();
-    //     });
-    // }
 
 });
 
 //Submit Personal
-$(document).on('submit', '#mPersonal', function(e) {
+$(document).on('submit', '#mPersonal', function (e) {
+    e.stopImmediatePropagation();
+    e.preventDefault();
+
+    p_valid = !p_valid_array.includes(false);
+
+    if (p_valid) {
+
+        var formData = new FormData(this);
+
+        if ($('.nuevoPersonal').length != 0) {
+            accion = 'nuevo_personal';
+        } else if ($('.editarPersonalF').length != 0) {
+            accion = 'editar_personal';
+            formData.append('id_personal', $('.editarPersonalF').attr('id'));
+        }
+
+        formData.append(accion, true);
+
+        valido = validarPersonal(accion);
+        console.log(valido);
+        if (valido) {
+
+            Swal.fire({
+                title: '¿Esta seguro de guardar el personal?',
+                text: "Usted va a guardar el personal, ¿Continuar?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Si, guardar!',
+                cancelButtonText: 'No, cancelar!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: SERVERURL + "/pasantes/ajax/admin.ajax.php",
+                        method: "POST",
+                        data: formData,
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        success: function (data) {
+                            console.log(data);
+                            if (data == 1) {
+                                Swal.fire(
+                                    '¡Guardado!',
+                                    'El personal ha sido guardado.',
+                                    'success'
+                                ).then(function () {
+                                    location.reload();
+                                });
+
+                            } else if (data == 0) {
+                                Swal.fire(
+                                    '¡Error!',
+                                    'Ha ocurrido un error, intente de nuevo mas tarde',
+                                    'error'
+                                ).then(function () {
+                                    location.reload();
+                                });
+                            } else if (data == 2) {
+                                Swal.fire(
+                                    '¡Error!',
+                                    'El personal ya existe!',
+                                    'error'
+                                )
+                            } else if (data == "error_s") {
+                                Swal.fire(
+                                    '¡Error!',
+                                    'No puedes editar la informacion de este personal',
+                                    'error'
+                                )
+                            }
+
+
+                        }
+                    });
+                }
+            });
+        }
+    } else {
+        Swal.fire(
+            '¡Error!',
+            'Revisa los campos en rojo',
+            'error'
+        );
+    }
+
+});
+
+//Submit Horario
+$(document).on('submit', '#mHorario', function (e) {
     e.stopImmediatePropagation();
     e.preventDefault();
 
     var formData = new FormData(this);
 
-    if ($('.nuevoPersonal').length != 0) {
-        accion = 'nuevo_personal';
-    } else if ($('.editarPersonalF').length != 0) {
-        accion = 'editar_personal';
-        formData.append('id_personal', $('.editarPersonalF').attr('id'));
+    if ($('.nuevoHorario').length != 0) {
+        accion = 'nuevo_horario';
+    } else if ($('.editarHorarioF').length != 0) {
+        accion = 'editar_horario';
+        formData.append('id_horario', $('.editarHorarioF').attr('id'));
     }
-        
+
     formData.append(accion, true);
 
-    valido = validarPersonal(accion);
+    valido = validarHorario(accion);
     console.log(valido);
     if (valido) {
-        
+
         Swal.fire({
-            title: '¿Esta seguro de guardar el personal?',
-            text: "Usted va a guardar el personal, ¿Continuar?",
-            icon: 'warning',
+            title: '¿Esta seguro de guardar el horario?',
+            text: "Usted va a guardar el horario, ¿Continuar?",
+            icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
@@ -573,7 +986,7 @@ $(document).on('submit', '#mPersonal', function(e) {
                         if (data == 1) {
                             Swal.fire(
                                 '¡Guardado!',
-                                'El personal ha sido guardado.',
+                                'El horario ha sido guardado.',
                                 'success'
                             ).then(function () {
                                 location.reload();
@@ -590,18 +1003,24 @@ $(document).on('submit', '#mPersonal', function(e) {
                         } else if (data == 2) {
                             Swal.fire(
                                 '¡Error!',
-                                'El personal ya existe!',
+                                'El horario ya existe!',
+                                'error'
+                            )
+                        } else if (data == "error_s") {
+                            Swal.fire(
+                                '¡Error!',
+                                'No puedes editar la informacion de este horario',
                                 'error'
                             )
                         }
-
                     }
                 });
             }
         });
     }
-
 });
+
+
 
 function validar(accion) {
     var r = false;
@@ -740,7 +1159,7 @@ function validarPersonal(accion) {
             'error'
         )
         return r;
-    } 
+    }
     // else if (correo == "") {
     //     Swal.fire(
     //         '¡Error!',
@@ -781,4 +1200,67 @@ function validarPersonal(accion) {
         return true;
     }
 
+}
+
+//para validar los datos de horario
+function validarHorario(accion) {
+    var r = false;
+    var hora_inicio = $('.hInicio').val();
+    var hora_inicio_almuerzo = $('.hAlmuerzoInicio').val();
+    var hora_fin_almuerzo = $('.hAlmuerzoFin').val();
+    var hora_fin = $('.hFin').val();
+
+    // console.log("Accion: " + "editar_usuario");
+    console.log("Accion: " + accion);
+
+    console.log("Hora_inicio: " + hora_inicio);
+    console.log("Hora_inicio_almuerzo: " + hora_inicio_almuerzo);
+    console.log("Hora_fin_almuerzo: " + hora_fin_almuerzo);
+    console.log("Hora_fin: " + hora_fin);
+
+    if (hora_inicio == "") {
+        Swal.fire(
+            '¡Error!',
+            'Ingrese una hora de inicio',
+            'error'
+        )
+        return r;
+    } else if (hora_inicio_almuerzo == "") {
+        Swal.fire(
+            '¡Error!',
+            'Ingrese una hora de inicio de almuerzo',
+            'error'
+        )
+        return r;
+    } else if (hora_fin_almuerzo == "") {
+        Swal.fire(
+            '¡Error!',
+            'Ingrese una hora de fin de almuerzo',
+            'error'
+        )
+        return r;
+    } else if (hora_fin == "") {
+        Swal.fire(
+            '¡Error!',
+            'Ingrese una hora de fin',
+            'error'
+        )
+        return r;
+    } else {
+        return true;
+    }
+}
+
+
+function togglePassword(id) {
+    // var input = document.getElementById(id);
+    var icon = $('#btn' + id).children().children();
+    var input = $('#password' + id);
+    if (input.attr('type') == 'password') {
+        input.attr('type', 'text');
+        icon.removeClass('fa fa-eye-slash');
+    } else {
+        input.attr('type', 'password');
+        icon.addClass('fa fa-eye');
+    }
 }

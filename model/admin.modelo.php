@@ -15,42 +15,39 @@ class AdminModelo extends mainModel
         $usuario = $datos['usuario'];
         $idRol = $datos['idRol'];
         $estado = $datos['estado'];
+        $idHorario = $datos['idHorario'];
         if ($isEditPass) {
             $clave = $datos['clave'];
+            $clave_hash = password_hash($clave, PASSWORD_DEFAULT);
             $query = "UPDATE usuario 
             SET usu_usuario = :usuario, 
             usu_clave = :clave, 
             usu_estado = :estado,
             per_id = :idPersonal,
-            rol_id = :idRol
+            rol_id = :idRol,
+            hor_id = :idHorario
             WHERE usu_id = :idUsuario";
         } else {
             $query = "UPDATE usuario 
             SET usu_usuario = :usuario,
             usu_estado = :estado,
             per_id = :idPersonal,
-            rol_id = :idRol
+            rol_id = :idRol,
+            hor_id = :idHorario
             WHERE usu_id = :idUsuario";
         }
 
         $sql = mainModel::conectar()->prepare($query);
 
-        // $sql->bindParam(":usuario", $usuario, PDO::PARAM_STR);
-        // $sql->bindParam(":estado", $estado, PDO::PARAM_INT);
-        // $sql->bindParam(":idPersonal", $idPersonal, PDO::PARAM_INT);
-        // $sql->bindParam(":idRol", $idRol, PDO::PARAM_INT);
-        // $sql->bindParam(":idusuario", $idUsuario, PDO::PARAM_INT);
-        // if ($isEditPass) {
-        //     $sql->bindParam(":clave", $clave, PDO::PARAM_STR);
-        // }
         if ($isEditPass) {
             $sql->execute(array(
                 ":usuario" => $usuario,
-                ":clave" => $clave,
+                ":clave" => $clave_hash,
                 ":estado" => $estado,
                 ":idPersonal" => $idPersonal,
                 ":idRol" => $idRol,
-                ":idUsuario" => $idUsuario
+                ":idUsuario" => $idUsuario,
+                ":idHorario" => $idHorario
             ));
         } else {
             $sql->execute(array(
@@ -58,7 +55,8 @@ class AdminModelo extends mainModel
                 ":estado" => $estado,
                 ":idPersonal" => $idPersonal,
                 ":idRol" => $idRol,
-                ":idUsuario" => $idUsuario
+                ":idUsuario" => $idUsuario,
+                ":idHorario" => $idHorario
             ));
         }
 
@@ -108,22 +106,54 @@ class AdminModelo extends mainModel
         return $sql;
     }
 
+    // Para editar un horario
+    protected function MdlEditarHorario($datos)
+    {
+        $idHorario = $datos['id_horario'];
+        $h_inicio = $datos['hora_inicio'];
+        $h_inicio_almuerzo = $datos['hora_inicio_almuerzo'];
+        $h_fin_almuerzo = $datos['hora_fin_almuerzo'];
+        $h_fin = $datos['hora_fin'];
+
+        $query = "UPDATE horario
+        SET hor_entrada = :h_inicio,
+        hor_salida_a = :h_inicio_almuerzo,
+        hor_regreso_a = :h_fin_almuerzo,
+        hor_salida = :h_fin
+        WHERE hor_id = :idHorario";
+        $sql = mainModel::conectar()->prepare($query);
+        $sql->execute(array(
+            ":h_inicio" => $h_inicio,
+            ":h_inicio_almuerzo" => $h_inicio_almuerzo,
+            ":h_fin_almuerzo" => $h_fin_almuerzo,
+            ":h_fin" => $h_fin,
+            ":idHorario" => $idHorario
+        ));
+        return $sql;
+    }
+
     //Para crear un Usuario
     protected function MdlCrearUsuario($datos){
         $usuario = $datos['usuario'];
         $clave = $datos['clave'];
+
+        $hash_pass = password_hash($clave, PASSWORD_DEFAULT);
+
         $idPersonal = $datos['idPersonal'];
         $idRol = $datos['idRol'];
         $estado = $datos['estado'];
-        $query = "INSERT INTO usuario (usu_usuario, usu_clave, usu_estado, per_id, rol_id)
-        VALUES (:usuario, :clave, :estado, :idPersonal, :idRol)";
+        $idHorario = isset($datos['idHorario']) ? $datos['idHorario'] : '1';
+        $query = "INSERT INTO usuario (usu_usuario, usu_clave, usu_estado, per_id, rol_id, hor_id)
+        VALUES (:usuario, :clave, :estado, :idPersonal, :idRol, :idHorario)";
         $sql = mainModel::conectar()->prepare($query);
         $sql->execute(array(
             ":usuario" => $usuario,
-            ":clave" => $clave,
+            ":clave" => $hash_pass,
             ":estado" => $estado,
             ":idPersonal" => $idPersonal,
-            ":idRol" => $idRol
+            ":idRol" => $idRol,
+            ":idHorario" => $idHorario,
+
         ));
         return $sql;
     }
@@ -156,6 +186,48 @@ class AdminModelo extends mainModel
         ));
         return $sql;
 
+    }
+
+    //Para crear un Horario
+    protected function MdlCrearHorario($datos){
+        $h_inicio = $datos['hora_inicio'];
+        $h_inicio_almuerzo = $datos['hora_inicio_almuerzo'];
+        $h_fin_almuerzo = $datos['hora_fin_almuerzo'];
+        $h_fin = $datos['hora_fin'];
+        $query = "INSERT INTO horario (hor_entrada, hor_salida_a, hor_regreso_a, hor_salida)
+        VALUES (:h_inicio, :h_inicio_almuerzo, :h_fin_almuerzo, :h_fin)";
+        $sql = mainModel::conectar()->prepare($query);
+        $sql->execute(array(
+            ":h_inicio" => $h_inicio,
+            ":h_inicio_almuerzo" => $h_inicio_almuerzo,
+            ":h_fin_almuerzo" => $h_fin_almuerzo,
+            ":h_fin" => $h_fin
+        ));
+
+        return $sql;
+    }
+
+    protected function MdlNuevoRegistroPasante($datos){
+        $id_personal = $datos['id_personal'];
+        $fecha = $datos['fecha'];
+        $h_entrada = $datos['h_inicio'];
+        $h_almuerzo_inicio = $datos['h_almuerzo_start_u'];
+        $h_almuerzo_fin = $datos['h_almuerzo_end_u'];
+        $h_salida = $datos['h_salida'];
+
+        $query = "INSERT INTO asistencia (asi_dia, asi_hora_ingreso, asi_hora_salida_a, asi_hora_regreso_a, asi_hora_salida, per_id)
+        VALUES (:fecha, :h_entrada, :h_almuerzo_inicio, :h_almuerzo_fin, :h_salida, :id_personal)";
+        $sql = mainModel::conectar()->prepare($query);
+        $sql->execute(array(
+            ":fecha" => $fecha,
+            ":h_entrada" => $h_entrada,
+            ":h_almuerzo_inicio" => $h_almuerzo_inicio,
+            ":h_almuerzo_fin" => $h_almuerzo_fin,
+            ":h_salida" => $h_salida,
+            ":id_personal" => $id_personal
+        ));
+        return $sql;
+        
     }
 
 }

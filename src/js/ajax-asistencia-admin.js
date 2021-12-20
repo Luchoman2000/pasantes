@@ -95,13 +95,13 @@ $(document).on('click', '.editarRegistro', function () {
     var row = $(this).closest('tr');
 
     console.log("EDITANDOO");
-    console.log("Ingreso: "+ row.children().eq(1).text());
-    console.log("Almuerzo_inicio: "+ row.children().eq(2).text());
-    console.log("Almuerzo_fin: "+ row.children().eq(3).text());
-    console.log("Salida: "+ row.children().eq(4).text());
+    console.log("Ingreso: " + row.children().eq(1).clone().children().remove().end().text());
+    console.log("Almuerzo_inicio: " + row.children().eq(2).text());
+    console.log("Almuerzo_fin: " + row.children().eq(3).text());
+    console.log("Salida: " + row.children().eq(4).clone().children().remove().end().text());
     console.log(id);
 
-    var h_entrada = row.children().eq(1).text();
+    var h_entrada = row.children().eq(1).clone().children().remove().end().text().replace(/\s/g, '');
     var h_almuerzo_start = "";
     var h_almuerzo_end = "";
     var h_salida = "";
@@ -112,7 +112,7 @@ $(document).on('click', '.editarRegistro', function () {
 
 
     if (row.children().eq(2).text() != "Sin almuerzo" && row.children().eq(2).text() != "--:--:--") {
-        h_almuerzo_start = row.children().eq(2).text();
+        h_almuerzo_start = row.children().eq(2).clone().children().remove().end().text().replace(/\s/g, '');
         $('#h_almuerzo_start_u').next().text(h_almuerzo_start);
         $('#h_almuerzo_start_u').val(h_almuerzo_start);
     } else {
@@ -120,7 +120,7 @@ $(document).on('click', '.editarRegistro', function () {
         $('#h_almuerzo_start_u').val("00:00:00");
     }
     if (row.children().eq(3).text().length != 0 && row.children().eq(3).text() != "--:--:--") {
-        h_almuerzo_end = row.children().eq(3).text();
+        h_almuerzo_end = row.children().eq(3).clone().children().remove().end().text().replace(/\s/g, '');
         $('#h_almuerzo_end_u').next().text(h_almuerzo_end);
         $('#h_almuerzo_end_u').val(h_almuerzo_end);
     } else {
@@ -128,7 +128,7 @@ $(document).on('click', '.editarRegistro', function () {
         $('#h_almuerzo_end_u').val("00:00:00");
     }
     if (row.children().eq(4).text() != "--:--:--") {
-        h_salida = row.children().eq(4).text();
+        h_salida = row.children().eq(4).clone().children().remove().end().text().replace(/\s/g, '');
         $('#h_salida_u').next().text(h_salida);
         $('#h_salida_u').val(h_salida);
     } else {
@@ -197,11 +197,39 @@ $(document).on('submit', '#guardar_edicion', function (e) {
     e.preventDefault();
     var formdata = new FormData(this);
     // var form = $(this);
+    var h_entrada = $('#h_entrada_u').val();
+    var h_almuerzo_start = $('#h_almuerzo_start_u').val();
+    var h_almuerzo_end = $('#h_almuerzo_end_u').val();
+    var h_salida = $('#h_salida_u').val();
+
+    console.log("Ingreso: " + h_entrada);
+    console.log("Almuerzo_inicio: " + h_almuerzo_start);
+    console.log("Almuerzo_fin: " + h_almuerzo_end);
+    console.log("Salida: " + h_salida);
+
+    //Validar orden de horas
+    // if (h_almuerzo_start != "00:00:00" && h_almuerzo_end != "00:00:00") {
+    //     if (h_entrada > h_almuerzo_start) {
+    //         Swal.fire(
+    //             '¡Error!',
+    //             'La hora de inicio del almuerzo no puede ser menor que la hora de entrada.',
+    //             'error'
+    //         )
+    //     } else if (h_almuerzo_end > h_salida) {
+    //         Swal.fire(
+    //             '¡Error!',
+    //             'La hora de fin del almuerzo no puede ser mayor a la hora de salida.',
+    //             'error'
+    //         )
+    //     }
+    // } else {
+
+
 
     console.log(formdata);
     Swal.fire({
         title: '¿Estás seguro?',
-        text: "Guardarás los cambios realizados en el registro de este usuario, ¡No podrás revertir esto!",
+        text: "Guardarás los cambios realizados en el registro de este usuario",
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
@@ -263,5 +291,133 @@ $(document).on('submit', '#guardar_edicion', function (e) {
             });
         }
     });
+    // }
 
 });
+
+
+$(document).on('click', '.btnNuevoRegistroAsi',function () {
+    // get today with moment ja
+    let today = moment().format('yyyy-MM-DD');
+    console.log(today);
+    $('#fecha_n_a').val(today);
+    $('.btnreset_h_e').prev().val('00:00:00');
+    $('.btnReset_i_a').prev().val('00:00:00');
+    $('.btnReset_f_a').prev().val('00:00:00');
+    $('.btnReset_s').prev().val('00:00:00');
+});
+
+//Para nuevo registro 
+$(document).on('submit', '#guardar_nuevo_registro', function (e) {
+
+    e.stopImmediatePropagation();
+
+    e.preventDefault();
+
+    console.log("Entro");
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "Crearás una asistencia a este usuariousuario",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: '¡Sí, crear!',
+        cancelButtonText: '¡No, cancelar!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            var formData = new FormData(this);
+            $.ajax({
+                url: SERVERURL + "/pasantes/ajax/admin.ajax.php",
+                method: "POST",
+                data: formData,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    console.log(data);
+                    if (data == 1) {
+                        Swal.fire(
+                            '¡Guardado!',
+                            'Se ha guardado el registro.',
+                            'success'
+                        ).then(function () {
+                            location.reload();
+                        });
+
+                    } else if (data == 0) {
+                        Swal.fire(
+                            '¡Error!',
+                            'Ha ocurrido un error, intente de nuevo mas tarde',
+                            'error'
+                        ).then(function () {
+                            location.reload();
+                        });
+                    } else if (data == 2) {
+                        Swal.fire(
+                            '¡Error!',
+                            'El usuario ya tiene un registro de asistencia en ese día',
+                            'error'
+                        )
+                    } else if (data == 'error_h') {
+                        Swal.fire(
+                            'Atención!',
+                            'La hora de entrada debe ser menor a la hora de salida.',
+                            'warning'
+                        )
+                    } else if (data == 'error_a') {
+                        Swal.fire(
+                            'Atención!',
+                            'No se ha marcado el inicio del almuerzo',
+                            'warning'
+                        )
+                    } else if (data == 'error_s') {
+
+                        Swal.fire(
+                            'Atención!',
+                            'Horas no secuenciales',
+                            'warning'
+                        );
+                    }
+
+                }
+
+            })
+        }
+    });
+})
+
+
+
+
+
+//Resetear horas
+$(document).on('click', '.btnReset_h_e', function (e) {
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    $(this).prev().val($('.s_h_entrada').text());
+})
+$(document).on('click', '.btnReset_i_a', function (e) {
+
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    $(this).prev().val($('.s_h_salida_a').val());
+})
+$(document).on('click', '.btnReset_f_a', function (e) {
+
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    $(this).prev().val($('.s_h_regreso_a').val());
+})
+$(document).on('click', '.btnReset_s', function (e) {
+
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    $(this).prev().val($('.s_h_salida').text());
+})
+
+//Para llenar acorde al horario
+$(document).on('click', '.btnAutoFill', function (e) {
+    e.stopImmediatePropagation();
+    e.preventDefault();
+})

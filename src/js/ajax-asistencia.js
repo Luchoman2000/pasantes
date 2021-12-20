@@ -2,6 +2,56 @@ function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
 
+// Validar campos de exportación
+var valid = true;
+$(function () {
+
+    //Check Empresa
+    $('#empresa').on('keyup', function () {
+        var empresa = $(this).val();
+        var pattern = /^[a-zA-Z\s]*$/;
+        if (pattern.test(empresa) && empresa.length > 4 && empresa.length < 30) {
+            $(this).removeClass('is-danger');
+            $(this).addClass('is-success');
+            valid = true;
+        } else {
+            $(this).removeClass('is-success');
+            $(this).addClass('is-danger');
+            valid = false;
+        }
+    });
+
+    //Check Tutor
+    $('#tutor').on('keyup', function () {
+        var tutor = $(this).val();
+        var pattern = /^[a-zA-Z\s]*$/;
+        if (pattern.test(tutor) && tutor.length > 4 && tutor.length < 30) {
+            $(this).removeClass('is-danger');
+            $(this).addClass('is-success');
+            valid = true;
+        } else {
+            $(this).removeClass('is-success');
+            $(this).addClass('is-danger');
+            valid = false;
+        }
+    });
+
+    //Check cargo
+    $('#cargo').on('keyup', function () {
+        var cargo = $(this).val();
+        var pattern = /^[a-zA-Z\s]*$/;
+        if (pattern.test(cargo) && cargo.length > 4 && cargo.length < 30) {
+            $(this).removeClass('is-danger');
+            $(this).addClass('is-success');
+            valid = true;
+        } else {
+            $(this).removeClass('is-success');
+            $(this).addClass('is-danger');
+            valid = false;
+        }
+    });
+})
+
 // Para marcar el ingreso
 $(document).on('click', '.m_entrada', function () {
     // Do click stuff here
@@ -286,7 +336,7 @@ $(document).on('click', '#m_almuerzo_fin', function () {
 
                     Toast.fire({
                         icon: "error",
-                        title: "Debe marcar primero el inicio del almuerzo 🤐 "
+                        title: "Debe marcar primero el inicio del almuerzo &#65; &#66; &#67;"
                     });
                 }
 
@@ -447,67 +497,146 @@ $(document).on('click', '#m_salida', function () {
 
 
 //Para exportar asistencia a word
-$(document).on('click', '#exportarWorda', function (e) {
+$(document).on('submit', '#exportarWorda', function (e) {
     e.preventDefault();
     e.stopImmediatePropagation();
-    // console.log(datos);
+    console.log(valid);
 
     var form = $(this);
     var url = form.attr('action');
     var data = form.serialize();
-    // data = data + '&reporte_asistencia=1';
-    // var data = new FormData(form);
-    // data.append('datos', datos);
-    // data.append('exportar_asistencia', true);
-    // Swal.fire({
-    //     title: 'Exportar a Word',
-    //     html: '<span>¿Desea exportar a Word?</span>',
-    //     icon: 'question',
-    //     showCancelButton: true,
-    //     confirmButtonColor: '#3085d6',
-    //     cancelButtonColor: '#d33',
-    //     confirmButtonText: 'Si, exportar!',
-    //     cancelButtonText: 'Cancelar'
-    // }).then((result) => {
-    //     if (result.isConfirmed) {
-
-    // ajax para exportar a word y descargarlo
-
-
-
-    $.ajax({
-        type: 'POST',
-        url: SERVERURL + "/pasantes/ajax/reporte.ajax.php",
-        url: url,
-        data: form.serialize(),
-        data: data,
-        // dataType: 'json',
-        success: function (data) {
-            //download data
-
-
-
-            console.log(data);
-            Swal.fire({
-                title: 'Exito!',
-                text: 'Se ha exportado correctamente',
-                icon: 'success',
-                confirmButtonText: 'Ok'
-            })
-        },
-        error: function (data) {
-            console.log(data);
-            Swal.fire({
-                title: 'Error!',
-                text: 'No se ha podido exportar',
-                icon: 'error',
-                confirmButtonText: 'Ok'
-            })
-        }
-    });
-    //     }
-    // })
+    if (valid) {
+        $.ajax({
+            type: 'POST',
+            url: SERVERURL + "/pasantes/ajax/reporte.ajax.php",
+            url: url,
+            data: form.serialize(),
+            data: data,
+            success: function (response) {  
+                window.location = SERVERURL + "/pasantes/ajax/reporte.ajax.php";
+            },
+            error: function (data) {
+                console.log(data);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'No se ha podido exportar',
+                    icon: 'error',
+                    confirmButtonText: 'Ok'
+                })
+            }
+        });
+    } else {
+        Swal.fire(
+            '¡Error!',
+            'Revisa los campos en rojo',
+            'error'
+        );
+    }
 
 });
 
-//Show Advanced options toggler
+
+
+// DataTables Bulma
+$(document).ready(function () {
+
+
+
+    //Diff hours
+    var h_entrada = $('.s_h_entrada').text();
+    var h_salida = $('.s_h_salida').text();
+
+    var h_salida_almuerzo = $('.s_h_salida_a').val();
+    var h_regreso_almuerzo = $('.s_h_regreso_a').val();
+
+
+    // console.log(h_entrada);
+    // console.log(h_salida_almuerzo);
+    // console.log(h_regreso_almuerzo);
+    // console.log(h_salida);
+
+
+
+    // get difference in hours with moment.js
+    var diff = moment.duration(moment(h_salida, "HH:mm:ss").diff(moment(h_entrada, "HH:mm:ss"))).asHours();
+    var diff_almuerzo = moment.duration(moment(h_regreso_almuerzo, "HH:mm:ss").diff(moment(h_salida_almuerzo, "HH:mm:ss"))).asHours();
+
+    // get diff between diff_almuerzo and diff and cast to format hh:mm:ss
+    var diff_total = diff - diff_almuerzo;
+    var diff_total_format = moment.utc(moment.duration(diff_total, "hours").asMilliseconds()).format("HH:mm");
+
+
+    // console.log(diff);
+    // console.log(diff_almuerzo);
+    // console.log(diff_total);
+    // console.log(diff_total_format);
+
+    $('.s_h_tot_horas').text(diff_total_format);
+
+
+    var table = $('#example').removeAttr('width').DataTable({
+        // scrollY: "300px",
+        // columnDefs: [{
+        //     width: 6200,
+        //     targets: 0
+        // }],
+        "language": {
+            "url": SERVERURL + "/pasantes/src/es_es.json"
+        },
+        "order": [
+            [
+                0, "desc"
+            ]
+        ],
+        searching: false,
+        pagin: false,
+        "pagingType": "simple",
+        lengthChange: false,
+        // responsive: true,
+        scrollCollapse: true,
+        scroller: true,
+        // deferRender: true,
+        fixedColumns: true,
+        "createdRow": function (row, data, index) {
+            var hora_salida = $('td', row).eq(4).clone().children().remove().end().text();
+            var hora_almuerzo = $('td', row).eq(2).clone().children().remove().end().text();
+            var total_de_horas = $('td', row).eq(5).clone().children().remove().end().text();
+            var diff_h_entrada = $('td', row).eq(1).find('span').text();
+            var diff_h_salida = $('td', row).eq(4).find('span').text();
+
+
+            // console.log(diff_h_entrada);
+
+            if (hora_salida == "00:00:00 ") {
+                $('td', row).eq(0).addClass('has-text-danger');
+            }
+            if (hora_almuerzo == "Sin almuerzo") {
+                $('td', row).eq(0).addClass('has-text-warning-dark');
+            }
+            $('td', row).eq(0).addClass('has-text-success');
+
+            // if string of diff_h_entrada has "-"
+            if (diff_h_entrada.includes("-")) {
+                $('td', row).eq(1).find('span').addClass('is-danger is-light');
+            } else {
+                $('td', row).eq(1).find('span').addClass('is-success is-light');
+            }
+
+            // if string of diff_h_salida has "-"
+            if (diff_h_salida.includes("-")) {
+                $('td', row).eq(4).find('span').addClass('is-danger is-light');
+            } else {
+                $('td', row).eq(4).find('span').addClass('is-success is-light');
+            }
+
+
+            // check difference between total_de_horas and diff_total
+            if (total_de_horas < diff_total_format) {
+                $('td', row).eq(5).addClass('has-text-danger');
+            } else {
+                $('td', row).eq(5).addClass('has-text-success');
+            }
+        },
+    });
+
+});
