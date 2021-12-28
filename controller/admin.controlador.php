@@ -10,11 +10,13 @@ class AdminControlador extends AdminModelo
     //Para mostrar los usuarios
     public function CtrMostrarUsuarios()
     {
-        $sql = mainModel::ejecutar_consulta_simple("SELECT u.*,r.rol_nombre as rol, r.rol_id as rol_id,
+        $sql = mainModel::ejecutar_consulta_simple("SELECT h.*, u.*,r.rol_nombre as rol, r.rol_id as rol_id,
         CONCAT(p.per_pri_nombre, ' ', p.per_seg_nombre, ' ', p.per_pri_apellido, ' ', p.per_seg_apellido) AS nombre 
         FROM usuario u
         INNER JOIN personal p ON u.per_id = p.per_id
-        INNER JOIN rol r ON u.rol_id = r.rol_id");
+        INNER JOIN rol r ON u.rol_id = r.rol_id
+        LEFT JOIN horario h ON u.hor_id = h.hor_id
+        ");
 
         $tabla = '
             <table id="listaUsuarios" class="table stripe row-border order-column nowrap" style="width:100%; box-sizing: inherit;">
@@ -22,8 +24,9 @@ class AdminControlador extends AdminModelo
                     <tr>
                         <th>Nombre</th>
                         <th>Usuario</th>
-                        <th>Estado</th>
                         <th>Rol</th>
+                        <th>Horario</th>
+                        <th>Estado</th>
                         <th style="text-align: center;">Acciones</th>
                     </tr>
                 </thead>
@@ -40,6 +43,16 @@ class AdminControlador extends AdminModelo
                     <tr>
                         <td style="vertical-align: middle;">' . $nombre . '</td>
                         <td style="vertical-align: middle;">' . $row['usu_usuario'] . '</td>';
+
+
+
+
+                $tabla .= '<td style="vertical-align: middle;">' . $row['rol'] . '</td>';
+                if (is_null($row['hor_id']) || $row['hor_id'] == 1) {
+                    $tabla .= '<td style="vertical-align: middle;">Sin horario</td>';
+                } else {
+                    $tabla .= '<td style="vertical-align: middle;">' . date('H:i a', strtotime($row['hor_entrada'])) . ' ' . date('H:i a', strtotime($row['hor_salida'])) . '</td>';
+                }
                 if ($row['usu_estado'] == 1) {
                     $tabla .= '
                         <td style="vertical-align: middle;">Activo</td>';
@@ -47,11 +60,7 @@ class AdminControlador extends AdminModelo
                     $tabla .= '
                         <td style="vertical-align: middle;">Inactivo</td>';
                 }
-
-
-
-                $tabla .= '<td style="vertical-align: middle;">' . $row['rol'] . '</td>
-                        <td style="vertical-align: middle; text-align: center;">';
+                $tabla .= '<td style="vertical-align: middle; text-align: center;">';
                 if ($row['rol'] != "ADMINISTRADOR" && $row['usu_estado'] != 0) {
                     $tabla .= '
                                 <button style="height: fit-content;" class="button is-info is-outlined" onclick="window.location.href=\'' . SERVERURL . 'registro/' . mainModel::encryption($row['per_id']) . '\'">
@@ -311,6 +320,8 @@ class AdminControlador extends AdminModelo
 
         if (isset($_POST['uHorario'])) {
             $idHorario = $_POST['uHorario'];
+        }else{
+            $idHorario = null;
         }
 
         $isEditPass = false;
@@ -389,6 +400,7 @@ class AdminControlador extends AdminModelo
         $dni = mainModel::limpiar_cadena($_POST['pCedula']);
         $telefono = isset($_POST['pTelefono']) ? mainModel::limpiar_cadena($_POST['pTelefono']) : "";
         $email = isset($_POST['pEmail']) ? mainModel::limpiar_cadena($_POST['pEmail']) : "";
+        $direccion = isset($_POST['pDireccion']) ? mainModel::limpiar_cadena($_POST['pDireccion']) : "";
         $fechaNacimiento = isset($_POST['pFechaNacimiento']) ? mainModel::limpiar_cadena($_POST['pFechaNacimiento']) : "1000-01-01";
         $estado = mainModel::limpiar_cadena($_POST['pEstado']);
 
@@ -401,6 +413,7 @@ class AdminControlador extends AdminModelo
             "dni" => $dni,
             "telefono" => $telefono,
             "email" => $email,
+            "direccion" => $direccion,
             "fechaNacimiento" => $fechaNacimiento,
             "estado" => $estado,
         ];
@@ -513,6 +526,7 @@ class AdminControlador extends AdminModelo
         $dni = mainModel::limpiar_cadena($_POST['pCedula']);
         $telefono = isset($_POST['pTelefono']) ? mainModel::limpiar_cadena($_POST['pTelefono']) : "";
         $email = isset($_POST['pEmail']) ? mainModel::limpiar_cadena($_POST['pEmail']) : "";
+        $direccion = isset($_POST['pDireccion']) ? mainModel::limpiar_cadena($_POST['pDireccion']) : "";
         $fechaNacimiento = isset($_POST['pFechaNacimiento']) ? mainModel::limpiar_cadena($_POST['pFechaNacimiento']) : "1000-01-01";
         $estado = mainModel::limpiar_cadena($_POST['pEstado']);
 
@@ -525,7 +539,7 @@ class AdminControlador extends AdminModelo
             "apellido2" => $apellido2,
             "dni" => $dni,
             "telefono" => $telefono,
-            // "direccion" => $direccion,
+            "direccion" => $direccion,
             "email" => $email,
             "fechaNacimiento" => $fechaNacimiento,
             "estado" => $estado,

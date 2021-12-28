@@ -74,7 +74,7 @@ class AdminModelo extends mainModel
         $dni = $datos['dni'];
         $telefono = $datos['telefono'];
         $email = $datos['email'];
-        // $direccion = $datos['direccion'];
+        $direccion = $datos['direccion'];
         $fechaNacimiento = $datos['fechaNacimiento'];
         $estado = $datos['estado'];
 
@@ -86,6 +86,7 @@ class AdminModelo extends mainModel
         per_dni = :dni, 
         per_telefono = :telefono, 
         per_correo = :email, 
+        per_direccion = :direccion,
         per_fecha_nacimiento = :fechaNacimiento, 
         per_estado = :estado
         WHERE per_id = :idPersonal";
@@ -98,7 +99,7 @@ class AdminModelo extends mainModel
             ":dni" => $dni,
             ":telefono" => $telefono,
             ":email" => $email,
-            // ":direccion" => $direccion,
+            ":direccion" => $direccion,
             ":fechaNacimiento" => $fechaNacimiento,
             ":estado" => $estado,
             ":idPersonal" => $idPersonal
@@ -167,11 +168,12 @@ class AdminModelo extends mainModel
         $dni = $datos['dni'];
         $telefono = $datos['telefono'];
         $correo = $datos['email'];
+        $direccion = $datos['direccion'];
         // $fechaNacimiento = date('Y-m-d', $datos['fechaNacimiento']);
         $fechaNacimiento = $datos['fechaNacimiento'];
         $estado = $datos['estado'];
-        $query = "INSERT INTO personal (per_pri_nombre, per_seg_nombre, per_pri_apellido, per_seg_apellido, per_dni, per_telefono, per_correo, per_fecha_nacimiento, per_estado)
-        VALUES (:nombre, :nombre2, :apellido, :apellido2, :dni, :telefono, :correo, :fechaNacimiento, :estado)";
+        $query = "INSERT INTO personal (per_pri_nombre, per_seg_nombre, per_pri_apellido, per_seg_apellido, per_dni, per_telefono, per_correo,per_direccion, per_fecha_nacimiento, per_estado)
+        VALUES (:nombre, :nombre2, :apellido, :apellido2, :dni, :telefono, :correo, :direccion,:fechaNacimiento, :estado)";
         $sql = mainModel::conectar()->prepare($query);
         $sql->execute(array(
             ":nombre" => $nombre,
@@ -181,6 +183,7 @@ class AdminModelo extends mainModel
             ":dni" => $dni,
             ":telefono" => $telefono,
             ":correo" => $correo,
+            ":direccion" => $direccion,
             ":fechaNacimiento" => $fechaNacimiento,
             ":estado" => $estado
         ));

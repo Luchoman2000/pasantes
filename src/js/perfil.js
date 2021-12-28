@@ -6,8 +6,8 @@ $(function () {
     //Check nombres
     $('#uNombres').on('keyup', function () {
         var nombres = $('#uNombres').val();
-        var pattern = /^[a-zA-Z\s]*$/;
-        if (pattern.test(nombres) && nombres.length > 0 && nombres.length < 30) {
+        var pattern = /^([a-zA-ZÀ-ÿÑñ]{4,15})?\s{0,1}([a-zA-ZÀ-ÿÑñ]{4,15})$/;
+        if (pattern.test(nombres) && nombres.length > 3 && nombres.length < 30) {
             $(this).removeClass('is-danger');
             $(this).addClass('is-success');
             valid_array[0] = true;
@@ -21,7 +21,7 @@ $(function () {
     //Check apellidos
     $('#uApellidos').on('keyup', function () {
         var apellidos = $('#uApellidos').val();
-        var pattern = /^[a-zA-Z\s]*$/;
+        var pattern = /^([a-zA-ZÀ-ÿÑñ]{4,15})?\s{0,1}([a-zA-ZÀ-ÿÑñ]{4,15})$/;
         if (pattern.test(apellidos) && apellidos.length > 0 && apellidos.length < 30) {
             $(this).removeClass('is-danger');
             $(this).addClass('is-success');
@@ -52,7 +52,7 @@ $(function () {
     $('#uTelefono').on('keyup', function () {
         var telefono = $('#uTelefono').val();
         var pattern = /^[0-9]*$/;
-        if (pattern.test(telefono) && telefono.length == 10) {
+        if (pattern.test(telefono) && telefono.length == 10 || telefono.length == "") {
             $(this).removeClass('is-danger');
             $(this).addClass('is-success');
             valid_array[3] = true;
@@ -66,7 +66,7 @@ $(function () {
     //Check correo
     $('#uCorreo').on('keyup', function () {
         var correo = $('#uCorreo').val();
-        var pattern = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+        var pattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
         if (pattern.test(correo) && correo.length > 0 && correo.length < 30) {
             $(this).removeClass('is-danger');
             $(this).addClass('is-success');
@@ -81,7 +81,7 @@ $(function () {
     // Check direccion
     $('#uDireccion').on('keyup', function () {
         var direccion = $('#uDireccion').val();
-        var pattern = /^[a-zA-Z0-9\s]*$/;
+        var pattern = /[\w',-\\/.\s]/;
         if (pattern.test(direccion) && direccion.length > 0 && direccion.length < 30) {
             $(this).removeClass('is-danger');
             $(this).addClass('is-success');

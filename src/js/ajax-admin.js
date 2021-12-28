@@ -9,8 +9,8 @@ $(function () {
     //Check Usuario
     $('.uUsuario').on('keyup', function () {
         var usuario = $('.uUsuario').val();
-        var pattern = /^[a-zA-Z0-9]*$/;
-        if (pattern.test(usuario) && usuario.length > 0 && usuario.length < 30) {
+        var pattern = /^(?=.{3,30}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/;
+        if (pattern.test(usuario) && usuario.length >= 3 && usuario.length <= 30) {
             $(this).removeClass('is-danger');
             $(this).addClass('is-success');
             u_valid_array[0] = true;
@@ -24,8 +24,8 @@ $(function () {
     //Check Clave1
     $('.uNClave').on('keyup', function () {
         var clave1 = $('.uNClave').val();
-        var pattern = /^[a-zA-Z0-9]*$/;
-        if (pattern.test(clave1) && clave1.length > 0 && clave1.length < 30) {
+        var pattern = /^(?=.{4,15}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/;
+        if (pattern.test(clave1) && clave1.length >= 4 && clave1.length <= 15) {
             $(this).removeClass('is-danger');
             $(this).addClass('is-success');
             u_valid_array[1] = true;
@@ -39,8 +39,8 @@ $(function () {
     //Check Clave2
     $('.uSNClave').on('keyup', function () {
         var clave2 = $('.uSNClave').val();
-        var pattern = /^[a-zA-Z0-9]*$/;
-        if (pattern.test(clave2) && clave2.length > 0 && clave2.length < 30) {
+        var pattern = /^(?=.{4,15}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/;
+        if (pattern.test(clave2) && clave2.length >= 4 && clave2.length <= 15) {
             $(this).removeClass('is-danger');
             $(this).addClass('is-success');
             u_valid_array[2] = true;
@@ -58,8 +58,8 @@ $(function () {
     //Check Nombre1
     $('.pNombre').on('keyup', function () {
         var nombre1 = $(this).val();
-        var pattern = /^[a-zA-Z]*$/;
-        if (pattern.test(nombre1) && nombre1.length > 0 && nombre1.length < 30) {
+        var pattern = /^[a-zA-ZÀ-ÿ\u00f1\u00d1]{4,15}$/;
+        if (pattern.test(nombre1) && nombre1.length > 3 && nombre1.length < 16) {
             $(this).removeClass('is-danger');
             $(this).addClass('is-success');
             p_valid_array[0] = true;
@@ -73,7 +73,7 @@ $(function () {
     //Check Nombre2
     $('.pNombre2').on('keyup', function () {
         var nombre2 = $(this).val();
-        var pattern = /^[a-zA-Z]*$/;
+        var pattern = /^[a-zA-ZÀ-ÿ\u00f1\u00d1]{4,15}$/;
         if (pattern.test(nombre2) && (nombre2.length > 1 && nombre2.length < 30) || nombre2 == "") {
             $(this).removeClass('is-danger');
             $(this).addClass('is-success');
@@ -88,7 +88,7 @@ $(function () {
     //Check Apellido1
     $('.pApellido').on('keyup', function () {
         var apellido1 = $(this).val();
-        var pattern = /^[a-zA-Z]*$/;
+        var pattern = /^[a-zA-ZÀ-ÿ\u00f1\u00d1]{4,15}$/;
         if (pattern.test(apellido1) && apellido1.length > 0 && apellido1.length < 30) {
             $(this).removeClass('is-danger');
             $(this).addClass('is-success');
@@ -103,7 +103,7 @@ $(function () {
     //Check Apellido2
     $('.pApellido2').on('keyup', function () {
         var apellido2 = $(this).val();
-        var pattern = /^[a-zA-Z]*$/;
+        var pattern = /^[a-zA-ZÀ-ÿ\u00f1\u00d1]{4,15}$/;
         if (pattern.test(apellido2) && (apellido2.length > 1 && apellido2.length < 30) || apellido2 == "") {
             $(this).removeClass('is-danger');
             $(this).addClass('is-success');
@@ -119,7 +119,7 @@ $(function () {
     $('.pCedula').on('keyup', function () {
         var cedula = $(this).val();
         var pattern = /^[0-9]*$/;
-        if (pattern.test(cedula) && cedula.length > 0 && cedula.length < 10) {
+        if (pattern.test(cedula) && cedula.length == 10) {
             $(this).removeClass('is-danger');
             $(this).addClass('is-success');
             p_valid_array[4] = true;
@@ -149,7 +149,7 @@ $(function () {
     $('.pEmail').on('keyup', function () {
         var email = $(this).val();
         var pattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-        if (pattern.test(email) && email.length > 0 && email.length < 30 || email == "") {
+        if (pattern.test(email) && email.length > 0 && email.length < 50 || email == "") {
             $(this).removeClass('is-danger');
             $(this).addClass('is-success');
             p_valid_array[6] = true;
@@ -160,20 +160,20 @@ $(function () {
         }
     });
 
-    //Check direccion
-    // $('.pDireccion').on('keyup', function () {
-    //     var direccion = $(this).val();
-    //     var pattern = /^[a-zA-Z0-9]*$/;
-    //     if (pattern.test(direccion) && direccion.length > 0 && direccion.length < 30) {
-    //         $(this).removeClass('is-danger');
-    //         $(this).addClass('is-success');
-    //         p_valid_array[7] = true;
-    //     } else {
-    //         $(this).removeClass('is-success');
-    //         $(this).addClass('is-danger');
-    //         p_valid_array[7] = false;
-    //     }
-    // });
+    // Check direccion
+    $('.pDireccion').on('keyup', function () {
+        var direccion = $(this).val();
+        var pattern = /[\w',-\\/.\s]/;
+        if (pattern.test(direccion) && direccion.length > 0 && direccion.length < 35 || direccion == "") {
+            $(this).removeClass('is-danger');
+            $(this).addClass('is-success');
+            p_valid_array[7] = true;
+        } else {
+            $(this).removeClass('is-success');
+            $(this).addClass('is-danger');
+            p_valid_array[7] = false;
+        }
+    });
 
     //Fin Validacion de formulario de personal
 
@@ -394,9 +394,18 @@ $(document).on('click', '.editarUsuario', function () {
             // console.log(data);
             $('.euHorario').html('');
             $('.euHorario').append(data);
+            console.log(data);
+            if ($('.euRol option:selected').text() == "ADMINISTRADOR") {
+                $('.euHorario').attr('disabled', true);
+                $('.euHorario').val("1");
+            } else {
+                $('.euHorario').attr('disabled', false);
+            }
 
         }
     });
+
+
 
     $('.euEstado').html('');
     $('.uNClave').val("");
@@ -425,6 +434,7 @@ $(document).on('click', '.editarUsuario', function () {
 
     $('.btnUsuarioForm').removeClass('nuevoUsuario');
     $('.btnUsuarioForm').addClass('editarUsuarioF');
+
 
 
 });
@@ -564,7 +574,8 @@ $(document).on('click', '#nuevo_usuario', function () {
     });
 
     // llenar slect de estado
-
+    $('.euHorario').attr('disabled', false);
+    $('.euHorario').val("1");
     $('.uUsuario').val("");
     $('.uNClave').val("");
     $('.uSNClave').val("");
@@ -1021,7 +1032,20 @@ $(document).on('submit', '#mHorario', function (e) {
 });
 
 
+$(document).on('change', '.euRol', function () {
+    if ($('.euRol option:selected').text() == "ADMINISTRADOR") {
+        $('.euHorario').val("1");
+        $('.euHorario').attr('disabled', true);
+    } else {
+        $('.euHorario').attr('disabled', false);
 
+
+    }
+
+
+});
+
+//Submit USuario
 function validar(accion) {
     var r = false;
     var personal = $('.euNombre').val();
@@ -1033,15 +1057,15 @@ function validar(accion) {
 
 
     // console.log("Accion: " + "editar_usuario");
-    console.log("Accion: " + accion);
+    // console.log("Accion: " + accion);
 
-    console.log("Personal: " + personal);
-    console.log("ID_ USUARIO: " + $('.btnUsuarioForm').attr('id'));
-    console.log("Usuario: " + usuario);
-    console.log("Rol: " + rol);
-    console.log("Estado: " + estado);
-    console.log("Clave: " + clave);
-    console.log("Clave2: " + clave2);
+    // console.log("Personal: " + personal);
+    // console.log("ID_ USUARIO: " + $('.btnUsuarioForm').attr('id'));
+    // console.log("Usuario: " + usuario);
+    // console.log("Rol: " + rol);
+    // console.log("Estado: " + estado);
+    // console.log("Clave: " + clave);
+    // console.log("Clave2: " + clave2);
 
     if (personal == "") {
         Swal.fire(
@@ -1124,19 +1148,19 @@ function validarPersonal(accion) {
     var estado = $('.pEstado').val();
 
     // console.log("Accion: " + "editar_usuario");
-    console.log("Accion: " + accion);
+    // console.log("Accion: " + accion);
 
-    console.log("Nombre: " + nombre);
-    console.log("Nombre2: " + nombre2);
-    console.log("Apellido: " + apellido);
-    console.log("Apellido2: " + apellido2);
+    // console.log("Nombre: " + nombre);
+    // console.log("Nombre2: " + nombre2);
+    // console.log("Apellido: " + apellido);
+    // console.log("Apellido2: " + apellido2);
 
-    console.log("Cedula: " + cedula);
-    console.log("Correo: " + correo);
-    console.log("Telefono: " + telefono);
+    // console.log("Cedula: " + cedula);
+    // console.log("Correo: " + correo);
+    // console.log("Telefono: " + telefono);
     // console.log("Direccion: " + direccion);
     // console.log("Rol: " + rol);
-    console.log("Estado: " + estado);
+    // console.log("Estado: " + estado);
 
     if (nombre == "") {
         Swal.fire(
@@ -1211,12 +1235,12 @@ function validarHorario(accion) {
     var hora_fin = $('.hFin').val();
 
     // console.log("Accion: " + "editar_usuario");
-    console.log("Accion: " + accion);
+    // console.log("Accion: " + accion);
 
-    console.log("Hora_inicio: " + hora_inicio);
-    console.log("Hora_inicio_almuerzo: " + hora_inicio_almuerzo);
-    console.log("Hora_fin_almuerzo: " + hora_fin_almuerzo);
-    console.log("Hora_fin: " + hora_fin);
+    // console.log("Hora_inicio: " + hora_inicio);
+    // console.log("Hora_inicio_almuerzo: " + hora_inicio_almuerzo);
+    // console.log("Hora_fin_almuerzo: " + hora_fin_almuerzo);
+    // console.log("Hora_fin: " + hora_fin);
 
     if (hora_inicio == "") {
         Swal.fire(

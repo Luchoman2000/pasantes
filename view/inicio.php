@@ -15,6 +15,11 @@ if ($vistas == "login" || $vistas == "404" || $vistas == "logout") {
         include "./view/content/logout-view.php";
     }
 } elseif (isset($_SESSION['p_id'])) {
+    $ruta = explode("/", $_GET['views']);
+    if(isset($ruta[1]) && $_SESSION['rol'] == "PASANTE"){
+       include "./view/content/404-view.php";
+    }else{
+        
 ?>
     <!DOCTYPE html>
     <html lang="es">
@@ -78,7 +83,7 @@ if ($vistas == "login" || $vistas == "404" || $vistas == "logout") {
     </html>
 
 <?php
-} else {
+}} else {
     require_once './controller/login.controlador.php';
     $logout = new LoginControlador();
     echo $logout->CtrCerrarSesion();

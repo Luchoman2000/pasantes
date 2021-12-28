@@ -74,6 +74,7 @@ class loginControlador extends LoginModelo
       if (password_verify($datos['password'], $row['usu_clave'])) {
         if ($row['estado'] == 1) {
 
+          session_set_cookie_params(60*60);
           session_name('SSP');
           session_start();
           $_SESSION['id'] = $row['usu_id'];

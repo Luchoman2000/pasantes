@@ -163,7 +163,7 @@ class AsistenciaControlador extends AsistenciaModelo
 
 
         $persona_id = $_SESSION['p_id'];
-        $hor_id = $_SESSION['hor_id'];
+        $hor_id = ($_SESSION['hor_id'] != null) ? $_SESSION['hor_id'] : 1;
 
         // @$persona_id = $_SESSION['p_id']; // ID de la persona
         // Obtener los registros del pasante
@@ -971,7 +971,7 @@ class AsistenciaControlador extends AsistenciaModelo
                 $h_ingreso = $row['asi_hora_ingreso'];
                 $h_almuerzo_inicio = $row['asi_hora_salida_a'];
                 $h_almuerzo_fin = $row['asi_hora_regreso_a'];
-                $h_salida = $row['asi_hora_salida'];
+                $h_salida = ($row['asi_hora_salida'] == "00:00:00") ? $row['asi_hora_ingreso'] : $row['asi_hora_salida'];
                 $nombre = strtolower($row['nombre']);
 
 
@@ -992,12 +992,12 @@ class AsistenciaControlador extends AsistenciaModelo
                 if ($h_almuerzo_fin == "00:00:00") {
                     $h_almuerzo_fin = "--:--:--";
                 }
-                if ($h_salida == "00:00:00") {
-                    $h_salida = "--:--:--";
+                if ($h_salida == $h_ingreso) {
+                    $h_salida = "00:00:00";
                 }
                 $horas[] = $total_horas;
 
-                if ($h_almuerzo_inicio == "--:--:--" && $h_almuerzo_fin == "--:--:--" && $h_salida != "--:--:--") {
+                if ($h_almuerzo_inicio == "--:--:--" && $h_almuerzo_fin == "--:--:--" && $h_salida != "00:00:00") {
 
 
                     $tabla .= '
@@ -1114,6 +1114,27 @@ class AsistenciaControlador extends AsistenciaModelo
                         $h_salida = ($row['asi_hora_salida'] == "00:00:00") ? $row['asi_hora_ingreso'] : $row['asi_hora_salida'];
 
 
+                        $datetime1 = new DateTime($h_almuerzo_inicio);
+                        $datetime2 = new DateTime($h_almuerzo_fin);
+
+                        $interval = $datetime2->diff($datetime1);
+                        $v_hora =  $interval->format('%R%H:%I');
+
+                        //Diferencia entre horas entrada y salida
+                        // $diff = $this->getTimeDiff($h_ingreso, $h_salida);
+
+                        // //Diferencia entre horas almuerzo inicio y almuerzo fin
+                        // $diff_a = $this->getTimeDiff($h_almuerzo_inicio, $h_almuerzo_fin);
+
+                        // //Diferencia entre horas entrada y almuerzo fin
+                        // $diff_b = $this->getTimeDiff($h_ingreso, $h_almuerzo_fin);
+                        // $diff_c = $this->getTimeDiff($h_ingreso,$diff_b);
+
+                        //Total de horas trabajadas
+
+                        // $total_horas = ($h_almuerzo_fin != '00:00:00' && $h_salida == $h_ingreso) ? $this->getTimeDiff($diff_a, $diff) : $diff_c;
+                        // $total_horas = $this->getTimeDiff($diff_a,$diff);  
+                        // $total_horas = $v_hora;
 
 
                         //Diferencia entre horas entrada y salida
@@ -1124,7 +1145,7 @@ class AsistenciaControlador extends AsistenciaModelo
 
                         //Total de horas trabajadas
                         $total_horas = $this->getTimeDiff($diff_a, $diff);
-
+                        
                         if ($hor_id != 1) {
 
                             $h_i = new DateTime($h_ingreso);
@@ -1160,6 +1181,8 @@ class AsistenciaControlador extends AsistenciaModelo
                         if ($h_salida == $h_ingreso) {
                             $h_salida = "00:00:00";
                         }
+
+                        
                         $horas[] = $total_horas;
 
                         if ($h_almuerzo_inicio == "--:--:--" && $h_almuerzo_fin == "--:--:--" && $h_salida != "00:00:00") {
