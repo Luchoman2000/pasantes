@@ -21,16 +21,16 @@ class PerfilControlador extends PerfilModelo
         $fecha_nacimiento = isset($_POST['uFechaNacimiento']) ?  mainModel::limpiar_cadena($_POST['uFechaNacimiento']) : "";
         $direccion = isset($_POST['uDireccion']) ?  mainModel::limpiar_cadena($_POST['uDireccion']) : "";
 
-        $Nombre1 = mainModel::limpiar_cadena($Nombre1);
-        $Nombre2 = isset($Nombre2) ? mainModel::limpiar_cadena($Nombre2) : "";
-        $Apellido1 = mainModel::limpiar_cadena($Apellido1);
-        $Apellido2 = isset($Apellido2) ? mainModel::limpiar_cadena($Apellido2) : "";
+        $Nombre1 = mb_strtolower(mainModel::limpiar_cadena($Nombre1));
+        $Nombre2 = isset($Nombre2) ? mb_strtolower(mainModel::limpiar_cadena($Nombre2)) : "";
+        $Apellido1 = mb_strtolower(mainModel::limpiar_cadena($Apellido1));
+        $Apellido2 = isset($Apellido2) ? mb_strtolower(mainModel::limpiar_cadena($Apellido2)) : "";
 
         $data = [
-            "Nombre1" => $Nombre1,
-            "Nombre2" => $Nombre2,
-            "Apellido1" => $Apellido1,
-            "Apellido2" => $Apellido2,
+            "Nombre1" => ucwords($Nombre1),
+            "Nombre2" => ucwords($Nombre2),
+            "Apellido1" => ucwords($Apellido1),
+            "Apellido2" => ucwords($Apellido2),
             "Cedula" => $cedula,
             "Telefono" => $Telefono,
             "Correo" => $correo,

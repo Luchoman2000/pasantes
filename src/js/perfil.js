@@ -67,7 +67,7 @@ $(function () {
     $('#uCorreo').on('keyup', function () {
         var correo = $('#uCorreo').val();
         var pattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-        if (pattern.test(correo) && correo.length > 0 && correo.length < 30) {
+        if (pattern.test(correo) && correo.length > 0 && correo.length < 30 || correo.length == "") {
             $(this).removeClass('is-danger');
             $(this).addClass('is-success');
             valid_array[4] = true;
@@ -82,7 +82,7 @@ $(function () {
     $('#uDireccion').on('keyup', function () {
         var direccion = $('#uDireccion').val();
         var pattern = /[\w',-\\/.\s]/;
-        if (pattern.test(direccion) && direccion.length > 0 && direccion.length < 30) {
+        if (pattern.test(direccion) && direccion.length > 0 && direccion.length < 30 || direccion.length == "") {
             $(this).removeClass('is-danger');
             $(this).addClass('is-success');
             valid_array[5] = true;

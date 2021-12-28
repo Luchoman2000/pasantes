@@ -1,4 +1,5 @@
 <?php
+
 require './../vendor/dompdf/dompdf/src/Autoloader.php';
 Dompdf\Autoloader::register();
 
@@ -469,6 +470,7 @@ class reporteControlador extends reporteModelo
     public function CtrCrarReporteRegistroPasanteTotal()
     {
 
+        require '../vendor/autoload.php';
         // Create a new pdf document with DOMPDF
 
         // use Dompdf\Dompdf;
@@ -744,10 +746,11 @@ class reporteControlador extends reporteModelo
                         <?php
 
                         foreach ($row as $key => $value) {
+                            $nombre = mb_strtolower($value['per_pri_nombre'] . ' ' . $value['per_seg_nombre'] . ' ' . $value['per_pri_apellido'] . ' ' . $value['per_seg_apellido']);
                         ?>
                             <tr>
                                 <!-- <td><?php echo $key + 1 ?></td> -->
-                                <td><?php echo $value['per_pri_nombre'] . ' ' . $value['per_seg_nombre'] . ' ' . $value['per_pri_apellido'] . ' ' . $value['per_seg_apellido']; ?> </td>
+                                <td><?php echo ucwords($nombre) ?> </td>
                                 <td><?php echo $value['asi_hora_ingreso'] ?></td>
                                 <td><?php echo $value['asi_hora_salida_a'] ?></td>
                                 <td><?php echo $value['asi_hora_regreso_a'] ?></td>

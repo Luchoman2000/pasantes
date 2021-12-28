@@ -1,4 +1,5 @@
 <?php
+// header('Content-Type: text/html; charset=UTF-8');  
 session_start();
 $peticionAjax = false;
 require_once 'core/configGeneral.php';
@@ -25,6 +26,7 @@ if ($vistas == "login" || $vistas == "404" || $vistas == "logout") {
     <html lang="es">
 
     <head>
+        <!-- <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> -->
         <link rel="shortcut icon" type="image/jpg" href="<?php echo SERVERURL ?>src/assets/icon/favicon.ico" />
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">

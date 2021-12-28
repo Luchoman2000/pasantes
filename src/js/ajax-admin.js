@@ -456,16 +456,16 @@ $(document).on('click', '.editarPersonal', function () {
     var fecha_nacimiento = row.children().eq(4).text();
 
     $('.pNombre').val("");
-    $('.pNombre').val(nombre[0].toUpperCase());
+    $('.pNombre').val(nombre[0]);
 
     $('.pNombre2').val("");
-    $('.pNombre2').val(nombre[1].toUpperCase());
+    $('.pNombre2').val(nombre[1]);
 
     $('.pApellido').val("");
-    $('.pApellido').val(nombre[2].toUpperCase());
+    $('.pApellido').val(nombre[2]);
 
     $('.pApellido2').val("");
-    $('.pApellido2').val(nombre[3].toUpperCase());
+    $('.pApellido2').val(nombre[3]);
 
 
     $('.pCedula').val("");

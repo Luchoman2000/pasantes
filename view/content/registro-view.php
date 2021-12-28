@@ -64,7 +64,7 @@
                                 </div>
                             </div>
                         </div>
-                        <?php if ($_SESSION['hor_id'] != "1" && $_SESSION['hor_id'] != null) {
+                        <?php if ($_SESSION['hor_id'] != "1" && $_SESSION['hor_id'] != null){
                         ?>
                             <div class="box">
                                 <h4 class="is-title has-text-primary">Horario</h4>
