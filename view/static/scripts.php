@@ -5,7 +5,11 @@
 <script src="<?php echo SERVERURL ?>index.js" type="module"></script>
 
 <?php
-
+if ($_GET['views'] == 'about') {
+?>
+    
+<?php
+}
 if ($_SESSION['rol'] == "ADMINISTRADOR") {
 ?>
 

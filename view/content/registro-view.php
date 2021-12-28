@@ -64,7 +64,7 @@
                                 </div>
                             </div>
                         </div>
-                        <?php if ($_SESSION['hor_id'] != "1" && $_SESSION['hor_id'] != null){
+                        <?php if ($_SESSION['hor_id'] != "1" && $_SESSION['hor_id'] != null) {
                         ?>
                             <div class="box">
                                 <h4 class="is-title has-text-primary">Horario</h4>
@@ -908,6 +908,9 @@
 
                         </div>
                         <div class="table-container">
+                            <div>
+                                Filtro comunas: <a class="toggle-vis" data-column="0">Pasante</a> - <a class="toggle-vis" data-column="1">Fecha</a> - <a class="toggle-vis" data-column="2">Ingreso</a> - <a class="toggle-vis" data-column="3">Almuerzo incio</a> - <a class="toggle-vis" data-column="4">Almuerzo fin</a> - <a class="toggle-vis" data-column="5">Salida</a> - <a class="toggle-vis" data-column="6">Horas</a>
+                            </div>
                             <?php
                             require_once './controller/asistencia.controlador.php';
                             $asistencia = new AsistenciaControlador();
@@ -979,6 +982,15 @@
                                 });
                         });
                 },
+            });
+            $('a.toggle-vis').on('click', function(e) {
+                e.preventDefault();
+
+                // Get the column API object
+                var column = table.column($(this).attr('data-column'));
+
+                // Toggle the visibility
+                column.visible(!column.visible());
             });
         </script>
         <br>
