@@ -1,4 +1,5 @@
 <?php
+// header('Content-Type: text/html; charset=UTF-8');  
 session_start();
 $peticionAjax = false;
 require_once 'core/configGeneral.php';
@@ -15,11 +16,17 @@ if ($vistas == "login" || $vistas == "404" || $vistas == "logout") {
         include "./view/content/logout-view.php";
     }
 } elseif (isset($_SESSION['p_id'])) {
+    $ruta = explode("/", $_GET['views']);
+    if(isset($ruta[1]) && $_SESSION['rol'] == "PASANTE"){
+       include "./view/content/404-view.php";
+    }else{
+        
 ?>
     <!DOCTYPE html>
     <html lang="es">
 
     <head>
+        <!-- <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> -->
         <link rel="shortcut icon" type="image/jpg" href="<?php echo SERVERURL ?>src/assets/icon/favicon.ico" />
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -78,7 +85,7 @@ if ($vistas == "login" || $vistas == "404" || $vistas == "logout") {
     </html>
 
 <?php
-} else {
+}} else {
     require_once './controller/login.controlador.php';
     $logout = new LoginControlador();
     echo $logout->CtrCerrarSesion();

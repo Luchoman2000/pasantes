@@ -16,7 +16,6 @@
         <div class="card-content">
             <div class="container mW alignCenter content">
                 <h1 class="title has-text-success">Administración</h1>
-                <!-- <p>Historial de dias asistidos de <strong></strong> asta la fecha:</p> -->
             </div>
         </div>
     </div>
@@ -319,6 +318,12 @@
                             </div>
                         </div>
                         <div class="field">
+                            <label class="label">Direccion</label>
+                            <div class="control">
+                                <input class="input pDireccion" type="text" name="pDireccion" placeholder="Direccion">
+                            </div>
+                        </div>
+                        <div class="field">
                             <label class="label">Email</label>
                             <div class="control">
                                 <input class="input pEmail" type="text" name="pEmail" placeholder="Email">
@@ -437,7 +442,7 @@
             $('#listaUsuarios').removeAttr('width').DataTable({
 
                 "language": {
-                    "url": "../pasantes/src/es_es.json"
+                    "url": SERVERURL + "/pasantes/src/es_es.json"
                 },
                 columnDefs: [{
                         width: 200,
@@ -457,7 +462,7 @@
             });
             $('#listaPersonal').removeAttr('width').DataTable({
                 "language": {
-                    "url": "../pasantes/src/es_es.json"
+                    "url": SERVERURL + "/pasantes/src/es_es.json"
                 },
                 pagin: false,
                 scrollCollapse: true,
@@ -467,7 +472,7 @@
             });
             $('#listaHorarios').DataTable({
                 "language": {
-                    "url": "../pasantes/src/es_es.json"
+                    "url": SERVERURL + "/pasantes/src/es_es.json"
                 },
                 pagin: false,
                 searching: false,

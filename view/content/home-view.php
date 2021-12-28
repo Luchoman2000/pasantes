@@ -31,7 +31,10 @@ if ($_SESSION['rol'] == 'PASANTE') {
 							</div>
 						</div>
 						<br>
-
+						<div class="aEstado notification is-success is-light is-hidden">
+							<button class="delete"></button>
+							Día completado 😃
+						</div>
 						<?php
 						require_once './controller/asistencia.controlador.php';
 						$asistencia = new AsistenciaControlador();
@@ -47,6 +50,23 @@ if ($_SESSION['rol'] == 'PASANTE') {
 	<br>
 	<br>
 
+	<script>
+		$(function() {
+			if ($('#des_m_salida').text() != 'Sin marcar' && $('#des_m_salida').length != 0) {
+				$('.aEstado').show();
+				$('.aEstado').removeClass('is-hidden');
+			} else {
+				$('.aEstado').hide();
+				$('.aEstado').addClass('is-hidden');
+			}
+			(document.querySelectorAll('.notification .delete') || []).forEach(($delete) => {
+				const $notification = $delete.parentNode;
+				$delete.addEventListener('click', () => {
+					$notification.parentNode.removeChild($notification);
+				});
+			});
+		})
+	</script>
 
 
 
@@ -232,7 +252,7 @@ if ($_SESSION['rol'] == 'PASANTE') {
 					<header class="modal-card-head">
 						<p class="modal-card-title">Generar reporte de hoy</p>
 					</header>
-					<section class="modal-card-body">
+					<section class="modal-card-body" style="height:auto;">
 						<input type="date" name="fecha_reporte_pasante" id="fecha_reporte_pasante" value="<?php echo date('Y-m-d'); ?>">
 					</section>
 					<footer class="modal-card-foot">
@@ -296,87 +316,9 @@ if ($_SESSION['rol'] == 'PASANTE') {
 ?>
 
 <script>
-	// moment.locale('es');
 	window.setInterval(function() {
 		$("#display-time").html(moment().format("LTS"));
 		$("#display-date").html(moment().format("DD/MM/YYYY"));
 		$("#display-day").html(moment().locale('es').format("dddd"));
 	}, 1000);
-
-	// setInterval(function() {
-	// 	setTime();
-	// 	setDate();
-	// }, 200);
-
-	// function setTime() {
-	// 	var disp_time = document.getElementById("display-time");
-	// 	let time = new Date();
-	// 	let hours = time.getHours();
-	// 	let minutes = time.getMinutes();
-	// 	let seconds = time.getSeconds();
-	// 	let period = "PM";
-	// 	if (seconds < 10) {
-	// 		seconds = "0" + seconds;
-	// 	}
-	// 	if (minutes < 10) {
-	// 		minutes = "0" + minutes;
-	// 	}
-	// 	if (hours < 12) {
-	// 		period = "AM";
-	// 	}
-	// 	if (hours == 0) {
-	// 		hours = "12";
-	// 	}
-	// 	if (hours > 12) {
-	// 		hours = hours - 12;
-	// 	}
-	// 	if (hours < 10) {
-	// 		hours = "0" + hours;
-	// 	}
-	// 	disp_time.innerHTML = hours + ":" + minutes + ":" + seconds + " " + period;
-	// }
-
-	// function setDate() {
-	// 	var disp_date = document.getElementById("display-date");
-	// 	var disp_day = document.getElementById("display-day");
-	// 	let time = new Date();
-	// 	let date = time.getDate();
-	// 	let month = time.getMonth();
-	// 	let year = time.getFullYear();
-	// 	let day = time.getDay();
-	// 	switch (day) {
-	// 		case 0:
-	// 			day = "Domingo";
-	// 			break;
-	// 		case 1:
-	// 			day = "Lunes";
-	// 			break;
-	// 		case 2:
-	// 			day = "Martes";
-	// 			break;
-	// 		case 3:
-	// 			day = "Miércoles";
-	// 			break;
-	// 		case 4:
-	// 			day = "Jueves";
-	// 			break;
-	// 		case 5:
-	// 			day = "Viernes";
-	// 			break;
-	// 		case 6:
-	// 			day = "Sábado";
-	// 			break;
-	// 		default:
-	// 			day = day;
-	// 	}
-	// 	if (date < 10) {
-	// 		date = "0" + date;
-	// 	}
-	// 	if (month < 10) {
-	// 		month = "0" + month;
-	// 	}
-	// 	day = day;
-	// 	disp_date.innerHTML = date + " / " + month + " / " + year;
-	// 	disp_day.innerHTML = day;
-	// }
 </script>

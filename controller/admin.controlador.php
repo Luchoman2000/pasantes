@@ -10,11 +10,13 @@ class AdminControlador extends AdminModelo
     //Para mostrar los usuarios
     public function CtrMostrarUsuarios()
     {
-        $sql = mainModel::ejecutar_consulta_simple("SELECT u.*,r.rol_nombre as rol, r.rol_id as rol_id,
+        $sql = mainModel::ejecutar_consulta_simple("SELECT h.*, u.*,r.rol_nombre as rol, r.rol_id as rol_id,
         CONCAT(p.per_pri_nombre, ' ', p.per_seg_nombre, ' ', p.per_pri_apellido, ' ', p.per_seg_apellido) AS nombre 
         FROM usuario u
         INNER JOIN personal p ON u.per_id = p.per_id
-        INNER JOIN rol r ON u.rol_id = r.rol_id");
+        INNER JOIN rol r ON u.rol_id = r.rol_id
+        LEFT JOIN horario h ON u.hor_id = h.hor_id
+        ");
 
         $tabla = '
             <table id="listaUsuarios" class="table stripe row-border order-column nowrap" style="width:100%; box-sizing: inherit;">
@@ -22,8 +24,9 @@ class AdminControlador extends AdminModelo
                     <tr>
                         <th>Nombre</th>
                         <th>Usuario</th>
-                        <th>Estado</th>
                         <th>Rol</th>
+                        <th>Horario</th>
+                        <th>Estado</th>
                         <th style="text-align: center;">Acciones</th>
                     </tr>
                 </thead>
@@ -34,12 +37,22 @@ class AdminControlador extends AdminModelo
 
             $datos = $sql->fetchAll();
             foreach ($datos as $row) {
-                $nombre = strtolower($row['nombre']);
+                $nombre = mb_strtolower($row['nombre']);
                 $nombre = ucwords($nombre);
                 $tabla .= '
                     <tr>
                         <td style="vertical-align: middle;">' . $nombre . '</td>
                         <td style="vertical-align: middle;">' . $row['usu_usuario'] . '</td>';
+
+
+
+
+                $tabla .= '<td style="vertical-align: middle;">' . $row['rol'] . '</td>';
+                if (is_null($row['hor_id']) || $row['hor_id'] == 1) {
+                    $tabla .= '<td style="vertical-align: middle;">Sin horario</td>';
+                } else {
+                    $tabla .= '<td style="vertical-align: middle;">' . date('H:i a', strtotime($row['hor_entrada'])) . ' ' . date('H:i a', strtotime($row['hor_salida'])) . '</td>';
+                }
                 if ($row['usu_estado'] == 1) {
                     $tabla .= '
                         <td style="vertical-align: middle;">Activo</td>';
@@ -47,11 +60,7 @@ class AdminControlador extends AdminModelo
                     $tabla .= '
                         <td style="vertical-align: middle;">Inactivo</td>';
                 }
-
-
-
-                $tabla .= '<td style="vertical-align: middle;">' . $row['rol'] . '</td>
-                        <td style="vertical-align: middle; text-align: center;">';
+                $tabla .= '<td style="vertical-align: middle; text-align: center;">';
                 if ($row['rol'] != "ADMINISTRADOR" && $row['usu_estado'] != 0) {
                     $tabla .= '
                                 <button style="height: fit-content;" class="button is-info is-outlined" onclick="window.location.href=\'' . SERVERURL . 'registro/' . mainModel::encryption($row['per_id']) . '\'">
@@ -113,7 +122,7 @@ class AdminControlador extends AdminModelo
 
             $datos = $sql->fetchAll();
             foreach ($datos as $row) {
-                $nombre = strtolower($row['nombre']);
+                $nombre = mb_strtolower($row['nombre']);
                 $nombre = ucwords($nombre);
                 $tabla .= '
                         <tr>
@@ -311,6 +320,8 @@ class AdminControlador extends AdminModelo
 
         if (isset($_POST['uHorario'])) {
             $idHorario = $_POST['uHorario'];
+        }else{
+            $idHorario = null;
         }
 
         $isEditPass = false;
@@ -382,25 +393,27 @@ class AdminControlador extends AdminModelo
         //     exit();
         // }
         $idPersonal = mainModel::decryption($_POST['id_personal']);
-        $nombre = mainModel::limpiar_cadena($_POST['pNombre']);
-        $nombre2 = isset($_POST['pNombre2']) ? mainModel::limpiar_cadena($_POST['pNombre2']) : "";
-        $apellido = mainModel::limpiar_cadena($_POST['pApellido']);
-        $apellido2 = isset($_POST['pApellido2']) ? mainModel::limpiar_cadena($_POST['pApellido2']) : "";
+        $nombre = mb_strtolower(mainModel::limpiar_cadena($_POST['pNombre']));
+        $nombre2 = isset($_POST['pNombre2']) ? mb_strtolower(mainModel::limpiar_cadena($_POST['pNombre2'])) : "";
+        $apellido = mb_strtolower(mainModel::limpiar_cadena($_POST['pApellido']));
+        $apellido2 = isset($_POST['pApellido2']) ? mb_strtolower(mainModel::limpiar_cadena($_POST['pApellido2'])) : "";
         $dni = mainModel::limpiar_cadena($_POST['pCedula']);
         $telefono = isset($_POST['pTelefono']) ? mainModel::limpiar_cadena($_POST['pTelefono']) : "";
         $email = isset($_POST['pEmail']) ? mainModel::limpiar_cadena($_POST['pEmail']) : "";
+        $direccion = isset($_POST['pDireccion']) ? mainModel::limpiar_cadena($_POST['pDireccion']) : "";
         $fechaNacimiento = isset($_POST['pFechaNacimiento']) ? mainModel::limpiar_cadena($_POST['pFechaNacimiento']) : "1000-01-01";
         $estado = mainModel::limpiar_cadena($_POST['pEstado']);
 
         $datos = [
             "idPersonal" => $idPersonal,
-            "nombre" => $nombre,
-            "nombre2" => $nombre2,
-            "apellido" => $apellido,
-            "apellido2" => $apellido2,
+            "nombre" => ucwords($nombre),
+            "nombre2" => ucwords($nombre2),
+            "apellido" => ucwords($apellido),
+            "apellido2" => ucwords($apellido2),
             "dni" => $dni,
             "telefono" => $telefono,
             "email" => $email,
+            "direccion" => $direccion,
             "fechaNacimiento" => $fechaNacimiento,
             "estado" => $estado,
         ];
@@ -476,7 +489,7 @@ class AdminControlador extends AdminModelo
         $estado = mainModel::limpiar_cadena($_POST['uEstado']);
         $clave = mainModel::limpiar_cadena($_POST['uNClave']);
         $clave2 = mainModel::limpiar_cadena($_POST['uSNClave']);
-        $idHorario =  $_POST['uHorario'];
+        $idHorario =  isset($_POST['uHorario']) ? $_POST['uHorario'] : 1;
 
 
         $datos = [
@@ -506,26 +519,27 @@ class AdminControlador extends AdminModelo
     //Para crear personal
     public function CtrCrearPersonal()
     {
-        $nombre = mainModel::limpiar_cadena($_POST['pNombre']);
-        $nombre2 = isset($_POST['pNombre2']) ? mainModel::limpiar_cadena($_POST['pNombre2']) : "";
-        $apellido = mainModel::limpiar_cadena($_POST['pApellido']);
-        $apellido2 = isset($_POST['pApellido2']) ? mainModel::limpiar_cadena($_POST['pApellido2']) : "";
+        $nombre = mb_strtolower(mainModel::limpiar_cadena($_POST['pNombre']));
+        $nombre2 = isset($_POST['pNombre2']) ? mb_strtolower(mainModel::limpiar_cadena($_POST['pNombre2'])) : "";
+        $apellido = mb_strtolower(mainModel::limpiar_cadena($_POST['pApellido']));
+        $apellido2 = isset($_POST['pApellido2']) ? mb_strtolower(mainModel::limpiar_cadena($_POST['pApellido2'])) : "";
         $dni = mainModel::limpiar_cadena($_POST['pCedula']);
         $telefono = isset($_POST['pTelefono']) ? mainModel::limpiar_cadena($_POST['pTelefono']) : "";
         $email = isset($_POST['pEmail']) ? mainModel::limpiar_cadena($_POST['pEmail']) : "";
+        $direccion = isset($_POST['pDireccion']) ? mainModel::limpiar_cadena($_POST['pDireccion']) : "";
         $fechaNacimiento = isset($_POST['pFechaNacimiento']) ? mainModel::limpiar_cadena($_POST['pFechaNacimiento']) : "1000-01-01";
         $estado = mainModel::limpiar_cadena($_POST['pEstado']);
 
         // 
 
         $datos = [
-            "nombre" => $nombre,
-            "nombre2" => $nombre2,
-            "apellido" => $apellido,
-            "apellido2" => $apellido2,
+            "nombre" => ucwords($nombre),
+            "nombre2" => ucwords($nombre2),
+            "apellido" => ucwords($apellido),
+            "apellido2" => ucwords($apellido2),
             "dni" => $dni,
             "telefono" => $telefono,
-            // "direccion" => $direccion,
+            "direccion" => $direccion,
             "email" => $email,
             "fechaNacimiento" => $fechaNacimiento,
             "estado" => $estado,
@@ -656,7 +670,8 @@ class AdminControlador extends AdminModelo
                                 $select .= 'selected';
                             }
                         }
-                        $select .= '>' . $row['per_pri_nombre'] . ' ' . $row['per_seg_nombre'] . ' ' . $row['per_pri_apellido'] . ' ' . $row['per_seg_apellido'] . '</option>';
+                        $name = mb_strtolower($row['per_pri_nombre'] . ' ' . $row['per_seg_nombre'] . ' ' . $row['per_pri_apellido'] . ' ' . $row['per_seg_apellido']);
+                        $select .= '>' . ucwords($name) . '</option>';
                     }
                     if (is_null($row['usu_id'])) {
                     }
@@ -678,8 +693,9 @@ class AdminControlador extends AdminModelo
                 foreach ($datos as $row) {
                     if (is_null($row['usu_id'])) {
                         $a++;
+                        $name = mb_strtolower($row['per_pri_nombre'] . ' ' . $row['per_seg_nombre'] . ' ' . $row['per_pri_apellido'] . ' ' . $row['per_seg_apellido']);
                         $select .= '
-                        <option value="' . mainModel::encryption($row['per_id']) . '">' . $row['per_pri_nombre'] . ' ' . $row['per_seg_nombre'] . ' ' . $row['per_pri_apellido'] . ' ' . $row['per_seg_apellido'] . '</option>
+                        <option value="' . mainModel::encryption($row['per_id']) . '">' . ucwords($name) . '</option>
                     ';
                     }
                     // if ($a > 0) {

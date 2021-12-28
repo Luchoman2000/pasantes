@@ -1,4 +1,5 @@
 <?php
+
 require './../vendor/dompdf/dompdf/src/Autoloader.php';
 Dompdf\Autoloader::register();
 
@@ -469,12 +470,19 @@ class reporteControlador extends reporteModelo
     public function CtrCrarReporteRegistroPasanteTotal()
     {
 
+        require '../vendor/autoload.php';
         // Create a new pdf document with DOMPDF
 
         // use Dompdf\Dompdf;
 
         $dompdf = new Dompdf();
-        $dompdf->loadHtml($this->templatehtml());
+        if (isset($_POST['fecha_reporte_pasante'])) {
+
+            $dompdf->loadHtml($this->templatehtml($_POST['fecha_reporte_pasante']));
+            // $dompdf->loadHtml('a');
+        } else {
+            $dompdf->loadHtml($this->templatehtml());
+        }
 
         // (Optional) Setup the paper size and orientation
         $dompdf->setPaper('A4', 'portrait');
@@ -556,15 +564,11 @@ class reporteControlador extends reporteModelo
         return $hours . ':' . $mins;
     }
 
-    function templatehtml()
+    function templatehtml($date = null)
     {
-        $fecha = date("Y-m-d");
+        $fecha = isset($date) ? $date : date("Y-m-d");
         $sql = mainModel::ejecutar_consulta_simple("SELECT * FROM asistencia a INNER JOIN personal p ON a.per_id = p.per_id WHERE asi_dia = '$fecha'");
         $row = $sql->fetchAll();
-
-
-
-
         ob_start();
         ?>
         <!DOCTYPE html>
@@ -574,39 +578,192 @@ class reporteControlador extends reporteModelo
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <meta http-equiv="X-UA-Compatible" content="ie=edge">
-            <link rel="stylesheet" href="<?php echo SERVERURL?>/src/css/bulma.min.css">
+            <style>
+                body,
+                button,
+                input,
+                optgroup,
+                select,
+                textarea {
+                    font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+                }
 
+                table {
+                    border-collapse: collapse;
+                    border-spacing: 0;
+                }
+
+                td,
+                th {
+                    padding: 0;
+                }
+
+                td:not([align]),
+                th:not([align]) {
+                    text-align: inherit;
+                }
+
+                .table {
+                    background-color: white;
+                    color: #363636;
+                }
+
+                .table td,
+                .table th {
+                    border: 1px solid #dbdbdb;
+                    border-width: 0 0 1px;
+                    padding: 0.5em 0.75em;
+                    vertical-align: top;
+                }
+
+                .table thead {
+                    background-color: transparent;
+                }
+
+                .table thead td,
+                .table thead th {
+                    border-width: 0 0 2px;
+                    color: #363636;
+                }
+
+                .table tfoot {
+                    background-color: transparent;
+                }
+
+                .table tfoot td,
+                .table tfoot th {
+                    border-width: 2px 0 0;
+                    color: #363636;
+                }
+
+                .table tbody {
+                    background-color: transparent;
+                }
+
+                .table tbody tr:last-child td,
+                .table tbody tr:last-child th {
+                    border-bottom-width: 0;
+                }
+
+                .table.is-bordered td,
+                .table.is-bordered th {
+                    border-width: 1px;
+                }
+
+                .table.is-bordered tr:last-child td,
+                .table.is-bordered tr:last-child th {
+                    border-bottom-width: 1px;
+                }
+
+                .table.is-fullwidth {
+                    width: 100%;
+                }
+
+                .table.is-hoverable tbody tr:not(.is-selected):hover {
+                    background-color: #fafafa;
+                }
+
+                .table.is-hoverable.is-striped tbody tr:not(.is-selected):hover {
+                    background-color: #fafafa;
+                }
+
+                .table.is-hoverable.is-striped tbody tr:not(.is-selected):hover:nth-child(even) {
+                    background-color: whitesmoke;
+                }
+
+                .table.is-narrow td,
+                .table.is-narrow th {
+                    padding: 0.25em 0.5em;
+                }
+
+                .table.is-striped tbody tr:not(.is-selected):nth-child(even) {
+                    background-color: #fafafa;
+                }
+
+                .table-container {
+                    -webkit-overflow-scrolling: touch;
+                    overflow: auto;
+                    overflow-y: hidden;
+                    max-width: 100%;
+                }
+
+                .table th {
+                    color: #363636;
+                }
+
+                .table th:not([align]) {
+                    text-align: inherit;
+                }
+
+                .is-italic {
+                    font-style: italic !important;
+                }
+                .is-bold {
+                    font-weight: bold !important;
+                }
+            </style>
             <title>Reporte</title>
         </head>
 
-        <body>
-            <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Hora Entrada</th>
-                        <th>Almmuerzo inicio</th>
-                        <th>Almmuerzo fin</th>
-                        <th>Hora Salida</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    foreach ($row as $key => $value) {
-                    ?>
-                        <tr>
-                            <td><?php echo $value['per_pri_nombre'] . ' ' . $value['per_seg_nombre'] . ' ' . $value['per_pri_apellido'] . ' ' . $value['per_seg_apellido']; ?> </td>
-                            <td><?php echo $value['asi_hora_ingreso'] ?></td>
-                            <td><?php echo $value['asi_hora_salida_a'] ?></td>
-                            <td><?php echo $value['asi_hora_regreso_a'] ?></td>
-                            <td><?php echo $value['asi_hora_salida'] ?></td>
-                        </tr>
 
-                    <?php
-                    }
-                    ?>
-                </tbody>
-            </table>
+        <body>
+
+            <?php
+            $path = SERVERURL . 'src/assets/img/senescyt.png';
+            $type = pathinfo($path, PATHINFO_EXTENSION);
+            $data = file_get_contents($path);
+            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+            ?>
+            <div class="columns pl-6 pr-6 pt-6">
+                <div class="column">
+                    <img src="<?php echo $base64 ?>" width="75%" height="54" />
+                    <p class="is-italic is-bold">
+                        Reporte de asistencia de los pasantes de el área de soporte al usuario
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="p-5">
+
+
+                <table class="table is-bordered is-fullwidth">
+                    <thead>
+                        <!-- fila que muestra la fecha -->
+                        <tr>
+                            <td><strong>FECHA: </strong></td>
+                            <td colspan="4"><?php echo $fecha ?></td>
+                        </tr>
+                        <tr>
+                            <!-- <th>Nro.</th> -->
+                            <th>Nombre</th>
+                            <th>Hora Entrada</th>
+                            <th>Almmuerzo inicio</th>
+                            <th>Almmuerzo fin</th>
+                            <th>Hora Salida</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+
+                        foreach ($row as $key => $value) {
+                            $nombre = mb_strtolower($value['per_pri_nombre'] . ' ' . $value['per_seg_nombre'] . ' ' . $value['per_pri_apellido'] . ' ' . $value['per_seg_apellido']);
+                        ?>
+                            <tr>
+                                <!-- <td><?php echo $key + 1 ?></td> -->
+                                <td><?php echo ucwords($nombre) ?> </td>
+                                <td><?php echo $value['asi_hora_ingreso'] ?></td>
+                                <td><?php echo $value['asi_hora_salida_a'] ?></td>
+                                <td><?php echo $value['asi_hora_regreso_a'] ?></td>
+                                <td><?php echo $value['asi_hora_salida'] ?></td>
+                            </tr>
+
+                        <?php
+                        }
+                        ?>
+                    </tbody>
+                </table>
+            </div>
         </body>
 
         </html>

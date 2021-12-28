@@ -27,7 +27,7 @@ $Pdata = $perfil->CtrGetDatosPersonales();
 
 				<!-- Perfil de usuario -->
 				
-				<?php if ($_SESSION['rol'] != 'ADMINISTRADOR') {
+				<?php if ($_SESSION['rol'] != 'ADMINISTRADOR' && ($_SESSION['hor_id'] != null || $_SESSION['hor_id'] == 1)) {
 				?>
 					<div class="box">
 						<fieldset disabled="disabled">

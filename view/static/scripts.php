@@ -2,7 +2,7 @@
 <!-- <script src="<?php echo SERVERURL ?>src/js/moment.js"></script> -->
 <script src="<?php echo SERVERURL ?>src/js/moment-with-locales.js"></script>
 <script src="<?php echo SERVERURL ?>src/js/modal-fx.js"></script>
-<script src="<?php echo SERVERURL ?>index.js" type="module"></script>
+<!-- <script src="<?php echo SERVERURL ?>index.js" type="module"></script> -->
 
 <?php
 

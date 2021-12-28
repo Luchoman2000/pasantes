@@ -12,6 +12,7 @@ class mainModel
     protected static function conectar()
     {
         $enlace = new PDO(SGBD, USER, PASS);
+        // $enlace->exec("set names utf8");
         return $enlace;
     }
 
@@ -19,6 +20,7 @@ class mainModel
     protected function ejecutar_consulta_simple($consulta)
     {
         $respuesta = self::conectar()->prepare($consulta);
+        
         $respuesta->execute();
         return $respuesta;
         $respuesta = null;
