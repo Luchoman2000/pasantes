@@ -252,7 +252,7 @@ if ($_SESSION['rol'] == 'PASANTE') {
 					<header class="modal-card-head">
 						<p class="modal-card-title">Generar reporte de hoy</p>
 					</header>
-					<section class="modal-card-body" style="height:auto;">
+					<section style="height: auto;" class="modal-card-body">
 						<input type="date" name="fecha_reporte_pasante" id="fecha_reporte_pasante" value="<?php echo date('Y-m-d'); ?>">
 					</section>
 					<footer class="modal-card-foot">

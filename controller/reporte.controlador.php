@@ -479,7 +479,6 @@ class reporteControlador extends reporteModelo
         if (isset($_POST['fecha_reporte_pasante'])) {
 
             $dompdf->loadHtml($this->templatehtml($_POST['fecha_reporte_pasante']));
-            // $dompdf->loadHtml('a');
         } else {
             $dompdf->loadHtml($this->templatehtml());
         }

@@ -38,6 +38,8 @@ if ($vistas == "login" || $vistas == "404" || $vistas == "logout") {
         <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/dataTables.bulma.min.css">
         <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/fixedColumns.dataTables.min.css">
         <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/modal-fx.min.css">
+        <script src="<?php echo SERVERURL ?>src/js/dat.gui.min.js"></script>
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5/dat.gui.min.js"></script> -->
         <script src="<?php echo SERVERURL ?>src/js/jquery.min.js"></script>
         <script src="<?php echo SERVERURL ?>src/js/jquery.dataTables.min.js"></script>
         <script src="<?php echo SERVERURL ?>src/js/dataTables.bulma.min.js"></script>

@@ -3,6 +3,17 @@ if ($_SESSION['rol'] == 'PASANTE') {
 ?>
     <!--Responsive navigation starts inside header-->
     <header class="nav-header">
+        <?php
+        if ($_GET['views'] == 'home') {
+        ?>
+            <a class="has-text-info is-medium aboutbtn" href="about" style="position: relative; float: left; cursor: pointer; font-size: 20px;">
+                <span class="icon is-medium">
+                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </span>
+            </a>
+        <?php
+        }
+        ?>
         <div class="container">
             <nav id="navigation">
                 <div id="navigationBox">

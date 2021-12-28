@@ -1153,6 +1153,28 @@ class AsistenciaControlador extends AsistenciaModelo
 
                         $a_marc = ($h_almuerzo_inicio != '00:00:00' && $h_almuerzo_fin != '00:00:00') ? true : false;
                         $s_marc = ($h_salida != '00:00:00') ? true : false;
+                        $datetime1 = new DateTime($h_almuerzo_inicio);
+                        $datetime2 = new DateTime($h_almuerzo_fin);
+
+                        $interval = $datetime2->diff($datetime1);
+                        $v_hora =  $interval->format('%R%H:%I');
+
+                        //Diferencia entre horas entrada y salida
+                        // $diff = $this->getTimeDiff($h_ingreso, $h_salida);
+
+                        // //Diferencia entre horas almuerzo inicio y almuerzo fin
+                        // $diff_a = $this->getTimeDiff($h_almuerzo_inicio, $h_almuerzo_fin);
+
+                        // //Diferencia entre horas entrada y almuerzo fin
+                        // $diff_b = $this->getTimeDiff($h_ingreso, $h_almuerzo_fin);
+                        // $diff_c = $this->getTimeDiff($h_ingreso,$diff_b);
+
+                        //Total de horas trabajadas
+
+                        // $total_horas = ($h_almuerzo_fin != '00:00:00' && $h_salida == $h_ingreso) ? $this->getTimeDiff($diff_a, $diff) : $diff_c;
+                        // $total_horas = $this->getTimeDiff($diff_a,$diff);  
+                        // $total_horas = $v_hora;
+
 
                         //Diferencia entre horas entrada y salida
                         $diff = $this->getTimeDiff($h_ingreso, $h_salida);
@@ -1221,6 +1243,8 @@ class AsistenciaControlador extends AsistenciaModelo
                         if ($h_salida == $h_ingreso) {
                             $h_salida = "00:00:00";
                         }
+
+                        
                         $horas[] = $total_horas;
 
                         if ($h_almuerzo_inicio == "--:--:--" && $h_almuerzo_fin == "--:--:--" && $h_salida != "00:00:00") {

@@ -19,7 +19,8 @@ class VistaModelo
             "home",
             "registro",
             "perfil",
-            "admin"
+            "admin",
+            "about"
         ];
 
 
