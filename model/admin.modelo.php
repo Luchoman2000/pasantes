@@ -112,22 +112,40 @@ class AdminModelo extends mainModel
     {
         $idHorario = $datos['id_horario'];
         $h_inicio = $datos['hora_inicio'];
+        $h_limite = $datos['h_limite'];
+        $h_condicion_tarde = $datos['h_condicion_tarde'];
+        $h_entrada_compensacion = $datos['h_entrada_compensacion'];
         $h_inicio_almuerzo = $datos['hora_inicio_almuerzo'];
+        $h_a_inicio_compensacion = $datos['h_a_inicio_compensacion'];
         $h_fin_almuerzo = $datos['hora_fin_almuerzo'];
+        $h_a_fin_compensacion = $datos['h_a_fin_compensacion'];
         $h_fin = $datos['hora_fin'];
+        $h_salida_compensacion = $datos['h_salida_compensacion'];
 
         $query = "UPDATE horario
         SET hor_entrada = :h_inicio,
+        hor_limite_entrada = :h_limite,
+        hor_marcar_tarde = :h_condicion_tarde,
+        hor_c_entrada = :h_entrada_compensacion,
         hor_salida_a = :h_inicio_almuerzo,
+        hor_c_a_salida = :h_a_inicio_compensacion,
         hor_regreso_a = :h_fin_almuerzo,
-        hor_salida = :h_fin
+        hor_c_a_regreso = :h_a_fin_compensacion,
+        hor_salida = :h_fin,
+        hor_c_salida = :h_salida_compensacion
         WHERE hor_id = :idHorario";
         $sql = mainModel::conectar()->prepare($query);
         $sql->execute(array(
             ":h_inicio" => $h_inicio,
+            ":h_limite" => $h_limite,
+            ":h_condicion_tarde" => $h_condicion_tarde,
+            ":h_entrada_compensacion" => $h_entrada_compensacion,
             ":h_inicio_almuerzo" => $h_inicio_almuerzo,
+            ":h_a_inicio_compensacion" => $h_a_inicio_compensacion,
             ":h_fin_almuerzo" => $h_fin_almuerzo,
+            ":h_a_fin_compensacion" => $h_a_fin_compensacion,
             ":h_fin" => $h_fin,
+            ":h_salida_compensacion" => $h_salida_compensacion,
             ":idHorario" => $idHorario
         ));
         return $sql;
@@ -194,17 +212,30 @@ class AdminModelo extends mainModel
     //Para crear un Horario
     protected function MdlCrearHorario($datos){
         $h_inicio = $datos['hora_inicio'];
+        $h_limite = $datos['h_limite'];
+        $h_condicion_tarde = $datos['h_condicion_tarde'];
+        $h_entrada_compensacion = $datos['h_entrada_compensacion'];
         $h_inicio_almuerzo = $datos['hora_inicio_almuerzo'];
+        $h_a_inicio_compensacion = $datos['h_a_inicio_compensacion'];
         $h_fin_almuerzo = $datos['hora_fin_almuerzo'];
+        $h_a_fin_compensacion = $datos['h_a_fin_compensacion'];
         $h_fin = $datos['hora_fin'];
-        $query = "INSERT INTO horario (hor_entrada, hor_salida_a, hor_regreso_a, hor_salida)
-        VALUES (:h_inicio, :h_inicio_almuerzo, :h_fin_almuerzo, :h_fin)";
+        $h_salida_compensacion = $datos['h_salida_compensacion'];
+
+        $query = "INSERT INTO horario (hor_entrada,hor_limite_entrada,hor_marcar_tarde, hor_c_entrada, hor_salida_a,hor_c_a_salida, hor_regreso_a,hor_c_a_regreso, hor_salida,hor_c_salida)
+        VALUES (:h_inicio, :h_limite, :h_condicion_tarde, :h_entrada_compensacion, :h_inicio_almuerzo, :h_a_inicio_compensacion, :h_fin_almuerzo, :h_a_fin_compensacion, :h_fin, :h_salida_compensacion)";
         $sql = mainModel::conectar()->prepare($query);
         $sql->execute(array(
             ":h_inicio" => $h_inicio,
+            ":h_limite" => $h_limite,
+            ":h_condicion_tarde" => $h_condicion_tarde,
+            ":h_entrada_compensacion" => $h_entrada_compensacion,
             ":h_inicio_almuerzo" => $h_inicio_almuerzo,
+            ":h_a_inicio_compensacion" => $h_a_inicio_compensacion,
             ":h_fin_almuerzo" => $h_fin_almuerzo,
-            ":h_fin" => $h_fin
+            ":h_a_fin_compensacion" => $h_a_fin_compensacion,
+            ":h_fin" => $h_fin,
+            ":h_salida_compensacion" => $h_salida_compensacion
         ));
 
         return $sql;

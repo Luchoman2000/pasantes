@@ -5,6 +5,7 @@ require_once "./../core/configGeneral.php";
 if (isset($_SESSION['id']) && $_SESSION['rol'] == "ADMINISTRADOR") {
     if (
         (isset($_POST['id']) && $_POST['borrar_usuario'] == true)
+        || isset($_GET['toggleCambioPass'])
         || (isset($_POST['id_personal']) && @$_POST['borrar_personal'] == true)
         || (isset($_POST['id_horario']) && @$_POST['borrar_horario'] == true)
         || (@$_POST['editar_usuario_select_personal'] == true)
@@ -14,6 +15,7 @@ if (isset($_SESSION['id']) && $_SESSION['rol'] == "ADMINISTRADOR") {
         || (isset($_POST['uPersonal']) && isset($_POST['uUsuario']) && isset($_POST['uRol']) && isset($_POST['uEstado'])) //Editar usuario
         || ((isset($_POST['id_personal']) && @$_POST['editar_personal'] == true) || (@$_POST['nuevo_personal'] == true)) //Editar personal
         || ((isset($_POST['id_horario']) && @$_POST['editar_horario'] == true) || (@$_POST['nuevo_horario'] == true)) //Editar horario
+        || ((isset($_GET['id_horario']) && @$_GET['get_horario_info'] == true)) //feth horario info
         || (isset($_POST['fecha']) && (isset($_POST['h_entrada_u']))) //Nuevo registro con fecha
     ) {
         require_once "./../controller/admin.controlador.php";
@@ -92,6 +94,11 @@ if (isset($_SESSION['id']) && $_SESSION['rol'] == "ADMINISTRADOR") {
             $NuevoHorario->CtrCrearHorario();
         }
 
+        if ((isset($_GET['id_horario']) && @$_GET['get_horario_info'] == true)) {
+            $InfoHorario = new AdminControlador();
+            $InfoHorario->CtrGetHorarioInfo();
+        }
+
         //Para nuevo registro con fecha
         if ((isset($_POST['fecha']) && (isset($_POST['h_entrada_u'])))) {
             $nuevoReg = new AdminControlador();
@@ -103,6 +110,13 @@ if (isset($_SESSION['id']) && $_SESSION['rol'] == "ADMINISTRADOR") {
             $EditarPersonal = new AdminControlador();
             $EditarPersonal->CtrEditarPersonal();
         }
+        
+        // Para permitir cambio de contraseña
+        if (isset($_GET['toggleCambioPass'])) {
+            $toggleCambioPass = new AdminControlador();
+            echo $toggleCambioPass->CtrToggleCambioPass();
+        }
+
     } else {
         echo "No se ha enviado ninguna información";
     }

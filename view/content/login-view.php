@@ -15,23 +15,23 @@ if (isset($_SESSION['p_id']) && isset($_SESSION['id'])) {
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="shortcut icon" type="image/jpg" href="<?php echo SERVERURL ?>src/assets/icon/favicon.ico" />
-
         <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/login.css">
         <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/bulma.min.css">
         <link rel="stylesheet" href="<?php echo SERVERURL ?>src/css/sweetalert2.min.css">
         <script src="<?php echo SERVERURL ?>src/js/sw.all.min.js"></script>
-
+        <script src="<?php echo SERVERURL ?>src/js/jquery.min.js"></script>
         <title>Login</title>
     </head>
 
     <body>
         <div class="wrapper">
+            <div class="on-time"></div>
             <div class="container">
                 <h1 class="title has-text-white">Bienvenido</h1>
 
-                <form class="form" action="" method="POST">
-                    <input name="usuario" type="text" placeholder="Usuario">
-                    <input name="clave" type="password" placeholder="Clave">
+                <form id="loguear" class="form" action="" method="POST">
+                    <input id="user" autocomplete="username" name="usuario" type="text" placeholder="Usuario">
+                    <input id="pass" autocomplete="current-password" name="clave" type="password" placeholder="Clave">
                     <button type="submit" id="login-button">Login</button>
                 </form>
             </div>
@@ -51,26 +51,9 @@ if (isset($_SESSION['p_id']) && isset($_SESSION['id'])) {
         </div>
     </body>
 
+    <script src="<?php echo SERVERURL ?>src/js/login.js"></script>
+
     </html>
-    <script>
-        let SERVERURL = document.location.origin;
-        var newStyle = document.createElement('style');
-        newStyle.appendChild(document.createTextNode("\
-        @font-face {\
-            font-family: Source Sans Pro;\
-            font-style: normal;\
-            font-weight: 200;\
-            src: url('" + SERVERURL + "/pasantes/src/fonts/SourceSansPro-Light.ttf') format('trueType');\
-        }\
-    "));
-
-        document.head.appendChild(newStyle);
-    </script>
 <?php
-    if (isset($_POST['usuario']) && isset($_POST['clave'])) {
-        require_once './controller/login.controlador.php';
-
-        $ins_login = new loginControlador();
-        echo $ins_login->CtrIniciarSesion();
-    }
-} ?>
+}
+?>

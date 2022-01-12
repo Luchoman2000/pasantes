@@ -46,4 +46,25 @@ class PerfilModelo extends mainModel
         return $sql;
         $sql = null;
     }
+
+    // Para editar la contraseña
+    public function MdlEditarClave($datos)
+    {
+        $id_personal = $datos['id_personal'];
+        $anteriorClave = $datos['anteriorClave'];
+        // Clave hash
+        $nuevaClave1 = $datos['nuevaClave1'];
+        $clave_hash = password_hash($nuevaClave1, PASSWORD_DEFAULT);
+        $nuevaClave2 = $datos['nuevaClave2'];
+
+        $sql = mainModel::conectar()->prepare("UPDATE usuario SET 
+        usu_clave = :nuevaClave1
+        WHERE usu_id = :id_personal");
+        $sql->execute(array(
+            "nuevaClave1" => $clave_hash,
+            "id_personal" => $id_personal
+        ));
+        return $sql;
+        $sql = null;
+    }
 }

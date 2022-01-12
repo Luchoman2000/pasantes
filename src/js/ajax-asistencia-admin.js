@@ -20,7 +20,7 @@ $(document).on('click', '#borrar_registro', function () {
                 method: "POST",
                 data: 'id=' + id + '&borrar_registro=true',
                 success: function (data) {
-                    console.log(data);
+                    // console.log(data);
                     if (data == 'ok') {
                         Swal.fire(
                             '¡Eliminado!',
@@ -48,7 +48,9 @@ $(document).on('click', '#borrar_registro', function () {
 $(document).on('click', '#editar_registro', function () {
     // id fila seleccionada
     var id = $(this).parent().parent().parent().attr('id');
-    console.log("EDITANDOO");
+    var id_p = $(this).parent().parent().parent().next().next().val();
+    // console.log(id_p);
+    // console.log("EDITANDOO");
 
     var h_entrada = $('#' + id).children().children().find('div.h_entrada').text();
     var h_almuerzo_start = "";
@@ -86,20 +88,60 @@ $(document).on('click', '#editar_registro', function () {
     }
 
 
+    fetch(SERVERURL + '/pasantes/ajax/asistencia.ajax.php?getObservacion=' + id).then(response => response.text()).then(result => {
+        $('#asi_obserbacion').val(result);
+    });
+
+    fetch(SERVERURL + "/pasantes/ajax/perfil.ajax.php?getHorario=" + id_p).then(function (response) {
+        return response.json();
+    }).then(function (data) {
+        // console.log(data);
+        if (data == 1) {
+            $('.blockHorario').hide();
+        } else {
+            $('.blockHorario').show();
+            $('#hor_entrada').html(data.hor_entrada);
+            // var h_limite = $('#hor_limite').text();
+            var h_limite = data.hor_limite_entrada;
+            $('#hor_limite').text(h_limite);
+            var hora_entrada = moment(h_entrada, "HH:mm:ss");
+            var horario_entrada = moment(data.hor_entrada, "HH:mm:ss");
+            if (hora_entrada <= horario_entrada) {
+                $('#asi_estado').text("Puntual");
+                $('#asi_estado').css("color", "green");
+            } else if (hora_entrada >= horario_entrada && hora_entrada <= moment(horario_entrada, "HH:mm:ss").add(h_limite, 'minutes')) {
+                $('#asi_estado').text("Atrasado");
+                $('#asi_estado').css("color", "orange");
+            } else {
+                $('#asi_estado').text("Tarde");
+                $('#asi_estado').css("color", "red");
+            }
+
+        }
+
+    });
+
 });
 
 //Para editar horas registro de pasante desde tabla
 $(document).on('click', '.editarRegistro', function () {
+
+    $('#edit_hora').addClass('is-active');
     // id fila seleccionada
     var id = $(this).attr('id');
+    var id_p = $(this).attr('data-idper');
     var row = $(this).closest('tr');
 
-    console.log("EDITANDOO");
-    console.log("Ingreso: " + row.children().eq(1).clone().children().remove().end().text());
-    console.log("Almuerzo_inicio: " + row.children().eq(2).text());
-    console.log("Almuerzo_fin: " + row.children().eq(3).text());
-    console.log("Salida: " + row.children().eq(4).clone().children().remove().end().text());
-    console.log(id);
+    // console.log(id_p);
+    // console.log("EDITANDOO");
+
+
+    // console.log("EDITANDOO");
+    // console.log("Ingreso: " + row.children().eq(1).clone().children().remove().end().text());
+    // console.log("Almuerzo_inicio: " + row.children().eq(2).text());
+    // console.log("Almuerzo_fin: " + row.children().eq(3).text());
+    // console.log("Salida: " + row.children().eq(4).clone().children().remove().end().text());
+    // console.log(id);
 
     var h_entrada = row.children().eq(1).clone().children().remove().end().text().replace(/\s/g, '');
     var h_almuerzo_start = "";
@@ -136,6 +178,36 @@ $(document).on('click', '.editarRegistro', function () {
         $('#h_salida_u').val("00:00:00");
     }
 
+    fetch(SERVERURL + '/pasantes/ajax/asistencia.ajax.php?getObservacion=' + id).then(response => response.text()).then(result => {
+        $('#asi_obserbacion').val(result);
+    });
+
+    fetch(SERVERURL + "/pasantes/ajax/perfil.ajax.php?getHorario=" + id_p).then(function (response) {
+        return response.json();
+    }).then(function (data) {
+        // console.log(data);
+        if (data == 1) {
+            $('.blockHorario').hide();
+        } else {
+            $('.blockHorario').show();
+            $('#hor_entrada').html(data.hor_entrada);
+            var h_limite = $('#hor_limite').text();
+            var hora_entrada = moment(h_entrada, "HH:mm:ss");
+            var horario_entrada = moment(data.hor_entrada, "HH:mm:ss");
+            if (hora_entrada <= horario_entrada) {
+                $('#asi_estado').text("Puntual");
+                $('#asi_estado').css("color", "green");
+            } else if (hora_entrada >= horario_entrada && hora_entrada <= moment(horario_entrada, "HH:mm:ss").add(h_limite, 'minutes')) {
+                $('#asi_estado').text("Atrasado");
+                $('#asi_estado').css("color", "orange");
+            } else {
+                $('#asi_estado').text("Tarde");
+                $('#asi_estado').css("color", "red");
+            }
+
+        }
+
+    });
 
 });
 
@@ -161,7 +233,7 @@ $(document).on('click', '#nueva_asistencia', function () {
                 method: "POST",
                 data: 'per_id_C=' + id + '&nueva_asistencia=true',
                 success: function (data) {
-                    console.log(data);
+                    // console.log(data);
                     if (data == 'ok') {
                         Swal.fire(
                             '¡Marcado!',
@@ -190,6 +262,23 @@ $(document).on('click', '#nueva_asistencia', function () {
 
 })
 
+$(document).on('change', '#h_entrada_u', function () {
+    var h_limite = $('#hor_limite').text();
+    var hora_entrada = moment($(this).val(), "HH:mm:ss");
+    var horario_entrada = moment($('#hor_entrada').text(), "HH:mm:ss");
+    if (hora_entrada <= horario_entrada) {
+        $('#asi_estado').text("Puntual");
+        $('#asi_estado').css("color", "green");
+    } else if (hora_entrada >= horario_entrada && hora_entrada <= moment(horario_entrada, "HH:mm:ss").add(h_limite, 'minutes')) {
+        $('#asi_estado').text("Atrasado");
+        $('#asi_estado').css("color", "orange");
+    } else {
+        $('#asi_estado').text("Tarde");
+        $('#asi_estado').css("color", "red");
+    }
+
+})
+
 
 //Para guardar horas editadas
 $(document).on('submit', '#guardar_edicion', function (e) {
@@ -202,10 +291,10 @@ $(document).on('submit', '#guardar_edicion', function (e) {
     var h_almuerzo_end = $('#h_almuerzo_end_u').val();
     var h_salida = $('#h_salida_u').val();
 
-    console.log("Ingreso: " + h_entrada);
-    console.log("Almuerzo_inicio: " + h_almuerzo_start);
-    console.log("Almuerzo_fin: " + h_almuerzo_end);
-    console.log("Salida: " + h_salida);
+    // console.log("Ingreso: " + h_entrada);
+    // console.log("Almuerzo_inicio: " + h_almuerzo_start);
+    // console.log("Almuerzo_fin: " + h_almuerzo_end);
+    // console.log("Salida: " + h_salida);
 
     //Validar orden de horas
     // if (h_almuerzo_start != "00:00:00" && h_almuerzo_end != "00:00:00") {
@@ -226,7 +315,7 @@ $(document).on('submit', '#guardar_edicion', function (e) {
 
 
 
-    console.log(formdata);
+    // console.log(formdata);
     Swal.fire({
         title: '¿Estás seguro?',
         text: "Guardarás los cambios realizados en el registro de este usuario",
@@ -248,7 +337,7 @@ $(document).on('submit', '#guardar_edicion', function (e) {
                 contentType: false,
                 processData: false,
                 success: function (data) {
-                    console.log(data);
+                    // console.log(data);
                     if (data == 'ok') {
                         Swal.fire(
                             '¡Guardado!',
@@ -284,6 +373,12 @@ $(document).on('submit', '#guardar_edicion', function (e) {
                             'Horas no secuenciales',
                             'warning'
                         );
+                    } else if (data == 'error_h_entrada') {
+                        Swal.fire(
+                            'Atención!',
+                            'Debe ingresar la hora de entrada',
+                            'warning'
+                        );
                     }
 
 
@@ -295,11 +390,10 @@ $(document).on('submit', '#guardar_edicion', function (e) {
 
 });
 
-
-$(document).on('click', '.btnNuevoRegistroAsi',function () {
+$(document).on('click', '.btnNuevoRegistroAsi', function () {
     // get today with moment ja
     let today = moment().format('yyyy-MM-DD');
-    console.log(today);
+    // console.log(today);
     $('#fecha_n_a').val(today);
     $('.btnreset_h_e').prev().val('00:00:00');
     $('.btnReset_i_a').prev().val('00:00:00');
@@ -314,7 +408,7 @@ $(document).on('submit', '#guardar_nuevo_registro', function (e) {
 
     e.preventDefault();
 
-    console.log("Entro");
+    // console.log("Entro");
     Swal.fire({
         title: '¿Estás seguro?',
         text: "Crearás una asistencia a este usuariousuario",
@@ -335,7 +429,7 @@ $(document).on('submit', '#guardar_nuevo_registro', function (e) {
                 contentType: false,
                 processData: false,
                 success: function (data) {
-                    console.log(data);
+                    // console.log(data);
                     if (data == 1) {
                         Swal.fire(
                             '¡Guardado!',
@@ -376,6 +470,12 @@ $(document).on('submit', '#guardar_nuevo_registro', function (e) {
                         Swal.fire(
                             'Atención!',
                             'Horas no secuenciales',
+                            'warning'
+                        );
+                    } else if (data == 'error_h_entrada') {
+                        Swal.fire(
+                            'Atención!',
+                            'Debe ingresar la hora de entrada',
                             'warning'
                         );
                     }

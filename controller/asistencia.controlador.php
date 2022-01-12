@@ -8,26 +8,92 @@ if ($peticionAjax) {
 class AsistenciaControlador extends AsistenciaModelo
 {
 
+    /**
+     * Funcion para obtener el estado de la asistencia
+     * @param type $hora La hora de la asistencia
+     * @param type $horario_ingreso La hora de ingreso segun el horario
+     * @param type $limite Limite de tolerancia para la hora de ingreso
+     * @return int Estado de la asistencia 0:Puntual, 1:Atrasado, 2:Tarde
+     */
+    function getEstadoAsistencia($hora, $horario_ingreso = '00:00:00', $limite)
+    {
+        if ($horario_ingreso != '00:00:00') {
+            if ($hora <= $horario_ingreso) {
+                $estado = 0; // Puntual
+            } elseif ($hora > $horario_ingreso && $hora <= date("H:i:s", strtotime($horario_ingreso . ' + ' . $limite . ' minute'))) {
+                $estado = 1; // Atrasado
+            } elseif ($hora > date("H:i:s", strtotime($horario_ingreso . ' + ' . $limite . ' minute'))) {
+                $estado = 2; // Tarde
+            } else {
+                $estado = 2; // Error
+            }
+        } else {
+            $estado = 0; // Puntual
+        }
+        return $estado;
+    }
+
     // Insertar ingreso de pasante
     public function CtrMarcarIngreso()
     {
-        $min = '3'; //minutos de perdon
+        // $permite_marcar = false; //si permite marcar ingreso aunque este tarde
+
+        $permite_marcar = '0'; // Si permite marcar contando las horas = 0 (por defecto) | Si permite marcar pero sin las horas de primer jornada = 1 | Si no permite marcar todo el dia = 2
+        $limite_ingreso = '0'; // Limite de ingreso de pasantes
+        $min = '0'; //minutos de perdón
+
+        $horario = mainModel::ejecutar_consulta_simple("SELECT * FROM horario WHERE hor_id = '" . $_SESSION['hor_id'] . "'");
+
+        if (isset($_SESSION['hor_id']) && $_SESSION['hor_id'] != 1 && $horario->rowCount() > 0) {
+            $hor = $horario->fetch();
+            $permite_marcar  = $hor['hor_marcar_tarde'];
+            $limite_ingreso  = $hor['hor_limite_entrada'];
+            $min = $hor['hor_c_entrada'];
+        }
+
         // PER_ID, DIA, *HORA INGRESO*
         $persona_id = $_SESSION['p_id']; // ID de la persona
         $today = date("Y-m-d"); // Fecha actual
         $now =  date("H:i:s");
-        $h_ingreso = date("H:i:s", strtotime($now. ' - '.$min.' minute')); // Hora actual
+        $h_ingreso = date("H:i:s", strtotime($now . ' - ' . $min . ' minute')); // Hora actual
+
+        $horario_ingreso = @isset($_SESSION['hor_id']) && @$_SESSION['hor_id'] != 1  ? @$_SESSION['horario']['hor_entrada'] : '00:00:00'; // Hora de ingreso segun el horario
+
         //$h_ingreso = strtotime($h_ingreso) - 60*3;
 
+        // if ($h_ingreso >= date("H:i:s", strtotime($hor_ingreso . ' + ' . $limite_ingreso . ' minute'))) {
+        // $datos = [
+        //     "per_id" => $persona_id,
+        //     "dia" => $today,
+        //     "h_ingreso" => '00:00:00',
+        // ];
+        // $validar = AsistenciaModelo::MdlValidarAsistencia($datos, "ingreso");
+        // if (!$validar) {
+        //     $res  = 2;
+        // } else {
 
+        //     $insertar = AsistenciaModelo::MdlMarcarAsistenciaAtrasado($datos);
+        //     if ($insertar->rowCount() >= 1) {
+        //         $res = 'tarde ok';
+        //     } else {
+        //         $res = 0;
+        //     }
+        // }
+        // $res = 'tarde';
+        // } else {
+        // }
+        // $res = 'A tiempo';
+
+        // Condicion estado
+
+        $estado = $this->getEstadoAsistencia($h_ingreso, $horario_ingreso, $limite_ingreso);
         $datos = [
             "per_id" => $persona_id,
             "dia" => $today,
-            "h_ingreso" => $h_ingreso
+            "h_ingreso" => ($permite_marcar == 2) ? '00:00:00' : ($permite_marcar == 1 && isset($hor['hor_salida_a']) ? $hor['hor_salida_a'] : $h_ingreso),
+            // "estado" => ($h_ingreso <= date("H:i:s", strtotime($horario_ingreso . ' + ' . $limite_ingreso . ' minute'))) ? '1' : '0'
+            "estado" => $estado
         ];
-
-
-
 
         $validar = AsistenciaModelo::MdlValidarAsistencia($datos, "ingreso");
         if (!$validar) {
@@ -35,14 +101,52 @@ class AsistenciaControlador extends AsistenciaModelo
         } else {
             $insertar = AsistenciaModelo::MdlMarcarAsistencia($datos);
             if ($insertar->rowCount() >= 1) {
-                $res = 1;
+                if ($estado != 2) {
+                    $res = ($estado == 1) ? 'atrasado ok' : 1;
+                } else if ($estado == 2) {
+                    $res = $permite_marcar == '0' ? 'tarde ok' : ($permite_marcar == '1' ? 'tarde sin registro entrada ok' : 'tarde sin registro todo ok');
+                }
             } else {
                 $res = 0;
             }
         }
         echo $res;
-        // echo json_encode($alerta);
+    }
 
+    // Para agregar obserbacion
+    public function CtrAgregarObservacion()
+    {
+
+        $datos = [
+            "per_id" => $_SESSION['p_id'],
+            "dia" => date("Y-m-d"),
+            "observacion" => $_GET['observacion']
+        ];
+        $insertar = AsistenciaModelo::MdlAgregarObservacion($datos);
+        if ($insertar->rowCount() >= 1) {
+            $res = 1;
+        } else {
+            $res = 0;
+        }
+        echo $res;
+    }
+
+    // Para actualizar obserbacion
+    public function CtrActualizarObservacion()
+    {
+
+        $datos = [
+            "per_id" => $_SESSION['p_id'],
+            "dia" => date("Y-m-d"),
+            "observacion" => $_GET['observacionUp']
+        ];
+        $insertar = AsistenciaModelo::MdlActualizarObservacion($datos);
+        if ($insertar->rowCount() >= 1) {
+            $res = 1;
+        } else {
+            $res = 0;
+        }
+        echo $res;
     }
 
     // Insertar almuerzo inicio pasante
@@ -53,7 +157,7 @@ class AsistenciaControlador extends AsistenciaModelo
         $persona_id = $_SESSION['p_id']; // ID de la persona
         $today = date("Y-m-d"); // Fecha actual
         $now =  date("H:i:s");
-        $h_almuerzo = date("H:i:s", strtotime($now. ' - '.$min.' minute')); // Hora actual
+        $h_almuerzo = date("H:i:s", strtotime($now . ' - ' . $min . ' minute')); // Hora actual
 
         $datos = [
             "per_id" => $persona_id,
@@ -83,7 +187,7 @@ class AsistenciaControlador extends AsistenciaModelo
         $persona_id = $_SESSION['p_id']; // ID de la persona
         $today = date("Y-m-d"); // Fecha actual
         $now =  date("H:i:s");
-        $h_almuerzo = date("H:i:s", strtotime($now. ' - '.$min.' minute')); // Hora actual
+        $h_almuerzo = date("H:i:s", strtotime($now . ' - ' . $min . ' minute')); // Hora actual
 
         $datos = [
             "per_id" => $persona_id,
@@ -117,7 +221,7 @@ class AsistenciaControlador extends AsistenciaModelo
         $persona_id = $_SESSION['p_id']; // ID de la persona
         $today = date("Y-m-d"); // Fecha actual
         $now =  date("H:i:s");
-        $h_salida = date("H:i:s", strtotime($now. ' - '.$min.' minute')); // Hora actual
+        $h_salida = date("H:i:s", strtotime($now . ' - ' . $min . ' minute')); // Hora actual
 
         $datos = [
             "per_id" => $persona_id,
@@ -166,10 +270,15 @@ class AsistenciaControlador extends AsistenciaModelo
         echo $res;
     }
 
-    // Mostrar horas de ingreso y salida
+    // Mostrar horas de ingreso y salida para DataTables
     public function CtrMostrarAsistenciaPasante()
     {
 
+        if (isset($_POST['screen']) && $_POST['screen'] == 'mobile') {
+            $screen = $_POST['screen'];
+        } else {
+            $screen = 'desktop';
+        }
 
         $persona_id = $_SESSION['p_id'];
         $hor_id = ($_SESSION['hor_id'] != null) ? $_SESSION['hor_id'] : 1;
@@ -180,24 +289,26 @@ class AsistenciaControlador extends AsistenciaModelo
         $hor = mainModel::ejecutar_consulta_simple("SELECT * FROM horario WHERE hor_id = '$hor_id'");
         $hors = $hor->fetch();
         // var_dump($hors);
+
         //Variable total de horas
         $horas = array();
 
-        $tabla = "";
-        $tabla .= '<table id="example" class="table stripe row-border order-column nowrap" style="width:100%; box-sizing: inherit;">
+        $tabla_desktop = "";
+        $tabla_desktop .= '<table id="asi_pasante" class="table display is-striped responsive stripe row-border order-column nowrap" style="width:100%; box-sizing: inherit;">
         <thead>
             <tr>
-                <th>Fecha</th>
-                <th>Ingreso</th>
-                <th>Almuerzo inicio</th>
-                <th>Almuerzo fin</th>
-                <th>Salida</th>
-                <th>Horas</th>
+                <th class="has-text-centered">Fecha</th>
+                <th class="has-text-centered">Entrada</th>
+                <th class="has-text-centered">Almuerzo inicio</th>
+                <th class="has-text-centered">Almuerzo fin</th>
+                <th class="has-text-centered">Salida</th>
+                <th class="has-text-centered">Asistencia</th>
+                <th class="has-text-centered">Total horas</th>
+                <th class="has-text-centered none">Observación</th>
             </tr>
         </thead>
         <tbody>';
         if ($sql->rowCount() >= 1) {
-
             $datos = $sql->fetchAll();
             foreach ($datos as $row) {
 
@@ -209,9 +320,6 @@ class AsistenciaControlador extends AsistenciaModelo
                 // $h_salida = $row['asi_hora_salida'];
                 $h_salida = ($row['asi_hora_salida'] == "00:00:00") ? $row['asi_hora_ingreso'] : $row['asi_hora_salida'];
 
-
-
-                
                 $a_marc = ($h_almuerzo_inicio != '00:00:00' && $h_almuerzo_fin != '00:00:00') ? true : false;
                 $s_marc = ($h_salida != '00:00:00') ? true : false;
 
@@ -220,28 +328,26 @@ class AsistenciaControlador extends AsistenciaModelo
 
                 //Diferencia entre horas almuerzo inicio y almuerzo fin
                 $diff_a = $this->getTimeDiff($h_almuerzo_inicio, $h_almuerzo_fin);
-                
-                $diff_b = $this->getTimeDiff($h_ingreso,$h_almuerzo_inicio);
+
+                $diff_b = $this->getTimeDiff($h_ingreso, $h_almuerzo_inicio);
 
                 $diff_b_al = $this->getSumHours([$diff_a, $h_ingreso]);
 
 
                 if ($h_almuerzo_inicio != '00:00:00' || $h_almuerzo_fin != '00:00:00') {
-                    
-                
-                //Total de horas trabajadas
-                if($h_almuerzo_inicio != '00:00:00' && $h_almuerzo_fin == '00:00:00' && $h_salida == $h_ingreso){
-                    
-                    $total_horas = $this->getTimeDiff($h_ingreso,  $h_almuerzo_inicio);
 
-                }elseif($a_marc && $h_salida == $h_ingreso){
 
-                    $total_horas = $this->getTimeDiff($diff_b_al, $h_almuerzo_inicio);
+                    //Total de horas trabajadas
+                    if ($h_almuerzo_inicio != '00:00:00' && $h_almuerzo_fin == '00:00:00' && $h_salida == $h_ingreso) {
 
-                }elseif ($a_marc && $s_marc) {
-                    $total_horas = $this->getTimeDiff($diff_a, $diff);
-                }
-            }else{
+                        $total_horas = $this->getTimeDiff($h_ingreso,  $h_almuerzo_inicio);
+                    } elseif ($a_marc && $h_salida == $h_ingreso) {
+
+                        $total_horas = $this->getTimeDiff($diff_b_al, $h_almuerzo_inicio);
+                    } elseif ($a_marc && $s_marc) {
+                        $total_horas = $this->getTimeDiff($diff_a, $diff);
+                    }
+                } else {
                     $total_horas = $this->getTimeDiff($diff_a, $diff);
                 }
                 // $total_horas = $this->getTimeDiff(($a_marc && !$s_marc) ? $h_almuerzo_inicio : $diff_a,  $diff);
@@ -281,83 +387,181 @@ class AsistenciaControlador extends AsistenciaModelo
                 if ($h_salida == $h_ingreso) {
                     $h_salida = "00:00:00";
                 }
-                $horas[] = $total_horas;
+
+                // $horas[] = $total_horas; //Total de horas trabajadas
+                $horas[] = $h_salida != "00:00:00" ? $total_horas : "00:00:00"; //Total de horas trabajadas sin contar los dias inconcompletos
+
+
+                $estado_a = $this->getEstadoAsistencia($h_ingreso, $hors['hor_entrada'], '10');
+                // var_dump($estado_a);
+                $fecha_c = '';
+
+                if ($h_almuerzo_inicio != '--:--:--' && $h_almuerzo_fin != '--:--:--' && $row['asi_hora_salida'] != '00:00:00') {
+                    $fecha_c = 'has-text-success';
+                } elseif ($h_almuerzo_inicio == '--:--:--' && $h_almuerzo_fin == '--:--:--' && $row['asi_hora_salida'] != '00:00:00') {
+                    $fecha_c = 'has-text-warning-dark';
+                } elseif ($row['asi_hora_salida'] == '00:00:00') {
+                    $fecha_c = 'has-text-danger';
+                }
+
+                $t_class = [
+                    //Color de la fecha
+                    'fecha_c' => $fecha_c,
+                    //Color de la hora si en el string incluye '-' es porque esta retrasada
+                    'diff_entrada_c' => (strpos($hor_dif_ingreso_n, '-') !== false) ? 'is-danger is-light' : 'is-primary is-light',
+                    'diff_salida_c' => (strpos($hor_dif_salida_n, '-') !== false) ? 'is-danger is-light' : 'is-primary is-light',
+                    // Color de el estado de la asistencia
+                    'estado_c' => ($estado_a == 0) ? 'has-text-success' : (($estado_a == 1) ? 'has-text-warning-dark' : 'has-text-danger'),
+                    'show_eye' => ($row['asi_observacion'] != '') ? '<span class="has-text-black icon is-small is-size-7 is-info"><i class="fa fa-eye"></i></span>' : '<span class="has-text-white icon is-small is-size-7 is-info"><i class="fa fa-eye"></i></span>',
+                ];
+
+                $permite_marcar = '0';
+                $limite_ingreso = '10';
+
+                if ($hor_id != 1) {
+                    // $horario = mainModel::ejecutar_consulta_simple("SELECT * FROM horario WHERE hor_id = '" . $_SESSION['hor_id'] . "'");
+
+                    $permite_marcar  = $hors['hor_marcar_tarde'];
+                    $limite_ingreso  = $hors['hor_limite_entrada'];
+                }
+
+                $estado = ($estado_a == 0) ? "Puntual" : ($estado_a == 1 ? "Atrasado" : 'Tarde');
+                // $color = (is_null($row['asi_estado']) || $row['asi_estado'] == 0) ? 'has-text-success' : ($row['asi_estado'] == 1 ? 'has-text-warning-dark' : 'has-text-danger');
+                $editObs = ($fecha == date('Y-m-d')) ?  '<span data-tooltip="Editar" class="updateObser icon is-small p-1 ml-1 is-size-7 tag is-info" style="cursor: pointer"><i class="fa fa-edit"></i></span>' : ' ';
 
                 if ($h_almuerzo_inicio == "--:--:--" && $h_almuerzo_fin == "--:--:--" && $h_salida != "00:00:00") {
-
-
-                    $tabla .= '
-                    <tr>
-                    <td style="vertical-align: middle;">' . $fecha . '</td>
-                    <td style="vertical-align: middle;">' . $h_ingreso . ' <span class="h_diff is-small tag">' . $hor_dif_ingreso_n . '</span></td>
-                    <td style="vertical-align: middle;" colspan="2" class="has-text-centered">Sin almuerzo</td>
-                    <td style="display: none;"></td>
-                    <td style="vertical-align: middle;">' . $h_salida . ' <span class="h_diff is-small tag">' . $hor_dif_salida_n . '</span></td>
-                    <td style="vertical-align: middle;">' . $total_horas . '</td>
-                    </tr>
-                    ';
+                    $almuerzo = '<td style="vertical-align: middle;" colspan="2" class="has-text-centered ">Sin almuerzo</td>
+                                 <td class="is-hidden"></td>';
                 } else {
-                    $tabla .= '
-                    <tr>
-                    <td style="vertical-align: middle;">' . $fecha . '</td>
-                    <td style="vertical-align: middle;">' . $h_ingreso . '  <span class="h_diff is-small tag">' . $hor_dif_ingreso_n . '</span></td>
-                    <td style="vertical-align: middle;">' . $h_almuerzo_inicio . '</td>
-                    <td style="vertical-align: middle;">' . $h_almuerzo_fin . '</td>
-                    <td style="vertical-align: middle;">' . $h_salida . ' <span class="h_diff is-small tag">' . $hor_dif_salida_n . '</span></td>
-                    <td style="vertical-align: middle;">' . $total_horas . '</td>
-                    </tr>
-                    ';
+                    $almuerzo = '<td class="has-text-centered" style="vertical-align: middle;">' . $h_almuerzo_inicio . '</td>
+                                 <td class="has-text-centered" style="vertical-align: middle;">' . $h_almuerzo_fin . '</td>';
+                }
+                $show_diff_salida = $hor_id == 1 ? '' : (($row['asi_hora_salida'] != '00:00:00') ? '<span class="' . $t_class['diff_salida_c'] . ' h_diff is-small tag">' . $hor_dif_salida_n . '</span>' : '<span class="h_diff is-small tag is-light">+00:00</span>');
+                $show_diff_entrada = $hor_id == 1 ? '' : '  <span class="' . $t_class['diff_entrada_c'] . ' h_diff is-small tag">' . $hor_dif_ingreso_n . '</span>';
+
+                if (($permite_marcar == 2 && $h_ingreso == "00:00:00") || $h_ingreso == "00:00:00" && $row['asi_hora_salida'] == '00:00:00' && $h_almuerzo_inicio == "--:--:--" && $h_almuerzo_fin == "--:--:--") {
+                    $tabla_desktop .= '
+                        <tr class="has-text-danger-dark">
+                            <td class="' . $t_class['fecha_c'] . ' has-text-centered" style="vertical-align: middle;">' . date('Y-m-d', strtotime($fecha)) . ' ' . $t_class['show_eye'] . '</td>
+                            <td colspan="4" style="vertical-align: middle;" class="has-text-centered ">No marcado</td>
+                            <td class="is-hidden">No marcado</td>
+                            <td class="is-hidden">No marcado</td>
+                            <td class="is-hidden">No marcado</td>
+                            <td class="has-text-centered " style="vertical-align: middle;">Tarde</td>
+                            <td class="has-text-centered" style="vertical-align: middle;">' . date('H\h i\m', strtotime($total_horas)) . '</td>
+                            <td><p class="is-inline">' . $row['asi_observacion'] . '</p>
+                            ' . $editObs . '</td>
+                        </tr>
+                        ';
+                } else {
+                    $tabla_desktop .= '
+                        <tr>
+                            <td class="' . $t_class['fecha_c'] . ' has-text-centered" style="vertical-align: middle;">' . date('Y-m-d', strtotime($fecha)) . ' ' . $t_class['show_eye'] . '</td>
+                            <td class=" has-text-centered" style="vertical-align: middle;">' . $h_ingreso . $show_diff_entrada . '</td>
+                            ' . $almuerzo . '
+                            <td class="has-text-centered" style="vertical-align: middle;">' . $h_salida . ' ' . $show_diff_salida . '</td>
+                            <td class="has-text-centered ' . $t_class['estado_c'] . '" style="vertical-align: middle;">' . $estado . '</td>
+                            <td class="has-text-centered" style="vertical-align: middle;">' . date('H\h i\m', strtotime($total_horas)) . '</td>
+                            <td><p class="is-inline">' . $row['asi_observacion'] . '</p>
+                            ' . $editObs . '</td>
+                        </tr>
+                        ';
                 }
             }
         } else {
-            $tabla .= '
+            $tabla_desktop .= '
             <tr>
                 <td colspan="6">No hay registros</td>
             </tr>
             ';
         }
-
-        $tabla .= '</tbody>
+        $tabla_desktop .= '</tbody>
         </table>
         <input class="total_horas" value="' . $this->getSumHours($horas) . '" hidden></input>
+        <input class="first_date" value="' . $fecha . '" hidden></input>
         
         ';
-        echo $tabla;
+        echo $tabla_desktop;
+    }
+
+    //test ajax Datatable
+    public function CtrListarAsistencia()
+    {
+        $data = mainModel::ejecutar_consulta_simple("SELECT * FROM asistencia");
+        $datos = array();
+        while ($row = $data->fetch(MYSQLI_ASSOC)) {
+            $datos[] = $row;
+        }
+        $dateset = array(
+            "echo" => 1,
+            "totalrecords" => count($datos),
+            "totaldisplayrecords" => count($datos),
+            'data' => $datos
+        );
+        echo json_encode($dateset);
     }
 
     // Mostrar el Home del pasante
     public function CtrMostrarInicioPasante()
     {
-        $persona_id = $_SESSION['p_id']; // ID de la persona
-        //fecha actual
+        // $permite_marcar = false;
+        $persona_id = $_SESSION['p_id'];
+        $permite_marcar = '0';
+        $limite_ingreso = '10';
+        $horario_entrada = '00:00:00';
+
+
+        if (isset($_SESSION['hor_id']) && $_SESSION['hor_id'] != 1) {
+            $hors = mainModel::ejecutar_consulta_simple("SELECT * FROM horario WHERE hor_id = '" . $_SESSION['hor_id'] . "'")->fetch();
+            $permite_marcar  = $hors['hor_marcar_tarde'];
+            $limite_ingreso  = $hors['hor_limite_entrada'];
+            $horario_entrada = $hors['hor_entrada'];
+        }
+
         $today = date("Y-m-d");
+
         $sql = mainModel::ejecutar_consulta_simple("SELECT * FROM asistencia WHERE per_id = $persona_id and asi_dia = '$today'");
+
         $card = "";
+        $color = "";
+        $estado = "";
 
-        // if ($sql->rowCount() == 0) {
-        //     $insertar = AsistenciaModelo::MdlInsertarFechaPasante($persona_id);
-        //     if ($insertar->rowCount() >= 1) {
-        //         // refresh page
-        //         if (headers_sent()) {
-        //             echo "<script type='text/javascript'>window.top.location='".SERVERURL."/home';</script>"; exit;
-        //         }else{
-        //             header('Location: '.SERVERURL.'home');
-        //         }
-        //     }
-        // }
-        // var_dump($datos);
+        if ($sql->rowCount() >= 1) {
+            $datos = $sql->fetch();
+            $estado_a = $this->getEstadoAsistencia($datos['asi_hora_ingreso'], $horario_entrada, $limite_ingreso);
+            // var_dump($estado_a);
+            // $estado_a = $this->getEstadoAsistencia($datos['asi_hora_ingreso'], isset($_SESSION['horario']['hor_entrada']) ? $_SESSION['horario']['hor_entrada'] : '00:00:00', '10');
+            $color = ($estado_a == 0) ? 'has-background-success-light' : (($estado_a == 1) ? 'has-background-warning-light' : 'has-background-danger-light');
+            $estado = ($estado_a == 0) ? 'Puntual' : (($estado_a == 1) ? 'Atrasado' : 'Tarde');
 
+            //Condicion si el pasante no tiene permiso para marcar tarde
+            if ($permite_marcar == '2') {
+                $card = '
+                    <div class="card has-background-danger-light">
+                        <div class="card-content">
+                            <div class="media">
+                                <div class="media-content">
+                                    <p class="title is-4">Tarde</p>
+                                    <p class="subtitle is-6">Lo siento usted ya no tiene permitido seguir marcando este día... 😥</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ';
+                echo $card;
+                exit();
+            }
+        }
 
-        $datos = $sql->fetch();
         $card .= '
-        <div class="list-item box">
+        <div class="list-item box ' . $color . '">
             <div class="columns is-mobile">
                 <div class="column">
                     <div class="list-item-content is-small">
                         <div class="list-item-title title is-5">Ingreso</div>
                     ';
         // Condicion en ingreso
-        if (@$datos['asi_hora_ingreso'] == "00:00:00" || $sql->rowCount() == 0) {
+        if ($sql->rowCount() == 0) {
             $card .= '
                         <div id="des_m_entrada" class="list-item-description has-text-grey">Sin marcar</div>
                     </div>
@@ -371,18 +575,41 @@ class AsistenciaControlador extends AsistenciaModelo
                                 </span>
                                 <span id="text_m_entrada">Marcar</span>
                 ';
-        } elseif (@$datos['asi_hora_ingreso'] != "00:00:00") {
+        } else if (@$estado_a == 2 && $sql->rowCount() != 0) {
+            if ($permite_marcar == '1') {
+                $card .= '<div id="des_m_entrada" class="list-item-description has-text-grey">Marcado a las: ' . @$hors['hor_salida_a'] . '</div>';
+            } else if ($permite_marcar == '0') {
+                $card .= '<div id="des_m_entrada" class="list-item-description has-text-grey">Marcado a las: ' . @$datos['asi_hora_ingreso'] . ' (' . $estado . ')</div>';
+            }
             $card .= '
-                        <div id="des_m_entrada" class="list-item-description has-text-grey">Marcado a la hora: ' . @$datos['asi_hora_ingreso'] . '</div>
                     </div>
                 </div>
                 <div class="column">
                     <div class="list-item-controls is-small">
                         <div class="buttons is-right">
-                            <button type="submit" id="m_entrada" class="m_entrada button is-light" disabled=""><span>✔ Marcado</span>
+                            <button class="button is-light is-danger has-text-black" disabled=""><span>Tarde</span>
                 ';
+        } elseif (@$estado_a == 1 && @$datos['asi_hora_ingreso'] != "00:00:00") {
+            $card .= '
+                        <div id="des_m_entrada" class="list-item-description has-text-grey">Marcado a la hora: ' . @$datos['asi_hora_ingreso'] . ' (' . $estado . ')</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="list-item-controls is-small">
+                        <div class="buttons is-right">
+                            <button class="m_entrada button is-light" disabled=""><span>✔ Marcado</span>
+                ';
+        } else if (@$estado_a == 0 && @$datos['asi_hora_ingreso'] != "00:00:00") {
+            $card .= '
+                    <div id="des_m_entrada" class="list-item-description has-text-grey">Marcado a la hora: ' . @$datos['asi_hora_ingreso'] . ' (' . $estado . ')</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="list-item-controls is-small">
+                        <div class="buttons is-right">
+                            <button class="button is-light" disabled=""><span>✔ Marcado</span>
+            ';
         }
-
         $card .= '
                             </button>
                         </div>
@@ -393,7 +620,9 @@ class AsistenciaControlador extends AsistenciaModelo
         ';
 
         // Si el ingreso esta marcado
-        if (@isset($datos['asi_hora_ingreso']) && @$datos['asi_hora_ingreso'] != "00:00:00") {
+        if (@isset($datos['asi_hora_ingreso'])
+            // && @$datos['asi_hora_ingreso'] != "00:00:00"
+        ) {
 
 
             // Condicion en almuerzo inicio
@@ -560,41 +789,27 @@ class AsistenciaControlador extends AsistenciaModelo
             // $card[$key]['title'] = 'Valor de ' . $value['asi_id'];
 
             //Si se conmpleto el dias de asistencia
+            $card[$key]['id'] = $value['asi_id'];
+            $card[$key]['h_ingreso'] = $value['asi_hora_ingreso'];
+            $card[$key]['h_salida'] = $value['asi_hora_salida'];
+            $card[$key]['dia'] = $value['asi_dia'];
+            $card[$key]['start'] = $value['asi_dia'] . ' ' . $value['asi_hora_ingreso'];
+            $card[$key]['end'] = $value['asi_dia'] . ' ' . $value['asi_hora_salida'];
+            $card[$key]['observacion'] =  $value['asi_observacion'];
+
             if ($value['asi_hora_salida'] != "00:00:00" && $value['asi_hora_ingreso'] != "00:00:00") {
-                $card[$key]['id'] = $value['asi_id'];
-                $card[$key]['h_ingreso'] = $value['asi_hora_ingreso'];
-                $card[$key]['h_salida'] = $value['asi_hora_salida'];
 
                 $card[$key]['title'] = 'Completo';
-                $card[$key]['dia'] = $value['asi_dia'];
-                $card[$key]['start'] = $value['asi_dia'] . ' ' . $value['asi_hora_ingreso'];
-                $card[$key]['end'] = $value['asi_dia'] . ' ' . $value['asi_hora_salida'];
                 $card[$key]['color'] = '#00d1b2';
             } elseif ($today == $value['asi_dia'] && $value['asi_hora_ingreso'] != "00:00:00" && $value['asi_hora_salida'] == "00:00:00") {
-                $card[$key]['id'] = $value['asi_id'];
-                $card[$key]['h_ingreso'] = $value['asi_hora_ingreso'];
-                $card[$key]['h_salida'] = $value['asi_hora_salida'];
 
                 $card[$key]['title'] = 'Pendiente';
-                $card[$key]['dia'] = $value['asi_dia'];
-                $card[$key]['start'] = $value['asi_dia'] . ' ' . $value['asi_hora_ingreso'];
-                $card[$key]['end'] = $value['asi_dia'] . ' ' . $value['asi_hora_salida'];
                 $card[$key]['color'] = '#ff7675';
             } else {
-                // $value['asi_hora_salida'] = $value['asi_hora_ingreso'];
-                $card[$key]['id'] = $value['asi_id'];
-                $card[$key]['title'] = 'Incompleto';
-                $card[$key]['dia'] = $value['asi_dia'];
 
-                $card[$key]['h_ingreso'] = $value['asi_hora_ingreso'];
-                $card[$key]['h_salida'] = $value['asi_hora_salida'];
-                $card[$key]['start'] = $value['asi_dia'] . ' ' . $value['asi_hora_ingreso'];
-                $card[$key]['end'] = $value['asi_dia'] . ' ' . $value['asi_hora_salida'];
+                $card[$key]['title'] = 'Incompleto';
                 $card[$key]['color'] = '#ff0000';
             }
-            // $card[$key]['start'] = $value['asi_dia'] . ' ' . $value['asi_hora_ingreso'];
-            // $card[$key]['end'] = $value['asi_dia'] . ' ' . $value['asi_hora_salida'];
-            // $card[$key]['color'] = '#00d1b2';
         }
         echo json_encode($card);
     }
@@ -632,15 +847,19 @@ class AsistenciaControlador extends AsistenciaModelo
         $list = "";
         if ($sql->rowCount() >= 1) {
 
-
-
             $datos = $sql->fetchAll();
             foreach ($datos as $row) {
+                $id_usuario = mainModel::decryption($this->CtrGetIdUsuario(mainModel::encryption($row['per_id'])));
+                $horario = mainModel::ejecutar_consulta_simple('SELECT h.* FROM usuario u INNER JOIN horario h ON u.hor_id = h.hor_id WHERE u.usu_id = "' . $id_usuario . '"')->fetch();
+                // var_dump($horario);
+                $estado = $this->getEstadoAsistencia($row['asi_hora_ingreso'], isset($horario['hor_entrada']) ? $horario['hor_entrada'] : '00:00:00', @$horario['hor_limite_entrada']);
+                // var_dump($estado);
+                $color = ($estado == 0) ? 'has-background-success-light' : (($estado == 1) ? 'has-background-warning-light' : 'has-background-danger-light');
                 $name = mb_strtolower($row['nombre']);
                 $list .= '
-                <div class="list-item" id="' . mainModel::encryption($row['asi_id']) . '">
+                <div class="list-item ' . $color . '" id="' . mainModel::encryption($row['asi_id']) . '">
                     <div class="list-item-content">
-                            <div class="list-item-title is-size-3 mb-1">' . ucwords($name) . '</div>
+                            <div class="is-size-3 mb-1">' . ucwords($name) . '</div>
                             <div class="list-item-description">
                 ';
                 if ($row['asi_hora_ingreso'] != "00:00:00") {
@@ -670,21 +889,27 @@ class AsistenciaControlador extends AsistenciaModelo
                 $list .= '
                             </div>
                         </div>
-                    <div class="list-item-controls">
+                    <div class="list-item-controls ">
                         <div class="buttons">
-                            <button id="' . mainModel::encryption($row['per_id']) . '"  data-tooltip="Registros" class="button is-dark is-inverted verRegistro">
+                            <button id="' . mainModel::encryption($row['asi_id']) . '"  data-tooltip="Observacion" class="' . $color . ' button is-dark is-inverted verObservacion">
+                                <span class="icon">
+                                    <i class="fa fa-eye"></i>
+                                </span>
+                            </button>
+
+                            <button id="' . mainModel::encryption($row['per_id']) . '"  data-tooltip="Registros" class="' . $color . ' button is-dark is-inverted verRegistro">
                                 <span class="icon">
                                     <i class="fa fa-list"></i>
                                 </span>
                             </button>
 
-                            <button id="editar_registro" data-tooltip="Editar" class="button is-dark is-inverted modal-button" data-target="edit_hora" data-toggle="modal">
+                            <button id="editar_registro" data-tooltip="Editar" class="' . $color . ' button is-dark is-inverted modal-button" data-target="edit_hora" data-toggle="modal">
                                 <span class="icon">
                                     <i class="fa fa-pencil"></i>
                                 </span>
                             </button>
                             
-                            <button id="borrar_registro" data-tooltip="Eliminar" class="button is-dark is-inverted">
+                            <button id="borrar_registro" data-tooltip="Eliminar" class="' . $color . ' button is-dark is-inverted">
                                 <span class="icon">
                                     <i class="fa fa-trash"></i>
                                 </span>
@@ -710,11 +935,27 @@ class AsistenciaControlador extends AsistenciaModelo
     // Para editar el registro de un pasante
     public function CtrEditarRegistro()
     {
+        // if ($_POST['h_entrada_u'] == '00:00:00') {
+        //     echo 'error_h_entrada';
+        //     exit();
+        // }
+        $id_h = mainModel::limpiar_cadena($_POST['horario']);
+
+        $hor = mainModel::ejecutar_consulta_simple("SELECT * FROM horario WHERE hor_id = '$id_h'");
+
+        if ($hor->rowCount() >= 1) {
+
+            $horario = $hor->fetch();
+        } else {
+            $horario = null;
+        }
+
         $id_asistencia = mainModel::decryption($_POST['asiId_u']);
         $h_ingreso = $_POST['h_entrada_u'];
         $h_almuerzo_start = $_POST['h_almuerzo_start_u'];
         $h_almuerzo_end = $_POST['h_almuerzo_end_u'];
         $h_salida = $_POST['h_salida_u'];
+        $observacion = $_POST['asi_observacion'];
         $today = date("Y-m-d");
 
         $datetime1 = new DateTime($h_almuerzo_start);
@@ -750,13 +991,30 @@ class AsistenciaControlador extends AsistenciaModelo
                     $h_almuerzo_end = '00:00:00';
                 }
 
+                // chequear estado del registro | PUNTUAL | ATRASADO | TARDE
+                // $h_ingreso = date("H:i:s", strtotime($h_ingreso));
+                @$horario_ingreso = is_null($horario['hor_entrada']) || $horario['hor_entrada'] == '00:00:00' ? $h_ingreso : $horario['hor_entrada'];
+                $limite_ingreso = 10;
+
+                if ($h_ingreso <= date("H:i:s", strtotime($horario_ingreso . ' + ' . $limite_ingreso . ' minute'))) {
+                    $estado = 0; // Puntual
+                } elseif ($h_ingreso >= $horario_ingreso && $h_ingreso <= date("H:i:s", strtotime($horario_ingreso . ' + ' . $limite_ingreso . ' minute'))) {
+                    $estado = 1; // Atrasado
+                } else {
+                    $estado = 2; // Tarde
+                }
+
+
+
                 $datos = [
                     "asi_id" => $id_asistencia,
                     "asi_hora_ingreso" => $h_ingreso,
                     "asi_hora_salida_a" => $h_almuerzo_start,
                     "asi_hora_regreso_a" => $h_almuerzo_end,
                     "asi_hora_salida" => $h_salida,
-                    "asi_dia" => $today
+                    "asi_observacion" => $observacion,
+                    "asi_dia" => $today,
+                    "asi_estado" => $estado,
                 ];
 
                 $sql = AsistenciaModelo::mdlEditarRegistro($datos);
@@ -874,7 +1132,7 @@ class AsistenciaControlador extends AsistenciaModelo
 
         // var_dump(array_diff($pasantes->fetchAll(), $pasantes_con_registro->fetchAll()));
         $tabla = '<table id="pasantes" class="table dataTable stripe row-border order-column" style="width:100%">';
-        $tabla .= ' 
+        $tabla .= '         
         <thead>
                 <tr>
                   <th>Nombre</th>
@@ -1106,159 +1364,189 @@ class AsistenciaControlador extends AsistenciaModelo
     // Mostrar horas de ingreso y salida
     public function CtrMostrarAsistenciaPasanteAdmin($h_id = null)
     {
+        $h_id = $_POST['horario'];
+        $ruta = (null !== explode("/", @$_GET["views"])) ? explode("/", @$_GET["views"]) : null;
 
-        $ruta = explode("/", $_GET["views"]);
         if (isset($ruta[1])) {
             $persona_id = mainModel::decryption($ruta[1]);
+        } else {
+            $persona_id = mainModel::decryption($_POST['id_p']);
         }
         // @$persona_id = $_SESSION['p_id']; // ID de la persona
         // Obtener los registros del pasante
         if (is_numeric($persona_id) && isset($h_id)) {
 
             $hor_id = $h_id;
+            // @$persona_id = $_SESSION['p_id']; // ID de la persona
+            // Obtener los registros del pasante
             $sql = mainModel::ejecutar_consulta_simple("SELECT * FROM asistencia WHERE per_id = $persona_id ORDER BY asi_id DESC");
             $hor = mainModel::ejecutar_consulta_simple("SELECT * FROM horario WHERE hor_id = '$hor_id'");
             $hors = $hor->fetch();
+            // var_dump($hors);
+
             //Variable total de horas
             $horas = array();
-            $tabla = "";
-            $tabla .= '<table id="example" class="table stripe row-border order-column nowrap" style="width:100%; box-sizing: inherit;">
-            <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>Ingreso</th>
-                    <th>Almuerzo inicio</th>
-                    <th>Almuerzo fin</th>
-                    <th>Salida</th>
-                    <th>Horas</th>
-                    <th style="text-align: center;">Acción</th>
-                </tr>
-            </thead>
-            <tbody>';
-            // echo $sql->errorInfo()[2];
-            if ($sql->errorCode() == "00000") {
-                if ($sql->rowCount() >= 1) {
 
-                    $datos = $sql->fetchAll();
-                    foreach ($datos as $row) {
+            $tabla_desktop = "";
+            $tabla_desktop .= '<table id="asi_pasante_adm" class="table display is-striped responsive stripe row-border order-column nowrap" style="width:100%; box-sizing: inherit;">
+        <thead>
+            <tr>
+                <th class="has-text-centered">Fecha</th>
+                <th class="has-text-centered">Entrada</th>
+                <th class="has-text-centered">Almuerzo inicio</th>
+                <th class="has-text-centered">Almuerzo fin</th>
+                <th class="has-text-centered">Salida</th>
+                <th class="has-text-centered">Asistencia</th>
+                <th class="has-text-centered">Total horas</th>
+                <th class="has-text-centered none">Observación</th>
+                <th class="has-text-centered">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>';
+            if ($sql->rowCount() >= 1) {
+                $datos = $sql->fetchAll();
+                foreach ($datos as $row) {
 
-                        // vars
-                        $fecha = $row['asi_dia'];
-                        $h_ingreso = $row['asi_hora_ingreso'];
-                        $h_almuerzo_inicio = $row['asi_hora_salida_a'];
-                        $h_almuerzo_fin = $row['asi_hora_regreso_a'];
-                        // $h_salida = $row['asi_hora_salida'];
-                        $h_salida = ($row['asi_hora_salida'] == "00:00:00") ? $row['asi_hora_ingreso'] : $row['asi_hora_salida'];
+                    // vars
+                    $fecha = $row['asi_dia'];
+                    $h_ingreso = $row['asi_hora_ingreso'];
+                    $h_almuerzo_inicio = $row['asi_hora_salida_a'];
+                    $h_almuerzo_fin = $row['asi_hora_regreso_a'];
+                    // $h_salida = $row['asi_hora_salida'];
+                    $h_salida = ($row['asi_hora_salida'] == "00:00:00") ? $row['asi_hora_ingreso'] : $row['asi_hora_salida'];
+
+                    $a_marc = ($h_almuerzo_inicio != '00:00:00' && $h_almuerzo_fin != '00:00:00') ? true : false;
+                    $s_marc = ($h_salida != '00:00:00') ? true : false;
+
+                    //Diferencia entre horas entrada y salida
+                    $diff = $this->getTimeDiff($h_ingreso, $h_salida);
+
+                    //Diferencia entre horas almuerzo inicio y almuerzo fin
+                    $diff_a = $this->getTimeDiff($h_almuerzo_inicio, $h_almuerzo_fin);
+
+                    $diff_b = $this->getTimeDiff($h_ingreso, $h_almuerzo_inicio);
+
+                    $diff_b_al = $this->getSumHours([$diff_a, $h_ingreso]);
 
 
-                        $a_marc = ($h_almuerzo_inicio != '00:00:00' && $h_almuerzo_fin != '00:00:00') ? true : false;
-                        $s_marc = ($h_salida != '00:00:00') ? true : false;
-                        $datetime1 = new DateTime($h_almuerzo_inicio);
-                        $datetime2 = new DateTime($h_almuerzo_fin);
+                    if ($h_almuerzo_inicio != '00:00:00' || $h_almuerzo_fin != '00:00:00') {
 
-                        $interval = $datetime2->diff($datetime1);
-                        $v_hora =  $interval->format('%R%H:%I');
-
-                        //Diferencia entre horas entrada y salida
-                        // $diff = $this->getTimeDiff($h_ingreso, $h_salida);
-
-                        // //Diferencia entre horas almuerzo inicio y almuerzo fin
-                        // $diff_a = $this->getTimeDiff($h_almuerzo_inicio, $h_almuerzo_fin);
-
-                        // //Diferencia entre horas entrada y almuerzo fin
-                        // $diff_b = $this->getTimeDiff($h_ingreso, $h_almuerzo_fin);
-                        // $diff_c = $this->getTimeDiff($h_ingreso,$diff_b);
 
                         //Total de horas trabajadas
+                        if ($h_almuerzo_inicio != '00:00:00' && $h_almuerzo_fin == '00:00:00' && $h_salida == $h_ingreso) {
 
-                        // $total_horas = ($h_almuerzo_fin != '00:00:00' && $h_salida == $h_ingreso) ? $this->getTimeDiff($diff_a, $diff) : $diff_c;
-                        // $total_horas = $this->getTimeDiff($diff_a,$diff);  
-                        // $total_horas = $v_hora;
-
-
-                        //Diferencia entre horas entrada y salida
-                        $diff = $this->getTimeDiff($h_ingreso, $h_salida);
-
-                        //Diferencia entre horas almuerzo inicio y almuerzo fin
-                        $diff_a = $this->getTimeDiff($h_almuerzo_inicio, $h_almuerzo_fin);
-                        
-                        $diff_b = $this->getTimeDiff($h_ingreso,$h_almuerzo_inicio);
-
-                        $diff_b_al = $this->getSumHours([$diff_a, $h_ingreso]);
-
-
-
-                        if ($h_almuerzo_inicio != '00:00:00' || $h_almuerzo_fin != '00:00:00') {
-                            
-                        
-                        //Total de horas trabajadas
-                        if($h_almuerzo_inicio != '00:00:00' && $h_almuerzo_fin == '00:00:00' && $h_salida == $h_ingreso){
-                            
                             $total_horas = $this->getTimeDiff($h_ingreso,  $h_almuerzo_inicio);
-
-                        }elseif($a_marc && $h_salida == $h_ingreso){
+                        } elseif ($a_marc && $h_salida == $h_ingreso) {
 
                             $total_horas = $this->getTimeDiff($diff_b_al, $h_almuerzo_inicio);
-
-                        }elseif ($a_marc && $s_marc) {
+                        } elseif ($a_marc && $s_marc) {
                             $total_horas = $this->getTimeDiff($diff_a, $diff);
                         }
-                    }else{
-                            $total_horas = $this->getTimeDiff($diff_a, $diff);
-                        }
-                        // $total_horas = $this->getTimeDiff(($a_marc && !$s_marc) ? $h_almuerzo_inicio : $diff_a,  $diff);
+                    } else {
+                        $total_horas = $this->getTimeDiff($diff_a, $diff);
+                    }
+                    // $total_horas = $this->getTimeDiff(($a_marc && !$s_marc) ? $h_almuerzo_inicio : $diff_a,  $diff);
 
-                        if ($hor_id != 1) {
+                    if ($hor_id != 1) {
 
-                            $h_i = new DateTime($h_ingreso);
-                            $h_a_i = new DateTime($h_almuerzo_inicio);
-                            $h_a_f = new DateTime($h_almuerzo_fin);
-                            $h_s = new DateTime($h_salida);
+                        $h_i = new DateTime($h_ingreso);
+                        $h_a_i = new DateTime($h_almuerzo_inicio);
+                        $h_a_f = new DateTime($h_almuerzo_fin);
+                        $h_s = new DateTime($h_salida);
 
-                            $hor_ingreso = new DateTime($hors['hor_entrada']);
-                            $hor_salida_a = new DateTime($hors['hor_salida_a']);
-                            $hor_regreso_a = new DateTime($hors['hor_regreso_a']);
-                            $hor_salida = new DateTime($hors['hor_salida']);
-                            // $datetime2 = new DateTime($h_almuerzo_end);
+                        $hor_ingreso = new DateTime($hors['hor_entrada']);
+                        $hor_salida_a = new DateTime($hors['hor_salida_a']);
+                        $hor_regreso_a = new DateTime($hors['hor_regreso_a']);
+                        $hor_salida = new DateTime($hors['hor_salida']);
+                        // $datetime2 = new DateTime($h_almuerzo_end);
 
-                            // $interval = $h_a_i->diff($h_a_f);
-                            // $v_hora =  $interval->format('%R%H:%i') . ' ';
-                            //Hora adelantada o retrasada
-                            $hor_dif_ingreso = $h_i->diff($hor_ingreso);
-                            $hor_dif_ingreso_n = $hor_dif_ingreso->format('%R%H:%I');
+                        // $interval = $h_a_i->diff($h_a_f);
+                        // $v_hora =  $interval->format('%R%H:%i') . ' ';
+                        //Hora adelantada o retrasada
+                        $hor_dif_ingreso = $h_i->diff($hor_ingreso);
+                        $hor_dif_ingreso_n = $hor_dif_ingreso->format('%R%H:%I');
 
-                            $hor_dif_salida = $hor_salida->diff($h_s);
-                            $hor_dif_salida_n = $hor_dif_salida->format('%R%H:%I');
-                        } else {
-                            $hor_dif_ingreso_n = "";
-                            $hor_dif_salida_n = "";
-                        }
+                        $hor_dif_salida = $hor_salida->diff($h_s);
+                        $hor_dif_salida_n = $hor_dif_salida->format('%R%H:%I');
+                    } else {
+                        $hor_dif_ingreso_n = "";
+                        $hor_dif_salida_n = "";
+                    }
 
-                        if ($h_almuerzo_inicio == "00:00:00") {
-                            $h_almuerzo_inicio = "--:--:--";
-                        }
-                        if ($h_almuerzo_fin == "00:00:00") {
-                            $h_almuerzo_fin = "--:--:--";
-                        }
-                        if ($h_salida == $h_ingreso) {
-                            $h_salida = "00:00:00";
-                        }
+                    if ($h_almuerzo_inicio == "00:00:00") {
+                        $h_almuerzo_inicio = "--:--:--";
+                    }
+                    if ($h_almuerzo_fin == "00:00:00") {
+                        $h_almuerzo_fin = "--:--:--";
+                    }
+                    if ($h_salida == $h_ingreso) {
+                        $h_salida = "00:00:00";
+                    }
 
-                        
-                        $horas[] = $total_horas;
-
-                        if ($h_almuerzo_inicio == "--:--:--" && $h_almuerzo_fin == "--:--:--" && $h_salida != "00:00:00") {
+                    // $horas[] = $total_horas; //Total de horas trabajadas
+                    $horas[] = $h_salida != "00:00:00" ? $total_horas : "00:00:00"; //Total de horas trabajadas sin contar los dias inconcompletos
 
 
-                            $tabla .= '
-                        <tr>
-                        <td style="vertical-align: middle;">' . $fecha . '</td>
-                        <td style="vertical-align: middle;">' . $h_ingreso . ' <span class="h_diff is-small tag">' . $hor_dif_ingreso_n . '</span></td>
-                        <td style="vertical-align: middle;" colspan="2" class="has-text-centered">Sin almuerzo</td>
-                        <td style="display: none;"></td>
-                        <td style="vertical-align: middle;">' . $h_salida . ' <span class="h_diff is-small tag">' . $hor_dif_salida_n . '</span></td>
-                        <td style="vertical-align: middle;">' . $total_horas . '</td>
-                        <td style="vertical-align: middle; text-align: center;">
+                    $estado_a = $this->getEstadoAsistencia($h_ingreso, $hors['hor_entrada'], '10');
+                    // var_dump($estado_a);
+                    $fecha_c = '';
+
+                    if ($h_almuerzo_inicio != '--:--:--' && $h_almuerzo_fin != '--:--:--' && $row['asi_hora_salida'] != '00:00:00') {
+                        $fecha_c = 'has-text-success';
+                    } elseif ($h_almuerzo_inicio == '--:--:--' && $h_almuerzo_fin == '--:--:--' && $row['asi_hora_salida'] != '00:00:00') {
+                        $fecha_c = 'has-text-warning-dark';
+                    } elseif ($row['asi_hora_salida'] == '00:00:00') {
+                        $fecha_c = 'has-text-danger';
+                    }
+
+                    $t_class = [
+                        //Color de la fecha
+                        'fecha_c' => $fecha_c,
+                        //Color de la hora si en el string incluye '-' es porque esta retrasada
+                        'diff_entrada_c' => (strpos($hor_dif_ingreso_n, '-') !== false) ? 'is-danger is-light' : 'is-primary is-light',
+                        'diff_salida_c' => (strpos($hor_dif_salida_n, '-') !== false) ? 'is-danger is-light' : 'is-primary is-light',
+                        // Color de el estado de la asistencia
+                        'estado_c' => ($estado_a == 0) ? 'has-text-success' : (($estado_a == 1) ? 'has-text-warning-dark' : 'has-text-danger'),
+                        'show_eye' => ($row['asi_observacion'] != '') ? '<span class="has-text-black icon is-small is-size-7 is-info"><i class="fa fa-eye"></i></span>' : '<span class="has-text-white icon is-small is-size-7 is-info"><i class="fa fa-eye"></i></span>',
+                    ];
+
+                    $permite_marcar = '0';
+                    $limite_ingreso = '10';
+
+                    if ($hor_id != 1) {
+                        // $horario = mainModel::ejecutar_consulta_simple("SELECT * FROM horario WHERE hor_id = '" . $_SESSION['hor_id'] . "'");
+
+                        $permite_marcar  = $hors['hor_marcar_tarde'];
+                        $limite_ingreso  = $hors['hor_limite_entrada'];
+                    }
+
+                    $estado = ($estado_a == 0) ? "Puntual" : ($estado_a == 1 ? "Atrasado" : 'Tarde');
+                    // $color = (is_null($row['asi_estado']) || $row['asi_estado'] == 0) ? 'has-text-success' : ($row['asi_estado'] == 1 ? 'has-text-warning-dark' : 'has-text-danger');
+                    $editObs = ($fecha == date('Y-m-d')) ?  '<span data-tooltip="Editar" class="updateObser icon is-small p-1 ml-1 is-size-7 tag is-info" style="cursor: pointer"><i class="fa fa-edit"></i></span>' : ' ';
+
+                    if ($h_almuerzo_inicio == "--:--:--" && $h_almuerzo_fin == "--:--:--" && $h_salida != "00:00:00") {
+                        $almuerzo = '<td style="vertical-align: middle;" colspan="2" class="has-text-centered ">Sin almuerzo</td>
+                                 <td class="is-hidden"></td>';
+                    } else {
+                        $almuerzo = '<td class="has-text-centered" style="vertical-align: middle;">' . $h_almuerzo_inicio . '</td>
+                                 <td class="has-text-centered" style="vertical-align: middle;">' . $h_almuerzo_fin . '</td>';
+                    }
+                    $show_diff_salida = $hor_id == 1 ? '' : (($row['asi_hora_salida'] != '00:00:00') ? '<span class="' . $t_class['diff_salida_c'] . ' h_diff is-small tag">' . $hor_dif_salida_n . '</span>' : '<span class="h_diff is-small tag is-light">+00:00</span>');
+                    $show_diff_entrada = $hor_id == 1 ? '' : '  <span class="' . $t_class['diff_entrada_c'] . ' h_diff is-small tag">' . $hor_dif_ingreso_n . '</span>';
+
+                    if (($permite_marcar == 2 && $h_ingreso == "00:00:00") || $h_ingreso == "00:00:00" && $row['asi_hora_salida'] == '00:00:00' && $h_almuerzo_inicio == "--:--:--" && $h_almuerzo_fin == "--:--:--") {
+                        $tabla_desktop .= '
+                        <tr class="has-text-danger-dark">
+                            <td class="' . $t_class['fecha_c'] . ' has-text-centered" style="vertical-align: middle;">' . date('Y-m-d', strtotime($fecha)) . ' ' . $t_class['show_eye'] . '</td>
+                            <td colspan="4" style="vertical-align: middle;" class="has-text-centered ">No marcado</td>
+                            <td class="is-hidden">No marcado</td>
+                            <td class="is-hidden">No marcado</td>
+                            <td class="is-hidden">No marcado</td>
+                            <td class="has-text-centered " style="vertical-align: middle;">Tarde</td>
+                            <td class="has-text-centered" style="vertical-align: middle;">' . date('H\h i\m', strtotime($total_horas)) . '</td>
+                            <td><p class="is-inline">' . $row['asi_observacion'] . '</p>
+                            </td>
+                            <td style="vertical-align: middle; text-align: center;">
                             <button style="height: fit-content;" id="' . mainModel::encryption($row['asi_id']) . '" class="button is-success is-outlined editarRegistro modal-button" data-tooltip="Editar" data-target="edit_hora" data-toggle="modal">
                                 <span class="icon">
                                     <i class="fa fa-pencil"></i>
@@ -1269,20 +1557,22 @@ class AsistenciaControlador extends AsistenciaModelo
                                     <i class="fa fa-trash"></i>
                                 </span>
                             </button>
+                        </td>
                         </tr>
                         ';
-                        } else {
-                            $tabla .= '
+                    } else {
+                        $tabla_desktop .= '
                         <tr>
-                        <td style="vertical-align: middle;">' . $fecha . '</td>
-                        <td style="vertical-align: middle;">' . $h_ingreso . '  <span class="h_diff is-small tag">' . $hor_dif_ingreso_n . '</span></td>
-                        <td style="vertical-align: middle;">' . $h_almuerzo_inicio . '</td>
-                        <td style="vertical-align: middle;">' . $h_almuerzo_fin . '</td>
-                        <td style="vertical-align: middle;">' . $h_salida . ' <span class="h_diff is-small tag">' . $hor_dif_salida_n . '</span></td>
-                        <td style="vertical-align: middle;">' . $total_horas . '</td>
-                        <td style="vertical-align: middle; text-align: center;">
-                        
-                            <button style="height: fit-content;" id="' . mainModel::encryption($row['asi_id']) . '" class="button is-success is-outlined modal-button editarRegistro" data-tooltip="Editar" data-target="edit_hora" data-toggle="modal">
+                            <td class="' . $t_class['fecha_c'] . ' has-text-centered" style="vertical-align: middle;">' . date('Y-m-d', strtotime($fecha)) . ' ' . $t_class['show_eye'] . '</td>
+                            <td class=" has-text-centered" style="vertical-align: middle;">' . $h_ingreso . $show_diff_entrada . '</td>
+                            ' . $almuerzo . '
+                            <td class="has-text-centered" style="vertical-align: middle;">' . $h_salida . ' ' . $show_diff_salida . '</td>
+                            <td class="has-text-centered ' . $t_class['estado_c'] . '" style="vertical-align: middle;">' . $estado . '</td>
+                            <td class="has-text-centered" style="vertical-align: middle;">' . date('H\h i\m', strtotime($total_horas)) . '</td>
+                            <td><p class="is-inline">' . $row['asi_observacion'] . '</p>
+                            </td>
+                            <td style="vertical-align: middle; text-align: center;">
+                            <button style="height: fit-content;" id="' . mainModel::encryption($row['asi_id']) . '" class="button is-success is-outlined editarRegistro modal-button" data-tooltip="Editar" data-target="edit_hora" data-toggle="modal">
                                 <span class="icon">
                                     <i class="fa fa-pencil"></i>
                                 </span>
@@ -1292,34 +1582,26 @@ class AsistenciaControlador extends AsistenciaModelo
                                     <i class="fa fa-trash"></i>
                                 </span>
                             </button>
-
+                        </td>
                         </tr>
                         ';
-                        }
                     }
-                } else {
-                    $tabla .= '
-                <tr>
-                    <td colspan="6">No hay registros</td>
-                </tr>
-                ';
                 }
             } else {
-                $tabla .= '<tr>
+                $tabla_desktop .= '
+            <tr>
                 <td colspan="6">No hay registros</td>
-            </tr>';
-            }
-            $tabla .= '</tbody>
-            </table>
-            <input class="total_horas" value="' . $this->getSumHours($horas) . '" hidden></input>
-            
+            </tr>
             ';
-        } else {
-            $tabla = '<tr>
-            <td colspan="6">No hay registros</td>
-            </tr>';
+            }
+            $tabla_desktop .= '</tbody>
+        </table>
+        <input class="total_horas" value="' . $this->getSumHours($horas) . '" hidden></input>
+        <input class="first_date" value="' . $fecha . '" hidden></input>
+        
+        ';
         }
-        echo $tabla;
+        echo $tabla_desktop;
     }
 
 
@@ -1357,6 +1639,20 @@ class AsistenciaControlador extends AsistenciaModelo
         }
     }
 
+    // Obtener pbservacion
+    public function CtrMostrarObservacion()
+    {
+        $obs = mainModel::decryption($_GET['getObservacion']);
+        $sql = mainModel::conectar()->prepare("SELECT asi_observacion FROM asistencia WHERE asi_id = ?");
+        $sql->execute(
+            [
+                $obs
+            ]
+        );
+        $row = $sql->fetch();
+        $observacion = $row['asi_observacion'];
+        echo $observacion;
+    }
 
     // Funcion para obtener la diferencia de horas
     function getTimeDiff($dtime, $atime)

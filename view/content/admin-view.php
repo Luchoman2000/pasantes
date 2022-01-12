@@ -10,8 +10,17 @@
 <?php
 
 } elseif ($_SESSION['rol'] == "ADMINISTRADOR") {
+    require_once './controller/perfil.controlador.php';
+    $perfil = new PerfilControlador();
+    $permite_cambio_clave = $perfil->CtrGetCoreConfig('permite_cambio_clave');
+
 
 ?>
+    <link href="<?php echo SERVERURL ?>src/css/bulma-switch.min.css" rel="stylesheet">
+    <link href="<?php echo SERVERURL ?>src/css/balloon.min.css" rel="stylesheet">
+    <link href="<?php echo SERVERURL ?>src/css/bulma-checkradio.min.css" rel="stylesheet">
+
+
     <div class="card">
         <div class="card-content">
             <div class="container mW alignCenter content">
@@ -60,17 +69,36 @@
                         <div class="card">
                             <!-- Nuevo usuario -->
 
-                            <button id="nuevo_usuario" class="button is-success is-outlined mt-4 ml-3 modal-button" data-target="usuarioForm" data-toggle="modal">
-                                <span class="icon is-small">
-                                    <i class="fa fa-user-plus" aria-hidden="true"></i>
-                                </span>
-                                <span>Nuevo usuario</span>
-                            </button>
+                            <div class="columns is-vcentered is-align-items-center is-align-items-self-end">
+                                <div class="column is-8">
+
+                                    <button id="nuevo_usuario" class="button is-success is-outlined mt-4 ml-3 modal-button" data-target="usuarioForm" data-toggle="modal">
+                                        <span class="icon is-small">
+                                            <i class="fa fa-user-plus" aria-hidden="true"></i>
+                                        </span>
+                                        <span>Nuevo usuario</span>
+                                    </button>
+                                </div>
+                                <div class="column">
+                                    <div class="field is-pulled-right pr-4">
+                                        <div class="control">
+                                            <label class="checkbox">
+                                                <!-- <input id="switchColorDefault" type="checkbox" name="switchColorDefault" class="switch" checked="checked"> -->
+
+                                                <input name="checkbox_cambio_clave" class="switch is-rounded is-outlined" <?php echo $permite_cambio_clave ? 'checked' : '' ?> type="checkbox" id="checkbox_cambio_clave" onclick="toggle_permitir_cambio_clave()">
+                                                <label for="checkbox_cambio_clave">Permitir cambio de clave </label>
+                                                <!-- <span>Mostrar diferencia</span> -->
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
 
                             <div class="card-content">
                                 <!-- Tabla de usuarios -->
                                 <div class="table-container">
-
 
                                     <?php
                                     require_once './controller/admin.controlador.php';
@@ -109,7 +137,7 @@
                 <div class="content-tab" id="horarios" style="display: none;">
                     <div class="card">
                         <!-- Nuevo horario -->
-                        <button id="nuevo_horario" class="button is-success is-outlined mt-4 ml3 modal-button" data-target="horarioForm" data-toggle="modal">
+                        <button id="nuevo_horario" class="button is-success is-outlined mt-4 ml-3 modal-button" data-target="horarioForm" data-toggle="modal">
                             <span class="icon is-small">
                                 <i class="fa fa-calendar-plus-o" aria-hidden="true"></i>
                             </span>
@@ -369,8 +397,8 @@
                         <p class="modal-card-title"><strong class="mHorarioTitle"></strong> </p>
                     </header>
                     <section class="modal-card-body">
-                        <div class="columns">
-                            <div class="column">
+                        <div class="columns is-multiline is-mobile is-align-items-self-end">
+                            <div class="column is-two-fifths">
                                 <div class="field">
                                     <label class="label">Hora entrada*</label>
                                     <div class="control">
@@ -378,19 +406,72 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="column is-4">
+                                <div class="field">
+                                    <div class="control">
+                                        <label class="label is-inline">Compensación</label>
 
-                            <div class="column">
+                                        <span data-balloon-length="medium" aria-label="Minutos de compensación, es decir los minutos que se van a restar " data-balloon-pos="right" style="cursor: help; color:turquoise " class="icon is-info mb-2">
+                                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                        </span>
+                                        <input value="3" min="0" max="100" style="width: 5rem;" type="number" class="input " name="h_entrada_c"></input>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="column is-2">
+                                <div class="field">
+                                    <div class="control">
+                                        <label class="label mb-2">Límite</label>
+
+                                        <!-- <span aria-label="Límite " data-balloon-pos="right" style="cursor: help; color:turquoise" class="icon is-info mb-2">
+                                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                        </span> -->
+                                        <input value="10" min="0" max="100" type="number" class="input" name="h_limite"></input>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- <div class="column">
+
+                                <div class="field">
+
+                                    <div class="control">
+                                        <label class="radio">
+                                            <input type="radio" name="rsvp">
+                                            Going
+                                        </label>
+                                        <label class="radio">
+                                            <input type="radio" name="rsvp">
+                                            Not going
+                                        </label>
+                                        <label class="radio" disabled>
+                                            <input type="radio" name="rsvp" disabled>
+                                            Maybe
+                                        </label>
+                                    </div>
+                                </div>
+                            </div> -->
+
+                            <!-- <div class="column">
+                                <div class="field">
+                                    <input id="switchRoundedDefault" type="checkbox" name="switchRoundedDefault" class="switch is-rounded is-small" checked="checked">
+                                    <label for="switchRoundedDefault">witch rounded defaultS</label>
+                                </div>
+                            </div> -->
+
+                            <!-- <div class="column">
                                 <div class="field">
                                     <label class="label">Hora Salida*</label>
                                     <div class="control">
                                         <input class="input hFin" type="time" name="hFin" placeholder="Hora Fin">
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
-                        <div class="columns">
+
+                        <div class="columns is-multiline is-mobile is-align-items-self-end">
                             <!-- almuerzo inicio -->
-                            <div class="column">
+                            <div class="column is-two-fifths">
                                 <div class="field">
                                     <label class="label">Hora Almuerzo Inicio*</label>
                                     <div class="control">
@@ -398,8 +479,25 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="column is-4">
+                                <div class="field">
+                                    <div class="control">
+                                        <label class="label is-inline">Compensación</label>
+
+                                        <span data-balloon-length="medium" aria-label="Minutos de compensación, es decir los minutos que se van a restar " data-balloon-pos="right" style="cursor: help; color:turquoise " class="icon is-info mb-2">
+                                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                        </span>
+                                        <input value="0" min="0" max="100" style="width: 5rem;" type="number" class="input " name="h_a_inicio_c"></input>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="columns is-multiline is-mobile is-align-items-self-end">
                             <!-- almuerzo fin -->
-                            <div class="column">
+
+                            <div class="column is-two-fifths">
                                 <div class="field">
                                     <label class="label">Hora Almuerzo Fin*</label>
                                     <div class="control">
@@ -407,8 +505,86 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="column is-4">
+                                <div class="field">
+                                    <div class="control">
+                                        <label class="label is-inline">Compensación</label>
+
+                                        <span data-balloon-length="medium" aria-label="Minutos de compensación, es decir los minutos que se van a restar " data-balloon-pos="right" style="cursor: help; color:turquoise " class="icon is-info mb-2">
+                                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                        </span>
+                                        <input value="5" min="0" max="100" style="width: 5rem;" type="number" class="input " name="h_a_fin_c"></input>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
+                        <div class="columns is-multiline is-mobile is-align-items-self-end">
+                            <!-- almuerzo fin -->
+                            <div class="column is-two-fifths">
+                                <div class="field">
+                                    <label class="label">Hora Salida*</label>
+                                    <div class="control">
+                                        <input class="input hFin" type="time" name="hFin" placeholder="Hora Fin">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="column is-4">
+                                <div class="field">
+                                    <div class="control">
+                                        <label class="label is-inline">Compensación</label>
+
+                                        <span data-balloon-length="medium" aria-label="Minutos de compensación, es decir los minutos que se van a restar " data-balloon-pos="right" style="cursor: help; color:turquoise " class="icon is-info mb-2">
+                                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                        </span>
+                                        <input value="0" min="0" max="100" style="width: 5rem;" type="number" class="input " name="h_salida_c"></input>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="columns is-multiline is-mobile is-align-items-self-end">
+                            <!-- almuerzo fin -->
+                            <!-- <div class="column is-two-fifths"> -->
+                            <!-- <div class="field">
+                                    <label class="label">Tarde*</label>
+                                    <div class="control">
+                                        <input class="input hFin" type="time" name="hFin" placeholder="Hora Fin">
+                                    </div>
+                                </div> -->
+                            <!-- </div> -->
+                            <div class="column">
+                                <div class="field">
+                                    <div class="is-block mb-4">
+                                        <label class="label is-inline mb-5">Tarde*</label>
+                                        <span data-balloon-length="medium" aria-label="Condición en caso de que se marque la entrada después del límite" data-balloon-pos="right" style="cursor: help; color:turquoise " class="icon is-info mb-2 is-inline">
+                                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                        </span>
+                                    </div>
+
+                                    <div class="is-block">
+
+                                        <input class="is-checkradio" id="m_t_0" type="radio" name="condicion_tarde" checked="checked" value="0">
+                                        <label for="m_t_0">Si permitir <span data-balloon-length="medium" aria-label="Permite al pasante marcar el ingreso asi este haya marcado después del límite" data-balloon-pos="up" style="cursor: help; color:turquoise " class="icon is-info mb-2 is-inline">
+                                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                            </span></label>
+
+                                        <input class="is-checkradio is-warning" id="m_t_1" type="radio" name="condicion_tarde" value="1">
+                                        <label for="m_t_1">Si, con pensión <span data-balloon-length="medium" aria-label="Permite marcar el ingreso, pero con la la hora empiezan a contar desde el inicio del almuerzo" data-balloon-pos="up" style="cursor: help; color:turquoise " class="icon is-info mb-2 is-inline">
+                                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                            </span></label>
+
+                                        <input class="is-checkradio is-danger" id="m_t_2" type="radio" name="condicion_tarde" value="2">
+                                        <label for="m_t_2">No permitir <span data-balloon-length="medium" aria-label="En caso de que el pasante exeda el límite ya no se le permitirá seguir marcando ese día, es decir se anula el día " data-balloon-pos="up" style="cursor: help; color:turquoise " class="icon is-info mb-2 is-inline">
+                                                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                            </span></label>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- </div> -->
                     </section>
                     <footer class="modal-card-foot">
                         <button class="button is-success btnHorarioForm">Guardar</button>
@@ -419,7 +595,6 @@
     </div>
 
     <script src="<?php echo SERVERURL ?>src/js/ajax-admin.js"></script>
-
 
     <script>
         function openTab(evt, tabName) {

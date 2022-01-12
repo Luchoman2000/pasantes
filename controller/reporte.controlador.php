@@ -22,7 +22,13 @@ class reporteControlador extends reporteModelo
 
 
         $id_pasante = (isset($_POST['id'])) ?  mainModel::decryption($_POST['id']) :  $_SESSION['p_id'];
-        $query = "SELECT * FROM asistencia WHERE per_id = '$id_pasante' ORDER BY asi_dia";
+        if (isset($_POST['fecha_desde']) && isset($_POST['fecha_hasta'])) {
+            # code...
+            $query = "SELECT * FROM asistencia WHERE per_id = '$id_pasante' AND asi_dia BETWEEN '$_POST[fecha_desde]' AND '$_POST[fecha_hasta]' ORDER BY asi_dia ";
+        }else{
+            $query = "SELECT * FROM asistencia WHERE per_id = '$id_pasante' ORDER BY asi_dia ";
+            
+        }
 
         $sql = mainModel::ejecutar_consulta_simple($query);
         if ($sql->rowCount() >= 1) {

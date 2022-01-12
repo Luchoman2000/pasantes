@@ -14,6 +14,7 @@ class AsistenciaModelo extends mainModel
         $id = $datos['per_id'];
         $dia = $datos['dia'];
         $h_ingreso = $datos['h_ingreso'];
+        $estado = $datos['estado'];
 
         $sql0 = mainModel::conectar()->prepare("SELECT * FROM asistencia WHERE per_id = :id and asi_dia = :dia");
         $sql0->bindParam(":id", $id);
@@ -26,26 +27,27 @@ class AsistenciaModelo extends mainModel
         $dato = $a->fetch();
         if ($a->rowCount() >= 1) {
 
-            $sql = mainModel::conectar()->prepare("UPDATE asistencia SET asi_hora_ingreso = :h_ingreso WHERE asi_dia = :dia AND per_id = :per_id");
+            $sql = mainModel::conectar()->prepare("UPDATE asistencia SET asi_hora_ingreso = :h_ingreso, asi_estado = :estado WHERE asi_dia = :dia AND per_id = :per_id");
             $sql->execute(array(
                 ':h_ingreso' => $h_ingreso,
                 ':dia' => $dia,
                 ':per_id' => $id,
-
+                ':estado' => $estado
             ));
             return $sql;
             $sql = null;
             exit();
         } else {
 
-            $sql = mainModel::conectar()->prepare("INSERT INTO asistencia(asi_dia, asi_hora_ingreso, per_id) 
-            VALUES(:dia, :h_ingreso, :per_id)
+            $sql = mainModel::conectar()->prepare("INSERT INTO asistencia(asi_dia, asi_hora_ingreso, per_id, asi_estado) 
+            VALUES(:dia, :h_ingreso, :per_id, :estado)
             ");
 
             $sql->execute(array(
                 ':dia' => $dia,
                 ':h_ingreso' => $h_ingreso,
                 ':per_id' => $id,
+                ':estado' => $estado,
 
             ));
             return $sql;
@@ -54,6 +56,41 @@ class AsistenciaModelo extends mainModel
         }
     }
 
+    // Para agregar observacion
+    protected function MdlAgregarObservacion($datos)
+    {
+        $id = $datos['per_id'];
+        $dia = $datos['dia'];
+        $observacion = $datos['observacion'];
+
+        $sql = mainModel::conectar()->prepare("UPDATE asistencia SET asi_observacion = :observacion WHERE asi_dia = :dia AND per_id = :per_id");
+        $sql->execute(array(
+            ':observacion' => $observacion,
+            ':dia' => $dia,
+            ':per_id' => $id,
+        ));
+        return $sql;
+        $sql = null;
+        exit();
+    }
+
+    // Para actualizar observacion
+    protected function MdlActualizarObservacion($datos)
+    {
+        $id = $datos['per_id'];
+        $dia = $datos['dia'];
+        $observacion = $datos['observacion'];
+
+        $sql = mainModel::conectar()->prepare("UPDATE asistencia SET asi_observacion = :observacion WHERE asi_dia = :dia AND per_id = :per_id");
+        $sql->execute(array(
+            ':observacion' => $observacion,
+            ':dia' => $dia,
+            ':per_id' => $id,
+        ));
+        return $sql;
+        $sql = null;
+        exit();
+    }
 
     // Para marcar inicio del almuerzo
     protected function MdlMarcarAlmuerzoInicio($datos)
@@ -225,6 +262,18 @@ class AsistenciaModelo extends mainModel
         $sql = null;
     }
 
+    protected function MdlMarcarAsistenciaAtrasado(){
+        $sql = mainModel::conectar()->prepare("UPDATE asistencia SET asi_estado = '' WHERE asi_dia = :dia AND per_id = :per_id");
+
+        $sql->execute(array(
+            ':dia' => date('Y-m-d'),
+            ':per_id' => $_SESSION['per_id'],
+
+        ));
+        return $sql;
+        $sql = null;
+    }
+
     // =ADMIN=
     // Para editar registro de pasante
     protected function MdlEditarRegistro($datos)
@@ -235,18 +284,24 @@ class AsistenciaModelo extends mainModel
         $h_almuerzo_inicio = $datos['asi_hora_salida_a'];
         $h_almuerzo_fin = $datos['asi_hora_regreso_a'];
         $h_salida = $datos['asi_hora_salida'];
+        $observacion = $datos['asi_observacion'];
+        $estado = $datos['asi_estado'];
 
         $sql = mainModel::conectar()->prepare("UPDATE asistencia SET 
         asi_hora_ingreso = ?,
         asi_hora_salida_a = ?,
         asi_hora_regreso_a = ?,
-        asi_hora_salida = ?
+        asi_hora_salida = ?,
+        asi_observacion = ?,
+        asi_estado = ?
         WHERE asi_id = ?");
         $sql->execute(array(
             $h_ingreso,
             $h_almuerzo_inicio,
             $h_almuerzo_fin,
             $h_salida,
+            $observacion,
+            $estado,
             $id,
         ));
 

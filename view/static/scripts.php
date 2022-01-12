@@ -2,12 +2,13 @@
 <!-- <script src="<?php echo SERVERURL ?>src/js/moment.js"></script> -->
 <script src="<?php echo SERVERURL ?>src/js/moment-with-locales.js"></script>
 <script src="<?php echo SERVERURL ?>src/js/modal-fx.js"></script>
+<!-- <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js" integrity="sha256-hlKLmzaRlE8SCJC1Kw8zoUbU8BxA+8kR3gseuKfMjxA=" crossorigin="anonymous"></script> -->
 <!-- <script src="<?php echo SERVERURL ?>index.js" type="module"></script> -->
 
 <?php
 if ($_GET['views'] == 'about') {
 ?>
-    
+
 <?php
 }
 if ($_SESSION['rol'] == "ADMINISTRADOR") {

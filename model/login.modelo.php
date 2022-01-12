@@ -1,5 +1,5 @@
 <?php
-if (@$PeticionAjax) {
+if (@$peticionAjax) {
     require_once "./../core/mainModel.php";
 } else {
     require_once "./core/mainModel.php";
@@ -7,7 +7,7 @@ if (@$PeticionAjax) {
 class LoginModelo extends mainModel
 {
 
-    
+
     protected function MdlIniciarSesion($datos)
     {
 
@@ -30,5 +30,40 @@ class LoginModelo extends mainModel
         $sql = null;
     }
 
+    protected function MdlPrevenirErrorHorario()
+    {
+        $sql = mainModel::conectar()->prepare("SELECT * FROM horario WHERE hor_id = 1");
+        $sql->execute();
+        return $sql;
+        $sql = null;
+    }
 
+    protected function MdlcheckSession($id)
+    {   
+        $sql = mainModel::conectar()->prepare("SELECT usu_sesion FROM usuario WHERE usu_id = :id");
+        $sql->bindParam(":id", $id);
+        $sql->execute();
+        return $sql;
+        $sql = null;
+
+    }
+
+    protected function MdlInsertSession($datos)
+    {
+        $sql = mainModel::conectar()->prepare("UPDATE usuario SET usu_sesion = :usu_sesion WHERE usu_id = :usu_id");
+        $sql->bindParam(":usu_sesion", $datos['session']);
+        $sql->bindParam(":usu_id", $datos['usu_id']);
+        $sql->execute();
+        return $sql;
+        $sql = null;
+    }
+
+    protected function MdlEliminarSession($id)
+    {
+        $sql = mainModel::conectar()->prepare("UPDATE usuario SET usu_sesion = '' WHERE usu_id = :usu_id");
+        $sql->bindParam(":usu_id", $id);
+        $sql->execute();
+        return $sql;
+        $sql = null;
+    }
 }

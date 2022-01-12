@@ -1,5 +1,6 @@
 <?php
 if ($_SESSION['rol'] == 'PASANTE') {
+	// var_dump($_SESSION);
 ?>
 	<div class="card">
 		<div class="card-content">
@@ -21,12 +22,12 @@ if ($_SESSION['rol'] == 'PASANTE') {
 				<div class="content">
 					<div id="marcador" class="list has-visible-pointer-controls">
 						<!-- RELOJ -->
-						<div id="holder">
+						<div id="holder" style="min-height: 84px;">
 							<div id="time-holder">
 								<div class="title is-3 has-text-centered has-text-info has-text-shadow" id="display-time"></div>
 							</div>
 							<div id="date-holder">
-								<div class="subtitle is-5 has-text-success has-text-centered" id="display-date"></div>
+								<div class="is-5 has-text-success has-text-centered" id="display-date"></div>
 								<div class="has-text-centered" id="display-day"></div>
 							</div>
 						</div>
@@ -46,14 +47,13 @@ if ($_SESSION['rol'] == 'PASANTE') {
 		</div>
 	</div>
 
-
 	<br>
 	<br>
 
 	<script>
 		$(function() {
 			if ($('#des_m_salida').text() != 'Sin marcar' && $('#des_m_salida').length != 0) {
-				$('.aEstado').show();
+				$('.aEstado').fadeIn(600);
 				$('.aEstado').removeClass('is-hidden');
 			} else {
 				$('.aEstado').hide();
@@ -62,15 +62,12 @@ if ($_SESSION['rol'] == 'PASANTE') {
 			(document.querySelectorAll('.notification .delete') || []).forEach(($delete) => {
 				const $notification = $delete.parentNode;
 				$delete.addEventListener('click', () => {
-					$notification.parentNode.removeChild($notification);
+					$($notification).fadeOut(300);
 				});
 			});
 		})
 	</script>
-
-
-
-
+	
 <?php
 } elseif ($_SESSION['rol'] == "ADMINISTRADOR") {
 ?>
@@ -92,12 +89,12 @@ if ($_SESSION['rol'] == 'PASANTE') {
 		<div class="card">
 			<div class="card-content">
 				<div class="content">
-					<div id="holder">
+					<div id="holder" style="min-height: 84px;">
 						<div id="time-holder">
 							<div class="title is-3 has-text-centered has-text-info has-text-shadow" id="display-time"></div>
 						</div>
 						<div id="date-holder">
-							<div class="subtitle is-5 has-text-success has-text-centered" id="display-date"></div>
+							<div class="is-5 has-text-success has-text-centered" id="display-date"></div>
 							<div class="has-text-centered" id="display-day"></div>
 						</div>
 					</div>
@@ -126,7 +123,7 @@ if ($_SESSION['rol'] == 'PASANTE') {
 					</div>
 
 					<div class="box" id="contacts">
-						<h1 class="title is-4 mb-2 has-text-info-dark">Asistencias de hoy</h1>
+						<p class="title is-size-3 mb-4 has-text-info-dark">Asistencias de hoy</p>
 
 
 						<div class="list">
@@ -155,6 +152,16 @@ if ($_SESSION['rol'] == 'PASANTE') {
 					</header>
 
 					<section class="modal-card-body">
+
+						<div class="card mb-4 p-3 blockHorario">
+							<h3 class="is-inline">Entrada: </h3>
+							<p class="is-inline" id="hor_entrada"></p>
+							<h3 class="is-inline-block">Estado: </h3>
+							<p class="is-inline" id="asi_estado"></p>
+							<br>
+							<h3 class="is-inline-block">Límite: </h3>
+							<p class="is-inline" id="hor_limite">10</p>
+						</div>
 
 						<div class="columns">
 							<div class="column is-5">
@@ -196,7 +203,15 @@ if ($_SESSION['rol'] == 'PASANTE') {
 							</div>
 						</div>
 
-						<input id="asiId" type="hidden" name="asiId_u">
+						<div class="columns">
+							<div class="column">
+								<label class="label has-text-info">Observación</label>
+								<textarea style="width: 100%; height: 59px;" class="textarea" placeholder="Observación" id="asi_obserbacion" name="asi_observacion"></textarea>
+
+							</div>
+							<input id="asiId" type="hidden" name="asiId_u">
+                            <input id="id_h" type="hidden" name="horario" value="<?php echo $horario['hor_id'] ?>">
+						</div>
 					</section>
 
 					<footer class="modal-card-foot">
@@ -211,7 +226,6 @@ if ($_SESSION['rol'] == 'PASANTE') {
 		</div>
 		<button class="modal-close is-large" aria-label="close"></button>
 	</div>
-
 
 	<div class="modal modal-fx-fadeInScale" id="nuevo_registro">
 		<div class="modal-background"></div>
@@ -264,16 +278,11 @@ if ($_SESSION['rol'] == 'PASANTE') {
 		<button class="modal-close is-large" aria-label="close"></button>
 	</div>
 
-
-
-
-
-
 	<br>
 	<br>
 
 	<script>
-		var table = $('#pasantes').DataTable({
+		var table_add = $('#pasantes').DataTable({
 
 			"language": {
 				"url": "./src/es_es.json"
@@ -307,8 +316,18 @@ if ($_SESSION['rol'] == 'PASANTE') {
 	<script>
 		$(document).on('click', '.verRegistro', function() {
 			var id = $(this).attr('id');
-			console.log(id);
 			window.location.href = "registro/" + id;
+		})
+		$(document).on('click', '.verObservacion', function() {
+			var id = $(this).attr('id');
+			var obs;
+			fetch(SERVERURL + '/pasantes/ajax/asistencia.ajax.php?getObservacion=' + id).then(response => response.text()).then(result => {
+				Swal.fire({
+					title: 'Observación',
+					text: result,
+				})
+
+			});
 		})
 	</script>
 <?php
@@ -319,6 +338,14 @@ if ($_SESSION['rol'] == 'PASANTE') {
 	window.setInterval(function() {
 		$("#display-time").html(moment().format("LTS"));
 		$("#display-date").html(moment().format("DD/MM/YYYY"));
-		$("#display-day").html(moment().locale('es').format("dddd"));
+		$("#display-day").html(ucwords(moment().locale('es').format("dddd")));
 	}, 1000);
+
+	$(function() {})
+
+	function ucwords(str) {
+		return (str + '').replace(/^([a-z\u00E0-\u00FC])|\s+([a-z\u00E0-\u00FC])/g, function($1) {
+			return $1.toUpperCase();
+		});
+	}
 </script>

@@ -2,6 +2,59 @@ function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
 
+function setObservacion() {
+    Swal.fire({
+        title: '¿Deseas añadir una observación?',
+        input: 'textarea',
+        inputAttributes: {
+            'maxlength': '140',
+            'autocapitalize': 'off',
+            'autocorrect': 'off'
+        },
+        inputPlaceholder: 'Escribe aquí tu observación',
+        showCancelButton: true,
+        confirmButtonText: 'Añadir',
+        cancelButtonText: 'Cancelar',
+        showLoaderOnConfirm: true,
+        preConfirm: async (observacion) => {
+            // console.log(observacion);
+            try {
+                const response = await fetch(`${SERVERURL}/pasantes/ajax/asistencia.ajax.php?observacion=${observacion}`);
+                // console.log(response);
+                if (!response.ok) {
+                    throw new Error(response.statusText);
+                }
+                if (response.status == 200) {
+                    Swal.fire(
+                        'Añadido',
+                        'Tu observación ha sido añadida.',
+                        'success'
+                    ).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    throw new Error('Error al añadir la observación');
+                }
+
+            } catch (error) {
+                // console.log(error);
+                Swal.showValidationMessage(
+                    `Error: ${error}`
+                );
+            }
+        },
+        preCancel: () => {
+            location.reload();
+        }
+
+    }).then((result) => {
+        if (result.isDismissed || result.isCancelled) {
+
+            location.reload();
+        }
+    });
+}
+
 // Validar campos de exportación
 var valid = true;
 $(function () {
@@ -65,10 +118,8 @@ $(document).on('click', '.m_entrada', function () {
         url: SERVERURL + "/pasantes/ajax/asistencia.ajax.php",
         data: "ingreso=1",
         success: function (response) {
-            console.log(response);
+            // console.log(response);
             if (response == 1) {
-
-
                 $('#marcador').append('<div id="almuerzo" style="display: none;" class="almuerzo box">\
             <div class="list-item box">\
                 <div class="columns is-mobile">\
@@ -116,8 +167,8 @@ $(document).on('click', '.m_entrada', function () {
                     </div>\
                 </div>');
 
-                $('#almuerzo').fadeIn();
-
+                $('#almuerzo').fadeIn(300);
+                $('.m_entrada').parent().parent().parent().parent().parent().addClass('has-background-success-light').fadeIn(300);
                 $('.m_entrada').addClass('is-light');
                 $('.m_entrada').removeClass('is-loading');
                 $('.m_entrada').removeClass('is-success');
@@ -129,7 +180,7 @@ $(document).on('click', '.m_entrada', function () {
 
                 const Toast = Swal.mixin({
                     toast: true,
-                    position: "top-end",
+                    position: "bottom-end",
                     showConfirmButton: false,
                     timer: 2000,
                     timerProgressBar: true,
@@ -146,7 +197,7 @@ $(document).on('click', '.m_entrada', function () {
             } else if (response == 2) {
                 const Toast = Swal.mixin({
                     toast: true,
-                    position: "top-end",
+                    position: "bottom-end",
                     showConfirmButton: false,
                     timer: 1000,
                     timerProgressBar: true,
@@ -162,8 +213,87 @@ $(document).on('click', '.m_entrada', function () {
 
                 Toast.fire({
                     icon: "error",
-                    title: "Ya marcó su entrada 🤐 "
+                    title: "Ya marcó su entrada 😐 "
                 });
+            } else if (response == 'atrasado ok') {
+                Swal.fire({
+                        icon: 'warning',
+                        title: '¡Atrasado!',
+                        text: 'Llegaste atrasado, tu entrada será registrada de todos modos.',
+                        showCancelButton: false,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Ok'
+                    })
+                    .then((result) => {
+                        if (result.value) {
+                            setObservacion();
+                        }
+                        // location.reload();
+                    })
+
+            } else if (response == 'tarde ok') {
+                Swal.fire({
+                        icon: 'warning',
+                        title: '¡Tarde!',
+                        text: 'Llegaste tarde 😢, tu entrada será registrada de todos modos.',
+                        showCancelButton: false,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Ok'
+                    })
+                    .then((result) => {
+                        if (result.value) {
+                            setObservacion();
+                        }
+                        // location.reload();
+                    })
+
+            } else if (response == 'tarde sin registro entrada ok') {
+                Swal.fire({
+                        icon: 'error',
+                        title: 'Tarde!',
+                        text: 'Llegaste tarde 😢, tu entrada no será registrada',
+                        showCancelButton: false,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Ok'
+                    })
+                    .then((result) => {
+                        if (result.value) {
+                            setObservacion();
+                        }
+                        // location.reload();
+                    })
+            } else if (response == 'tarde sin registro todo ok') {
+                Swal.fire({
+                        icon: 'error',
+                        title: 'Tarde!',
+                        text: 'Llegaste tarde 😢, tu asistencia de hoy no será registrada',
+                        showCancelButton: false,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Ok'
+                    })
+                    .then((result) => {
+                        if (result.value) {
+                            setObservacion();
+                        }
+                        // location.reload();
+                    })
+
+            } else if (response == 0) {
+                Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Ha ocurrido un error, por favor intente nuevamente.',
+                        showCancelButton: false,
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'Reintentar'
+                    })
+                    .then((result) => {
+                        location.reload();
+                    })
             }
         }
     });
@@ -177,64 +307,80 @@ $(document).on('click', '#m_almuerzo_inicio', function () {
 
     $('#m_almuerzo_inicio').removeClass('is-light');
     $('#m_almuerzo_inicio').addClass('is-loading');
-    $.ajax({
-        type: "POST",
-        url: SERVERURL + "/pasantes/ajax/asistencia.ajax.php",
-        data: "almuerzo_inicio=1",
-        success: function (response) {
-            console.log(response);
-            if (response == 1) {
-                $('#m_almuerzo_inicio').addClass('is-light');
-                $('#m_almuerzo_inicio').removeClass('is-loading');
-                $('#m_almuerzo_inicio').removeClass('is-success');
-                // $('.m_entrada').children('#text_m_entrada').html('✔ Marcado ')
-                $('#m_almuerzo_inicio').children('span').remove();
-                $('#des_m_almuerzo_inicio').text('Marcado a la hora: ' + moment().format('HH:mm:ss'));
-                $('#m_almuerzo_inicio').html('<span>✔ Marcado</span>')
-                $('#m_almuerzo_inicio').prop("disabled", true);
+    Swal.fire({
+        title: 'Aviso',
+        text: "Estas apunto de empezar tu hora de almurzo, ¿Continuar?",
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Si, continuar',
+        cancelButtonText: 'No, cancelar'
+    }).then((result) => {
+        $('#m_almuerzo_inicio').removeClass('is-loading');
+        $('#m_almuerzo_inicio').addClass('is-light');
 
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: "top-end",
-                    showConfirmButton: false,
-                    timer: 2000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener("mouseenter", Swal.stopTimer)
-                        toast.addEventListener("mouseleave", Swal.resumeTimer)
+        if (result.isConfirmed) {
+            $.ajax({
+                type: "POST",
+                url: SERVERURL + "/pasantes/ajax/asistencia.ajax.php",
+                data: "almuerzo_inicio=1",
+                success: function (response) {
+                    // console.log(response);
+                    if (response == 1) {
+                        $('#m_almuerzo_inicio').addClass('is-light');
+                        $('#m_almuerzo_inicio').removeClass('is-loading');
+                        $('#m_almuerzo_inicio').removeClass('is-success');
+                        // $('.m_entrada').children('#text_m_entrada').html('✔ Marcado ')
+                        $('#m_almuerzo_inicio').children('span').remove();
+                        $('#des_m_almuerzo_inicio').text('Marcado a la hora: ' + moment().format('HH:mm:ss'));
+                        $('#m_almuerzo_inicio').html('<span>✔ Marcado</span>')
+                        $('#m_almuerzo_inicio').prop("disabled", true);
+
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: "bottom-end",
+                            showConfirmButton: false,
+                            timer: 2000,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener("mouseenter", Swal.stopTimer)
+                                toast.addEventListener("mouseleave", Swal.resumeTimer)
+                            }
+                        })
+                        let comidas = ['🍏', '🍎', '🍊', '🍌', '🍉', '🍇', '🍓', '🍗', '🍖', '🍔', '🍟', '🍕', '🍤', '🍙', '🍚', '🍘', '🍥', '🍰', '🎂', '🍮', '🍭', '🍬', '🍫', '🍿', '🍩', '🍪', '🌰', '🍝', '🍜', '🍲', '🍛', '🍣', '🍱']
+
+
+                        Toast.fire({
+                            icon: "success",
+                            title: "Almuerzo iniciado " + comidas[getRandomInt(comidas.length)]
+                        })
+                    } else if (response == 2) {
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: "bottom-end",
+                            showConfirmButton: false,
+                            timer: 1000,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.addEventListener("mouseenter", Swal.stopTimer)
+                                toast.addEventListener("mouseleave", Swal.resumeTimer)
+                            },
+                            willClose: () => {
+                                location.reload();
+                            }
+
+                        });
+
+                        Toast.fire({
+                            icon: "error",
+                            title: "Ya marcó su entrada de almuerzo 😐 "
+                        });
                     }
-                })
-                let comidas = ['🍕', '🍔', '🌭', '🍗', '🥑', '🥧', '🥓', '🍟', '🍖', '🍛', '🎂']
-
-
-                Toast.fire({
-                    icon: "success",
-                    title: "Almuerzo iniciado " + comidas[getRandomInt(comidas.length)]
-                })
-            } else if (response == 2) {
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: "top-end",
-                    showConfirmButton: false,
-                    timer: 1000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener("mouseenter", Swal.stopTimer)
-                        toast.addEventListener("mouseleave", Swal.resumeTimer)
-                    },
-                    willClose: () => {
-                        location.reload();
-                    }
-
-                });
-
-                Toast.fire({
-                    icon: "error",
-                    title: "Ya marcó su entrada de almuerzo 🤐 "
-                });
-            }
+                }
+            });
         }
-    });
+    })
 });
 
 // Para marcar el fin del almuerzo
@@ -246,7 +392,7 @@ $(document).on('click', '#m_almuerzo_fin', function () {
     if (!$('#m_almuerzo_inicio').is(':disabled')) {
         const Toast = Swal.mixin({
             toast: true,
-            position: "top-end",
+            position: "bottom-end",
             showConfirmButton: false,
             timer: 1000,
             timerProgressBar: true,
@@ -259,7 +405,7 @@ $(document).on('click', '#m_almuerzo_fin', function () {
 
         Toast.fire({
             icon: "error",
-            title: "Debe marcar primero el inicio del almuerzo 😑 "
+            title: "Debe marcar primero el inicio del almuerzo 😐 "
         });
     } else {
         $('#m_almuerzo_fin').removeClass('is-light');
@@ -270,7 +416,7 @@ $(document).on('click', '#m_almuerzo_fin', function () {
             url: SERVERURL + "/pasantes/ajax/asistencia.ajax.php",
             data: "almuerzo_fin=1",
             success: function (response) {
-                console.log(response);
+                // console.log(response);
                 if (response == 1) {
                     $('#m_almuerzo_fin').addClass('is-light');
                     $('#m_almuerzo_fin').removeClass('is-loading');
@@ -283,7 +429,7 @@ $(document).on('click', '#m_almuerzo_fin', function () {
 
                     const Toast = Swal.mixin({
                         toast: true,
-                        position: "top-end",
+                        position: "bottom-end",
                         showConfirmButton: false,
                         timer: 2000,
                         timerProgressBar: true,
@@ -300,7 +446,7 @@ $(document).on('click', '#m_almuerzo_fin', function () {
                 } else if (response == 2) {
                     const Toast = Swal.mixin({
                         toast: true,
-                        position: "top-end",
+                        position: "bottom-end",
                         showConfirmButton: false,
                         timer: 1000,
                         timerProgressBar: true,
@@ -316,12 +462,12 @@ $(document).on('click', '#m_almuerzo_fin', function () {
 
                     Toast.fire({
                         icon: "error",
-                        title: "Ya marcó su regreso del almuerzo 🤐 "
+                        title: "Ya marcó su regreso del almuerzo 😐 "
                     });
                 } else if (response == 3) {
                     const Toast = Swal.mixin({
                         toast: true,
-                        position: "top-end",
+                        position: "bottom-end",
                         showConfirmButton: false,
                         timer: 1000,
                         timerProgressBar: true,
@@ -336,7 +482,7 @@ $(document).on('click', '#m_almuerzo_fin', function () {
 
                     Toast.fire({
                         icon: "error",
-                        title: "Debe marcar primero el inicio del almuerzo &#65; &#66; &#67;"
+                        title: "Debe marcar primero el inicio del almuerzo"
                     });
                 }
 
@@ -348,7 +494,7 @@ $(document).on('click', '#m_almuerzo_fin', function () {
 // Para marcar la salida
 $(document).on('click', '#m_salida', function () {
     // Do click stuff here
-    console.log('IS CLICKEEEEED salida');
+    // console.log('IS CLICKEEEEED salida');
     // $('.m_entrada').removeClass('is-success');
     $('#m_salida').removeClass('is-light');
     $('#m_salida').addClass('is-loading');
@@ -369,7 +515,7 @@ $(document).on('click', '#m_salida', function () {
                     url: SERVERURL + "/pasantes/ajax/asistencia.ajax.php",
                     data: "salida=1&no_almuerzo=1",
                     success: function (response) {
-                        console.log(response);
+                        // console.log(response);
                         if (response == 1) {
                             $('#m_salida').addClass('is-light');
                             $('#m_salida').removeClass('is-loading');
@@ -382,7 +528,7 @@ $(document).on('click', '#m_salida', function () {
 
                             const Toast = Swal.mixin({
                                 toast: true,
-                                position: "top-end",
+                                position: "bottom-end",
                                 showConfirmButton: false,
                                 timer: 2000,
                                 timerProgressBar: true,
@@ -400,7 +546,7 @@ $(document).on('click', '#m_salida', function () {
                         } else if (response == 2) {
                             const Toast = Swal.mixin({
                                 toast: true,
-                                position: "top-end",
+                                position: "bottom-end",
                                 showConfirmButton: false,
                                 timer: 1000,
                                 timerProgressBar: true,
@@ -416,7 +562,7 @@ $(document).on('click', '#m_salida', function () {
 
                             Toast.fire({
                                 icon: "error",
-                                title: "Ya marcó su salida 🤐 "
+                                title: "Ya marcó su salida 😐 "
                             });
                         }
                     }
@@ -429,78 +575,166 @@ $(document).on('click', '#m_salida', function () {
         });
 
     } else {
-        $.ajax({
-            type: "POST",
-            url: SERVERURL + "/pasantes/ajax/asistencia.ajax.php",
-            data: "salida=1",
-            success: function (response) {
-                console.log(response);
-                if (response == 1) {
-                    $('#m_salida').addClass('is-light');
-                    $('#m_salida').removeClass('is-loading');
-                    $('#m_salida').removeClass('is-success');
-                    // $('.m_entrada').children('#text_m_entrada').html('✔ Marcado ')
-                    $('#m_salida').children('span').remove();
-                    $('#des_m_salida').text('Marcado a la hora: ' + moment().format('HH:mm:ss'));
-                    $('#m_salida').html('<span>✔ Marcado</span>')
-                    $('#m_salida').prop("disabled", true);
+        Swal.fire({
+            title: 'Aviso',
+            text: "Estás a punto de marcar tu salida, ¿Continuar?",
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Si, marcar salida!',
+            cancelButtonText: 'No, cancelar!'
+        }).then((result) => {
+            $('#m_salida').removeClass('is-loading');
+            $('#m_salida').addClass('is-light');
 
-                    const Toast = Swal.mixin({
-                        toast: true,
-                        position: "top-end",
-                        showConfirmButton: false,
-                        timer: 2000,
-                        timerProgressBar: true,
-                        didOpen: (toast) => {
-                            toast.addEventListener("mouseenter", Swal.stopTimer)
-                            toast.addEventListener("mouseleave", Swal.resumeTimer)
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "POST",
+                    url: SERVERURL + "/pasantes/ajax/asistencia.ajax.php",
+                    data: "salida=1",
+                    success: function (response) {
+                        // console.log(response);
+                        if (response == 1) {
+                            Swal.fire({
+                                position: 'bottom-end',
+                                icon: 'success',
+                                title: '¡Dia Completado! 😃',
+                                showConfirmButton: false,
+                                timer: 1000
+                            }).then
+                            $('#m_salida').addClass('is-light');
+                            $('#m_salida').removeClass('is-loading');
+                            $('#m_salida').removeClass('is-success');
+                            // $('.m_entrada').children('#text_m_entrada').html('✔ Marcado ')
+                            $('#m_salida').children('span').remove();
+                            $('#des_m_salida').text('Marcado a la hora: ' + moment().format('HH:mm:ss'));
+                            $('#m_salida').html('<span>✔ Marcado</span>')
+                            $('#m_salida').prop("disabled", true);
+
+                            const Toast = Swal.mixin({
+                                toast: true,
+                                position: "bottom-end",
+                                showConfirmButton: false,
+                                timer: 2000,
+                                timerProgressBar: true,
+                                didOpen: (toast) => {
+                                    toast.addEventListener("mouseenter", Swal.stopTimer)
+                                    toast.addEventListener("mouseleave", Swal.resumeTimer)
+                                }
+                            })
+
+                            Toast.fire({
+                                icon: "success",
+                                title: "Salida marcada ✔"
+                            })
+                            Swal.fire({
+                                position: 'bottom-end',
+                                icon: 'success',
+                                title: '¡Dia Completado! 😃',
+                                showConfirmButton: false,
+                                timer: 1000
+                            })
+                        } else if (response == 2) {
+                            const Toast = Swal.mixin({
+                                toast: true,
+                                position: "bottom-end",
+                                showConfirmButton: false,
+                                timer: 1000,
+                                timerProgressBar: true,
+                                didOpen: (toast) => {
+                                    toast.addEventListener("mouseenter", Swal.stopTimer)
+                                    toast.addEventListener("mouseleave", Swal.resumeTimer)
+                                },
+                                willClose: () => {
+                                    location.reload();
+                                }
+
+                            });
+
+                            Toast.fire({
+                                icon: "error",
+                                title: "Ya marcó su salida 😐 "
+                            });
                         }
-                    })
-
-                    Toast.fire({
-                        icon: "success",
-                        title: "Salida marcada ✔"
-                    })
-                    Swal.fire({
-                        position: 'top-end',
-                        icon: 'success',
-                        title: '¡Dia Completado! 😃',
-                        showConfirmButton: false,
-                        timer: 1000
-                    })
-                } else if (response == 2) {
-                    const Toast = Swal.mixin({
-                        toast: true,
-                        position: "top-end",
-                        showConfirmButton: false,
-                        timer: 1000,
-                        timerProgressBar: true,
-                        didOpen: (toast) => {
-                            toast.addEventListener("mouseenter", Swal.stopTimer)
-                            toast.addEventListener("mouseleave", Swal.resumeTimer)
-                        },
-                        willClose: () => {
-                            location.reload();
-                        }
-
-                    });
-
-                    Toast.fire({
-                        icon: "error",
-                        title: "Ya marcó su salida 🤐 "
-                    });
-                }
+                    }
+                });
             }
         });
     }
 })
 
 
+$(document).on('click', '.updateObser', function () {
+    var text = $(this).prev().text();
+    Swal.fire({
+        title: 'Observación',
+        input: 'textarea',
+        inputAttributes: {
+            'maxlength': '140',
+            'autocapitalize': 'off',
+            'autocorrect': 'off',
+            'pattern': '^[[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ \s]{0,120}]*$',
+            'title': 'Solo letras y números',
+            'validationMessage': 'Solo letras y números (max. 120 caracteres)'
+        },
+        inputValue: text,
+        inputPlaceholder: 'Escribe aquí tu observación de este día',
+        showCancelButton: true,
+        confirmButtonText: 'Actualizar',
+        cancelButtonText: 'Cancelar',
+        showLoaderOnConfirm: true,
+        preConfirm: async (observacion) => {
+            // console.log(observacion);
+            try {
+                const response = await fetch(`${SERVERURL}/pasantes/ajax/asistencia.ajax.php?observacionUp=${observacion}`);
+                // console.log(response);
+                if (!response.ok) {
+                    throw new Error(response.statusText);
+                }
+                if (response.status == 200) {
+                    Swal.fire(
+                        'Acualizado!',
+                        'Tu observación ha sido actualizada.',
+                        'success'
+                    ).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    throw new Error('Error al añadir la observación');
+                }
+
+            } catch (error) {
+                // console.log(error);
+                Swal.showValidationMessage(
+                    `Error: ${error}`
+                );
+            }
+        },
+        preCancel: () => {
+            location.reload();
+        },
+        inputValidator: (observacion) => {
+            return new Promise((resolve) => {
+                // validar con saltos de linea
+                Validar = /^[[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ \s]{0,120}]*$/;
+                if (Validar.test(observacion) && observacion.length <= 120) {
+                    resolve()
+                } else {
+                    resolve('Solo letras y números')
+                }
+            });
+        }
+
+
+    })
+})
+
 //Para exportar asistencia a word
 $(document).on('submit', '#exportarWorda', function (e) {
     e.preventDefault();
     e.stopImmediatePropagation();
-    console.log(valid);
+    // console.log(valid);
 
     var form = $(this);
     var url = form.attr('action');
@@ -512,11 +746,11 @@ $(document).on('submit', '#exportarWorda', function (e) {
             url: url,
             data: form.serialize(),
             data: data,
-            success: function (response) {  
+            success: function (response) {
                 window.location = SERVERURL + "/pasantes/ajax/reporte.ajax.php";
             },
             error: function (data) {
-                console.log(data);
+                // console.log(data);
                 Swal.fire({
                     title: 'Error!',
                     text: 'No se ha podido exportar',
@@ -532,111 +766,5 @@ $(document).on('submit', '#exportarWorda', function (e) {
             'error'
         );
     }
-
-});
-
-
-
-// DataTables Bulma
-$(document).ready(function () {
-
-
-
-    //Diff hours
-    var h_entrada = $('.s_h_entrada').text();
-    var h_salida = $('.s_h_salida').text();
-
-    var h_salida_almuerzo = $('.s_h_salida_a').val();
-    var h_regreso_almuerzo = $('.s_h_regreso_a').val();
-
-
-    // console.log(h_entrada);
-    // console.log(h_salida_almuerzo);
-    // console.log(h_regreso_almuerzo);
-    // console.log(h_salida);
-
-
-
-    // get difference in hours with moment.js
-    var diff = moment.duration(moment(h_salida, "HH:mm:ss").diff(moment(h_entrada, "HH:mm:ss"))).asHours();
-    var diff_almuerzo = moment.duration(moment(h_regreso_almuerzo, "HH:mm:ss").diff(moment(h_salida_almuerzo, "HH:mm:ss"))).asHours();
-
-    // get diff between diff_almuerzo and diff and cast to format hh:mm:ss
-    var diff_total = diff - diff_almuerzo;
-    var diff_total_format = moment.utc(moment.duration(diff_total, "hours").asMilliseconds()).format("HH:mm");
-
-
-    // console.log(diff);
-    // console.log(diff_almuerzo);
-    // console.log(diff_total);
-    // console.log(diff_total_format);
-
-    $('.s_h_tot_horas').text(diff_total_format);
-
-
-    var table = $('#example').removeAttr('width').DataTable({
-        // scrollY: "300px",
-        // columnDefs: [{
-        //     width: 6200,
-        //     targets: 0
-        // }],
-        "language": {
-            "url": SERVERURL + "/pasantes/src/es_es.json"
-        },
-        "order": [
-            [
-                0, "desc"
-            ]
-        ],
-        searching: false,
-        pagin: false,
-        "pagingType": "simple",
-        lengthChange: false,
-        // responsive: true,
-        scrollCollapse: true,
-        scroller: true,
-        // deferRender: true,
-        fixedColumns: true,
-        "createdRow": function (row, data, index) {
-            var hora_salida = $('td', row).eq(4).clone().children().remove().end().text();
-            var hora_almuerzo = $('td', row).eq(2).clone().children().remove().end().text();
-            var total_de_horas = $('td', row).eq(5).clone().children().remove().end().text();
-            var diff_h_entrada = $('td', row).eq(1).find('span').text();
-            var diff_h_salida = $('td', row).eq(4).find('span').text();
-
-
-            // console.log(diff_h_entrada);
-
-            if (hora_salida == "00:00:00 ") {
-                $('td', row).eq(0).addClass('has-text-danger');
-            }
-            if (hora_almuerzo == "Sin almuerzo") {
-                $('td', row).eq(0).addClass('has-text-warning-dark');
-            }
-            $('td', row).eq(0).addClass('has-text-success');
-
-            // if string of diff_h_entrada has "-"
-            if (diff_h_entrada.includes("-")) {
-                $('td', row).eq(1).find('span').addClass('is-danger is-light');
-            } else {
-                $('td', row).eq(1).find('span').addClass('is-success is-light');
-            }
-
-            // if string of diff_h_salida has "-"
-            if (diff_h_salida.includes("-")) {
-                $('td', row).eq(4).find('span').addClass('is-danger is-light');
-            } else {
-                $('td', row).eq(4).find('span').addClass('is-success is-light');
-            }
-
-
-            // check difference between total_de_horas and diff_total
-            if (total_de_horas < diff_total_format) {
-                $('td', row).eq(5).addClass('has-text-danger');
-            } else {
-                $('td', row).eq(5).addClass('has-text-success');
-            }
-        },
-    });
 
 });

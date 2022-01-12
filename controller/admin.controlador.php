@@ -175,6 +175,7 @@ class AdminControlador extends AdminModelo
             <table id="listaHorarios" class="table is-fullwidth is-striped is-hoverable">
                 <thead>
                     <tr>
+                        <th>ID</th>
                         <th>Hora de entrada</th>
                         <th>Hora de salida almuerzo</th>
                         <th>Hora de regreso almuerzo</th>
@@ -189,6 +190,7 @@ class AdminControlador extends AdminModelo
             foreach ($datos as $row) {
                 $tabla .= '
                         <tr>
+                            <td style="vertical-align: middle;">' . $row['hor_id'] . '</td>
                             <td style="vertical-align: middle;">' . date('H:i a', strtotime($row['hor_entrada'])) . '</td>
                             <td style="vertical-align: middle;">' . date('H:i a', strtotime($row['hor_salida_a'])) . '</td>
                             <td style="vertical-align: middle;">' . date('H:i a', strtotime($row['hor_regreso_a'])) . '</td>
@@ -320,7 +322,7 @@ class AdminControlador extends AdminModelo
 
         if (isset($_POST['uHorario'])) {
             $idHorario = $_POST['uHorario'];
-        }else{
+        } else {
             $idHorario = null;
         }
 
@@ -451,15 +453,27 @@ class AdminControlador extends AdminModelo
         // }
         $idHorario = mainModel::decryption($_POST['id_horario']);
         $hora_inicio = mainModel::limpiar_cadena($_POST['hInicio']);
+        $h_entrada_compensacion = mainModel::limpiar_cadena($_POST['h_entrada_c']);
+        $h_limite = mainModel::limpiar_cadena($_POST['h_limite']);
+        $h_condicion_tarde = mainModel::limpiar_cadena($_POST['condicion_tarde']);
         $hora_inicio_almuerzo = mainModel::limpiar_cadena($_POST['hAlmuerzoInicio']);
+        $h_a_inicio_compensacion = mainModel::limpiar_cadena($_POST['h_a_inicio_c']);
         $hora_fin_almuerzo = mainModel::limpiar_cadena($_POST['hAlmuerzoFin']);
+        $h_a_fin_compensacion = mainModel::limpiar_cadena($_POST['h_a_fin_c']);
         $hora_fin = mainModel::limpiar_cadena($_POST['hFin']);
+        $h_salida_compensacion = mainModel::limpiar_cadena($_POST['h_salida_c']);
         $datos = [
             "id_horario" => $idHorario,
             "hora_inicio" => $hora_inicio,
+            "h_entrada_compensacion" => $h_entrada_compensacion,
+            "h_limite" => $h_limite,
+            "h_condicion_tarde" => $h_condicion_tarde,
             "hora_inicio_almuerzo" => $hora_inicio_almuerzo,
+            "h_a_inicio_compensacion" => $h_a_inicio_compensacion,
             "hora_fin_almuerzo" => $hora_fin_almuerzo,
+            "h_a_fin_compensacion" => $h_a_fin_compensacion,
             "hora_fin" => $hora_fin,
+            "h_salida_compensacion" => $h_salida_compensacion,
         ];
 
         $sql = AdminModelo::MdlEditarHorario($datos);
@@ -563,14 +577,28 @@ class AdminControlador extends AdminModelo
     public function CtrCrearHorario()
     {
         $hora_inicio = mainModel::limpiar_cadena($_POST['hInicio']);
+        $h_entrada_compensacion = mainModel::limpiar_cadena($_POST['h_entrada_c']);
+        $h_limite = mainModel::limpiar_cadena($_POST['h_limite']);
+        $h_condicion_tarde = mainModel::limpiar_cadena($_POST['condicion_tarde']);
         $hora_inicio_almuerzo = mainModel::limpiar_cadena($_POST['hAlmuerzoInicio']);
+        $h_a_inicio_compensacion = mainModel::limpiar_cadena($_POST['h_a_inicio_c']);
         $hora_fin_almuerzo = mainModel::limpiar_cadena($_POST['hAlmuerzoFin']);
+        $h_a_fin_compensacion = mainModel::limpiar_cadena($_POST['h_a_fin_c']);
         $hora_fin = mainModel::limpiar_cadena($_POST['hFin']);
+        $h_salida_compensacion = mainModel::limpiar_cadena($_POST['h_salida_c']);
+
+
         $datos = [
             "hora_inicio" => $hora_inicio,
+            "h_entrada_compensacion" => $h_entrada_compensacion,
+            "h_limite" => $h_limite,
+            "h_condicion_tarde" => $h_condicion_tarde,
             "hora_inicio_almuerzo" => $hora_inicio_almuerzo,
+            "h_a_inicio_compensacion" => $h_a_inicio_compensacion,
             "hora_fin_almuerzo" => $hora_fin_almuerzo,
+            "h_a_fin_compensacion" => $h_a_fin_compensacion,
             "hora_fin" => $hora_fin,
+            "h_salida_compensacion" => $h_salida_compensacion,
         ];
         $sql = AdminModelo::MdlCrearHorario($datos);
         if ($sql->rowCount() > 0) {
@@ -581,10 +609,20 @@ class AdminControlador extends AdminModelo
         echo $res;
     }
 
+    public function CtrGetHorarioInfo(){
+        $id = mainModel::decryption($_GET['id_horario']);
+        $sql = mainModel::ejecutar_consulta_simple("SELECT * FROM horario WHERE hor_id = '$id'");
+        $datos = $sql->fetch();
+        echo json_encode($datos);
+    }
+
     //Para crear nuevo registro pasante
     public function CtrNuevoRegistroPasante()
     {
-
+        // if ($_POST['h_entrada_u'] == '00:00:00') {
+        //     echo 'error_h_entrada';
+        //     exit();
+        // }
         $fecha = mainModel::limpiar_cadena($_POST['fecha']);
         $h_inicio = mainModel::limpiar_cadena($_POST['h_entrada_u']);
         $h_almuerzo_start_u = isset($_POST['h_almuerzo_start_u']) ?  mainModel::limpiar_cadena($_POST['h_almuerzo_start_u']) : "00:00:00";
@@ -819,7 +857,7 @@ class AdminControlador extends AdminModelo
                                 $a++;
                             }
                         }
-                        $select .= '>' . date('H:i a', strtotime($row['hor_entrada'])) . ' - ' . date('H:i a', strtotime($row['hor_salida'])) . '</option>';
+                        $select .= '>' . $row['hor_id'] . ' - ' . date('H:i a', strtotime($row['hor_entrada'])) . ' - ' . date('H:i a', strtotime($row['hor_salida'])) . '</option>';
 
                         // }    
                     }
@@ -833,7 +871,7 @@ class AdminControlador extends AdminModelo
                     foreach ($datos as $row) {
 
                         $select .= '<option value="' . $row['hor_id'] . '"';
-                        $select .= '>' . date('H:i a', strtotime($row['hor_entrada'])) . ' - ' . date('H:i a', strtotime($row['hor_salida'])) . '</option>';
+                        $select .= '>' . $row['hor_id'] . ' - ' . date('H:i a', strtotime($row['hor_entrada'])) . ' - ' . date('H:i a', strtotime($row['hor_salida'])) . '</option>';
                         // }    
                     }
                 }
@@ -847,7 +885,7 @@ class AdminControlador extends AdminModelo
                 foreach ($datos as $row) {
                     // if (!is_null($row['hor_id'])) {
                     $select .= '
-                        <option value="' . $row['hor_id'] . '">' .  date('H:i a', strtotime($row['hor_entrada'])) . ' - ' . date('H:i a', strtotime($row['hor_salida'])) . '</option>
+                        <option value="' . $row['hor_id'] . '">' . $row['hor_id'] . ' - ' .  date('H:i a', strtotime($row['hor_entrada'])) . ' - ' . date('H:i a', strtotime($row['hor_salida'])) . '</option>
                     ';
                     // }
                 }
@@ -855,5 +893,21 @@ class AdminControlador extends AdminModelo
         }
 
         echo $select;
+    }
+
+    // Para permitir el cambio de contraseña
+    public function CtrToggleCambioPass()
+    {
+        $valor = $_GET['toggleCambioPass'];
+        if ($valor == '1' || $valor == '0') {
+            $sql = mainModel::ejecutar_consulta_simple("UPDATE core SET cor_estado='$valor' WHERE cor_config='permitir_cambio_clave_pasante'");
+            if ($sql->rowCount() > 0) {
+                return 'ok';
+            } else {
+                return 'error ' . $valor;
+            }
+        } else {
+            return 'error';
+        }
     }
 }

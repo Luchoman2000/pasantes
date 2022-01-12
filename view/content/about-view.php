@@ -35,7 +35,7 @@
                         </div>
                         <div class="card-foot">
                             <h3>
-                                Hecho con <span class="easter"><i class="has-text-danger fa fa-heart"></i></span> por pasantes para pasantes.
+                                Hecho con <span style="cursor: pointer;" class="easter"><i class="has-text-danger fa fa-heart"></i></span> por pasantes para pasantes.
                             </h3>
 
                         </div>
@@ -86,7 +86,7 @@
                 });
             }, 500);
 
-            console.log(size);
+            // console.log(size);
 
             if (size > 15) {
                 $('.easter').children().css({

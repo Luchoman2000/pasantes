@@ -1,5 +1,6 @@
 <link href="<?php echo SERVERURL ?>src/css/bulma-calendar.min.css" rel="stylesheet">
 <link href="<?php echo SERVERURL ?>src/css/calendar.main.min.css" rel="stylesheet">
+<link href="<?php echo SERVERURL ?>src/css/bulma-switch.min.css" rel="stylesheet">
 <script src="<?php echo SERVERURL ?>src/js/calendar.main.min.js"></script>
 <script src="<?php echo SERVERURL ?>src/js/es.js"></script>
 <script src="<?php echo SERVERURL ?>src/js/bulma-calendar.min.js"></script>
@@ -7,8 +8,8 @@
     require_once './controller/perfil.controlador.php';
     $perfil = new PerfilControlador();
     $horario = $perfil->CtrGetHorario();
+    // var_dump($_SESSION)
 ?>
-
 
     <div class="card">
         <div class="card-content">
@@ -19,7 +20,6 @@
         </div>
     </div>
 
-
     <br>
     <br>
 
@@ -27,18 +27,16 @@
         <div class="card">
             <div class="card-content">
 
-                <div class="tabs is-fullwidth is-boxed">
+                <div class="tabs is-fullwidth">
                     <ul>
-                        <li class="tab" onclick="openTab(event,'lista')">
+                        <li class="listAs tab is-active" onclick="openTab(event,'lista')">
                             <a>
                                 <span class="icon is-small"><i class="fa fa-list" aria-hidden="true"></i></span>
                                 <span>Lista</span>
                             </a>
                         </li>
-                    </ul>
-                    <ul>
                         <li class="tab " onclick="openTab(event,'calendario')">
-                            <a>
+                            <a class="calend">
                                 <span class="icon is-small"><i class="fa fa-calendar" aria-hidden="true"></i></span>
                                 <span>Calendario</span>
                             </a>
@@ -46,15 +44,18 @@
                     </ul>
                 </div>
 
-                <div class="content-tab " id="lista" style="display: none;">
+                <div class="content-tab " id="lista">
                     <div class="content">
                         <div class="columns is-vcentered is-mobile">
                             <div class="column">
-                                <span class=" ml-3 has-text-info">Total Horas: <span class="total_horas_show title is-6">a</span></span>
+                                <span class=" ml-3 has-text-info">Total Horas: <span class="total_horas_show title is-6"></span>
+                                    <span style="cursor: help;" class="icon is-info has-tooltip-right has-tooltip-multiline" data-tooltip="Total de horas registradas. No contarán las horas de los días sin completar">
+                                        <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                    </span>
+                                </span>
                             </div>
                             <div class="column">
                                 <div class="buttons is-right mr-3">
-
                                     <button type="submit" class=" btnExportarAsi is-outlined is-info button is-small modal-button" data-target="exportarAsistencia" data-toggle="modal">
                                         <span class="icon">
                                             <i class="fa fa-external-link" aria-hidden="true"></i>
@@ -64,30 +65,35 @@
                                 </div>
                             </div>
                         </div>
-                        <?php if ($_SESSION['hor_id'] != "1" && $_SESSION['hor_id'] != null){
+                        <?php if ($_SESSION['hor_id'] != "1" && $_SESSION['hor_id'] != null) {
                         ?>
                             <div class="box">
                                 <h4 class="is-title has-text-primary">Horario</h4>
                                 <div class="columns">
                                     <div class="column">
-                                        <span class=" ml-3 has-text-info">Entrada: <span class="s_h_entrada title is-6"><?php echo $horario['hor_entrada'] ?></span></span>
-                                        <span class=" ml-3 has-text-info">Salida: <span class="s_h_salida title is-6"><?php echo $horario['hor_salida'] ?></span></span>
+                                        <span class="ml-3 has-text-info">Entrada: <span class="s_h_entrada title is-6"><?php echo $horario['hor_entrada'] ?></span></span>
+                                        <span class="ml-3 has-text-info">Salida: <span class="s_h_salida title is-6"><?php echo $horario['hor_salida'] ?></span></span>
                                         <span class="ml-3 has-text-info">Horas: <span class="s_h_tot_horas title is-6"></span></span>
                                     </div>
-                                    <!-- <div class="column">
-                                        <span class=" ml-3 has-text-info">Almuerzo inicio: <span class=" title is-6"><?php echo $horario['hor_salida_a'] ?></span></span>
-                                        <span class=" ml-3 has-text-info">Almuerzo fin: <span class=" title is-6"><?php echo $horario['hor_regreso_a'] ?></span></span>
-                                    </div> -->
+                                    <!-- </div> -->
+                                    <!-- <div class="columns"> -->
+                                    <div class="column is-8">
+                                        <span class="is-hidden-mobile  ml-3 has-text-info">Almuerzo inicio: <span class=" title is-6"><?php echo $horario['hor_salida_a'] ?></span></span>
+                                        <span class="is-hidden-mobile  ml-3 has-text-info">Almuerzo fin: <span class=" title is-6"><?php echo $horario['hor_regreso_a'] ?></span></span>
+                                    </div>
+                                    <!-- </div> -->
                                     <input class="s_h_salida_a" type="hidden" value="<?php echo $horario['hor_salida_a'] ?>">
                                     <input class="s_h_regreso_a" type="hidden" value="<?php echo $horario['hor_regreso_a'] ?>">
                                 </div>
-                                <div class="column ">
+                                <div class="column">
                                     <!-- Checkbox para mostrar o no las horas de diferencia -->
                                     <div class="field">
                                         <div class="control">
                                             <label class="checkbox">
-                                                <input checked type="checkbox" id="checkbox_horas_diferencia" onclick="show_horas_diferencia()">
-                                                <span>Mostrar diferencia</span>
+                                                <!-- <input id="switchColorDefault" type="checkbox" name="switchColorDefault" class="switch" checked="checked"> -->
+                                                <input name="checkbox_horas_diferencia" class="switch is-rounded is-outlined is-small" checked="checked" type="checkbox" id="checkbox_horas_diferencia" onclick="show_horas_diferencia()">
+                                                <label for="checkbox_horas_diferencia">Mostrar diferencia</label>
+                                                <!-- <span>Mostrar diferencia</span> -->
                                             </label>
                                         </div>
                                     </div>
@@ -109,27 +115,17 @@
                         } ?>
 
 
-                <div class="table-container">
+                <div class="table-container" style="overflow-x: hidden;">
+                </div>
+                </div>
 
-                    <?php
-                    require_once './controller/asistencia.controlador.php';
-                    $asistencia = new AsistenciaControlador();
-                    echo $asistencia->CtrMostrarAsistenciaPasante();
-                    ?>
-                </div>
-                </div>
             </div>
-
-            <div class="content-tab is-active" id="calendario">
+            <div class="content-tab" id="calendario" style="display: none;">
                 <div class="p-4">
-
                     <div id='calendar'></div>
                 </div>
-
             </div>
-
         </div>
-    </div>
     </div>
 
     <div class="modal modal-fx-fadeInScale" id="exportarAsistencia">
@@ -175,6 +171,27 @@
                             </div>
                         </div>
                         <div class="columns">
+                            <!-- Fecha desde -->
+                            <div class="column">
+                                <div class="field">
+                                    <label class="label">Desde</label>
+                                    <div class="control">
+                                        <input id="fecha_desde" class="input" type="date" name="fecha_desde" value="<?php echo date('Y-m-d') ?>" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Fecha hasta -->
+                            <div class="column">
+                                <div class="field">
+                                    <label class="label">Hasta</label>
+                                    <div class="control">
+                                        <input id="fecha_hasta" class="input" type="date" name="fecha_hasta" value="<?php echo date("Y-m-d") ?>" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="columns">
                             <div class="column">
                                 <div class="field">
                                     <div class="control">
@@ -203,16 +220,17 @@
         <button class="modal-close is-large" aria-label="close"></button>
     </div>
 
+    <!-- vista - Calendario de asistencias -->
     <script>
         var calendarEl = document.getElementById('calendar');
         var datos = [];
         var calendar = new FullCalendar.Calendar(calendarEl, {
             // themeSystem: 'bootstrap',
             eventClick: function(info) {
-                console.log(info);
-                console.log('');
-                console.log(info.event.dia);
-                console.log(info.event.title);
+                // console.log(info);
+                // console.log('');
+                // console.log(info.event.dia);
+                // console.log(info.event.title);
                 if (info.event.title == "Incompleto") {
                     msgEstado = "Incompleto 🔴";
                 } else if (info.event.title == "Completo") {
@@ -225,10 +243,23 @@
                     title: 'Dia ' + info.event.extendedProps.dia,
                     html: '<span>Hora ingreso</span><p>' + info.event.extendedProps.h_ingreso + '</p>' +
                         '<span>Hora Salida</span><p>' + info.event.extendedProps.h_salida + '</p>' +
-                        '<span>Estado</span><p>' + msgEstado + '</p>',
+                        '<span>Estado</span><p>' + msgEstado + '</p>' +
+                        '<span>Observación</span><p>' + info.event.extendedProps.observacion || '' + '</p>',
+                    showConfirmButton: true,
+                    confirmButtonText: 'Ver',
+                    showCloseButton: true,
+                    showCancelButton: true,
+                    cancelButtonText: 'Cerrar',
 
-                    // showCloseButton: true,
-                })
+                }).then((res) => {
+                    if (res.isConfirmed) {
+                        $('.dataTables_filter input').val(info.event.extendedProps.dia);
+                        $('.dataTables_filter input').keyup();
+                        // Create event of click
+                        var evt = $('.listAs').get(0).dispatchEvent(new MouseEvent('click'));
+                        openTab(evt, 'lista');
+                    }
+                });
             },
 
             selectable: true,
@@ -236,6 +267,7 @@
             select: function(info) {
                 this.changeView('timeGridDay', info.startStr);
                 // this.eventClick(info);
+                // console.log(table_asi);
             },
 
             events: {
@@ -251,7 +283,7 @@
                 success: function(data) {
                     // alert('nice!');
                     datos = data;
-                    console.log('nice');
+                    // console.log('nice');
                     // console.log(data);
                 },
                 color: 'yellow', // a non-ajax option
@@ -306,12 +338,113 @@
                 right: 'dayGridMonth,timeGridDay'
             },
         });
+
         calendar.render();
+        // $('.tabLista li a').click();
+        $(document).on('click', '.calend', function() {
+            calendar.render();
+
+        });
     </script>
 
+    <!-- vista - Lista de asistencias -->
     <script>
-        var tot = $('.total_horas').val()
-        $('.total_horas_show').text(tot)
+        // DataTables Bulma
+        $(function() {
+
+            //Diff hours
+            var h_entrada = $('.s_h_entrada').text();
+            var h_salida = $('.s_h_salida').text();
+
+            var h_salida_almuerzo = $('.s_h_salida_a').val();
+            var h_regreso_almuerzo = $('.s_h_regreso_a').val();
+
+
+            // console.log(h_entrada);
+            // console.log(h_salida_almuerzo);
+            // console.log(h_regreso_almuerzo);
+            // console.log(h_salida);
+
+
+
+            // get difference in hours with moment.js
+            var diff = moment.duration(moment(h_salida, "HH:mm:ss").diff(moment(h_entrada, "HH:mm:ss"))).asHours();
+            var diff_almuerzo = moment.duration(moment(h_regreso_almuerzo, "HH:mm:ss").diff(moment(h_salida_almuerzo, "HH:mm:ss"))).asHours();
+
+            // get diff between diff_almuerzo and diff and cast to format hh:mm:ss
+            var diff_total = diff - diff_almuerzo;
+            var diff_total_format = moment.utc(moment.duration(diff_total, "hours").asMilliseconds()).format("HH:mm");
+
+
+            // console.log(diff);
+            // console.log(diff_almuerzo);
+            // console.log(diff_total);
+            // console.log(diff_total_format);
+
+            $('.s_h_tot_horas').text(diff_total_format);
+
+
+
+            $.ajax({
+                url: SERVERURL + '/pasantes/ajax/asistencia.ajax.php',
+                type: 'POST',
+                data: {
+                    'listarAsistenciaPasante': true,
+                    // 'screen': (document.body.clientWidth <= 768) ? 'mobile' : 'desktop'
+                    'screen': 'desktop'
+                },
+                success: function(respuesta) {
+                    // console.log(respuesta);
+                    $('.table-container').html(respuesta).hide().fadeIn(1000);
+                    var table_asi = $('#asi_pasante').removeAttr('width').DataTable({
+                        // scrollY: "300px",
+                        columnDefs: [
+
+                            {
+                                responsivePriority: 1,
+                                targets: 1
+                            },
+                            {
+                                responsivePriority: 2,
+                                targets: -4
+                            },
+                            {
+                                targets: -1,
+                                className: 'nowrap-normal'
+                            }
+                        ],
+                        "language": {
+                            "url": SERVERURL + "/pasantes/src/es_es.json"
+                        },
+                        "order": [
+                            [
+                                0, "desc"
+                            ]
+                        ],
+                        pagin: false,
+                        "pagingType": "simple",
+                        lengthChange: false,
+                        scrollCollapse: true,
+                        scroller: true,
+                        fixedColumns: true,
+
+                    });
+
+                    $('.total_horas_show').text($('.total_horas').val())
+                    $('#fecha_desde').val($('.first_date').val());
+                    $('#fecha_desde').attr('min', $('.first_date').val());
+                    $('#fecha_desde').attr('max', $('#fecha_hasta').val());
+                    $('#fecha_hasta').attr('min', $('.first_date').val());
+                    $('#fecha_hasta').attr('max', $('#fecha_hasta').val());
+
+
+                }
+            });
+
+
+
+
+        });
     </script>
 
     <br>
@@ -349,7 +482,6 @@
             </div>
         </div>
 
-
         <br>
         <br>
 
@@ -359,29 +491,31 @@
             <div class="card">
                 <div class="card-content">
 
-                    <div class="tabs is-fullwidth is-boxed">
+                    <div class="tabs is-fullwidth">
                         <ul>
-                            <li class="tab" onclick="openTab(event,'lista')">
+                            <li class="tab is-active" onclick="openTab(event,'lista')">
                                 <a>
                                     <span class="icon is-small"><i class="fa fa-list" aria-hidden="true"></i></span>
                                     <span>Lista</span>
                                 </a>
                             </li>
-                        </ul>
-                        <ul>
                             <li class="tab " onclick="openTab(event,'calendario')">
-                                <a>
+                                <a class="calend">
                                     <span class="icon is-small"><i class="fa fa-calendar" aria-hidden="true"></i></span>
                                     <span>Calendario</span>
                                 </a>
                             </li>
                         </ul>
                     </div>
-                    <div class="content-tab " id="lista" style="display: none;">
+                    <div class="content-tab " id="lista">
                         <div class="content">
                             <div class="columns is-vcentered is-mobile">
                                 <div class="column">
-                                    <span class=" ml-3 has-text-info">Total Horas: <span class="total_horas_show title is-6"></span></span>
+                                    <span class=" ml-3 has-text-info">Total Horas: <span class="total_horas_show title is-6"></span>
+                                        <span style="cursor: help;" class="icon is-info has-tooltip-right has-tooltip-multiline" data-tooltip="Total de horas registradas. No contarán las horas de los días sin completar">
+                                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                                        </span>
+                                    </span>
                                 </div>
                                 <div class="column">
                                     <div class="buttons is-right mr-3">
@@ -400,10 +534,8 @@
                                         </button>
                                     </div>
                                 </div>
-
                             </div>
-
-                            <?php if (@$horario['hor_id'] != "1" && !is_null(@$horario['hor_id'])) {
+                            <?php if (@$horario['hor_id'] != "1" && @$horario['hor_id'] != null) {
                             ?>
                                 <div class="box">
                                     <h4 class="is-title has-text-primary">Horario</h4>
@@ -413,24 +545,25 @@
                                             <span class=" ml-3 has-text-info">Salida: <span class="s_h_salida title is-6"><?php echo $horario['hor_salida'] ?></span></span>
                                             <span class="ml-3 has-text-info">Horas: <span class="s_h_tot_horas title is-6"></span></span>
                                         </div>
-                                        <!-- <div class="column">
-                                        <span class=" ml-3 has-text-info">Almuerzo inicio: <span class=" title is-6"><?php echo $horario['hor_salida_a'] ?></span></span>
-                                        <span class=" ml-3 has-text-info">Almuerzo fin: <span class=" title is-6"><?php echo $horario['hor_regreso_a'] ?></span></span>
-                                    </div> -->
+                                        <div class="column">
+                                            <span class="is-hidden-mobile  ml-3 has-text-info">Almuerzo inicio: <span class=" title is-6"><?php echo $horario['hor_salida_a'] ?></span></span>
+                                            <span class="is-hidden-mobile  ml-3 has-text-info">Almuerzo fin: <span class=" title is-6"><?php echo $horario['hor_regreso_a'] ?></span></span>
+                                        </div>
                                         <input class="s_h_salida_a" type="hidden" value="<?php echo $horario['hor_salida_a'] ?>">
                                         <input class="s_h_regreso_a" type="hidden" value="<?php echo $horario['hor_regreso_a'] ?>">
                                     </div>
-                                    <div class="column ">
-                                        <!-- Checkbox para mostrar o no las horas de diferencia -->
-                                        <div class="field">
-                                            <div class="control">
-                                                <label class="checkbox">
-                                                    <input checked type="checkbox" id="checkbox_horas_diferencia" onclick="show_horas_diferencia()">
-                                                    <span>Mostrar diferencia</span>
-                                                </label>
-                                            </div>
+                                    <div class="column">
+                                    <!-- Checkbox para mostrar o no las horas de diferencia -->
+                                    <div class="field">
+                                        <div class="control">
+                                            <label class="checkbox">
+                                                <input name="checkbox_horas_diferencia" class="switch is-rounded is-outlined is-small" checked="checked" type="checkbox" id="checkbox_horas_diferencia" onclick="show_horas_diferencia()">
+                                                <label for="checkbox_horas_diferencia">Mostrar diferencia</label>
+                                               
+                                            </label>
                                         </div>
                                     </div>
+                                </div>
                                 </div>
                         </div>
                     <?php
@@ -447,23 +580,22 @@
                     <?php
                             } ?>
 
+
                     <div class="table-container">
                         <?php
                         // var_dump($horario);
-                        echo $asistencia->CtrMostrarAsistenciaPasanteAdmin(($horario == 1) ? $horario : $horario['hor_id']);
+                        // echo $asistencia->CtrMostrarAsistenciaPasanteAdmin(($horario == 1) ? $horario : $horario['hor_id']);
                         ?>
                     </div>
                     </div>
                 </div>
-                <div class="content-tab is-active" id="calendario">
+                <div class="content-tab is-active" id="calendario" style="display: none;">
                     <div class="p-4">
 
                         <div id='calendar'></div>
                     </div>
                 </div>
             </div>
-
-        </div>
 
         </div>
 
@@ -480,6 +612,16 @@
                         </header>
 
                         <section class="modal-card-body">
+
+                            <div class="card mb-4 p-3 blockHorario">
+                                <h3 class="is-inline">Entrada: </h3>
+                                <p class="is-inline" id="hor_entrada"></p>
+                                <h3 class="is-inline-block">Estado: </h3>
+                                <p class="is-inline" id="asi_estado"></p>
+                                <br>
+                                <h3 class="is-inline-block">Límite: </h3>
+                                <p class="is-inline" id="hor_limite">10</p>
+                            </div>
 
                             <div class="columns">
                                 <div class="column is-5">
@@ -521,7 +663,16 @@
                                 </div>
                             </div>
 
+                            <div class="columns">
+                                <div class="column">
+                                    <label class="label has-text-info">Observación</label>
+                                    <textarea style="width: 100%; height: 59px;" class="textarea" placeholder="Observación" id="asi_obserbacion" name="asi_observacion"></textarea>
+
+                                </div>
+                            </div>
+
                             <input id="asiId" type="hidden" name="asiId_u">
+                            <input id="id_h" type="hidden" name="horario" value="<?php echo $horario['hor_id'] ?>">
                         </section>
 
                         <footer class="modal-card-foot">
@@ -708,6 +859,26 @@
                                 </div>
                             </div>
                             <div class="columns">
+                                <!-- Fecha desde -->
+                                <div class="column">
+                                    <div class="field">
+                                        <label class="label">Desde</label>
+                                        <div class="control">
+                                            <input id="fecha_desde" class="input" type="date" name="fecha_desde" value="<?php echo date('Y-m-d') ?>" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Fecha hasta -->
+                                <div class="column">
+                                    <div class="field">
+                                        <label class="label">Hasta</label>
+                                        <div class="control">
+                                            <input id="fecha_hasta" class="input" type="date" name="fecha_hasta" value="<?php echo date("Y-m-d") ?>" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="columns">
                                 <div class="column">
                                     <div class="field">
                                         <div class="control">
@@ -736,17 +907,16 @@
             <button class="modal-close is-large" aria-label="close"></button>
         </div>
 
-
         <script>
             var calendarEl = document.getElementById('calendar');
             var datos = [];
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 // themeSystem: 'bootstrap',
                 eventClick: function(info) {
-                    console.log(info);
-                    console.log('');
-                    console.log(info.event.dia);
-                    console.log(info.event.title);
+                    // console.log(info);
+                    // console.log('');
+                    // console.log(info.event.dia);
+                    // console.log(info.event.title);
                     if (info.event.title == "Incompleto") {
                         msgEstado = "Incompleto 🔴";
                     } else if (info.event.title == "Completo") {
@@ -786,7 +956,7 @@
                     success: function(data) {
                         // alert('nice!');
                         datos = data;
-                        console.log('nice');
+                        // console.log('nice');
                         // console.log(data);
                     },
                     color: 'yellow', // a non-ajax option
@@ -842,39 +1012,121 @@
                 },
             });
             calendar.render();
+            $(document).on('click', '.calend', function() {
+                calendar.render();
 
-            // $(document).on('click', '.btnExportarAsi', function() {
-
-            //     console.log('click');
-            //     console.log(datos);
-            //     var form = $('<form>').attr('id', 'exportarWord').attr('method', 'POST').attr('action', SERVERURL + '/pasantes/ajax/reporte.ajax.php');
-            //     var input = $('<input>').attr('type', 'hidden').attr('name', 'reporte_asistencia').val('true');
-            //     form.append(input);
-            //     $('body').append(form);
-            //     form.submit();
-
-            // })
+            });
         </script>
-
-        <script>
-            // var b_calendar = new bulmaCalendar('#date_range', {
-            //     dateFormat: 'yyyy/MM/dd',
-            //     disabledDates: [<?php echo $asistencia->CtrGetDatesById($id) ?>],
-            //     lang: 'es',
-            // });
-            // b_calendar.on('select', date => {
-            //     console.log(date);
-            // });
-        </script>
-
 
         <script>
             var tot = $('.total_horas').val()
             $('.total_horas_show').text(tot)
         </script>
 
+        <script>
+            // DataTables Bulma
+            $(function() {
+
+                //Diff hours
+                var h_entrada = $('.s_h_entrada').text();
+                var h_salida = $('.s_h_salida').text();
+
+                var h_salida_almuerzo = $('.s_h_salida_a').val();
+                var h_regreso_almuerzo = $('.s_h_regreso_a').val();
 
 
+                // console.log(h_entrada);
+                // console.log(h_salida_almuerzo);
+                // console.log(h_regreso_almuerzo);
+                // console.log(h_salida);
+
+
+
+                // get difference in hours with moment.js
+                var diff = moment.duration(moment(h_salida, "HH:mm:ss").diff(moment(h_entrada, "HH:mm:ss"))).asHours();
+                var diff_almuerzo = moment.duration(moment(h_regreso_almuerzo, "HH:mm:ss").diff(moment(h_salida_almuerzo, "HH:mm:ss"))).asHours();
+
+                // get diff between diff_almuerzo and diff and cast to format hh:mm:ss
+                var diff_total = diff - diff_almuerzo;
+                var diff_total_format = moment.utc(moment.duration(diff_total, "hours").asMilliseconds()).format("HH:mm");
+
+
+                // console.log(diff);
+                // console.log(diff_almuerzo);
+                // console.log(diff_total);
+                // console.log(diff_total_format);
+
+                $('.s_h_tot_horas').text(diff_total_format);
+
+
+
+                $.ajax({
+                    url: SERVERURL + '/pasantes/ajax/asistencia.ajax.php',
+                    type: 'POST',
+                    data: {
+                        'listarAsistenciaPasante_adm': true,
+                        'horario': <?php echo ($horario == 1) ? $horario : $horario['hor_id'] ?>,
+                        'id_p': '<?php echo $id ?>'
+                        // 'screen': (document.body.clientWidth <= 768) ? 'mobile' : 'desktop'
+                        // 'screen': 'desktop'
+                    },
+                    success: function(respuesta) {
+                        // console.log(respuesta);
+                        $('.table-container').html(respuesta).hide().fadeIn(1000);
+                        var table_asi = $('#asi_pasante_adm').removeAttr('width').DataTable({
+                            // scrollY: "300px",
+                            columnDefs: [
+
+                                // {
+                                //     responsivePriority: 1,
+                                //     targets: 1
+                                // },
+                                // {
+                                //     responsivePriority: 2,
+                                //     targets: -4
+                                // },
+                                {
+                                    targets: -2,
+                                    className: 'nowrap-normal'
+                                }
+                            ],
+                            "language": {
+                                "url": SERVERURL + "/pasantes/src/es_es.json"
+                            },
+                            "order": [
+                                [
+                                    0, "desc"
+                                ]
+                            ],
+                            // searching: false,
+                            pagin: false,
+                            "pagingType": "simple",
+                            lengthChange: false,
+                            // responsive: true,
+                            scrollCollapse: true,
+                            scroller: true,
+                            // deferRender: true,
+                            fixedColumns: true,
+
+                            
+
+                        });
+
+                        $('.total_horas_show').text($('.total_horas').val())
+                        $('#fecha_desde').val($('.first_date').val());
+                        $('#fecha_desde').attr('min', $('.first_date').val());
+                        $('#fecha_desde').attr('max', $('#fecha_hasta').val());
+                        $('#fecha_hasta').attr('min', $('.first_date').val());
+                        $('#fecha_hasta').attr('max', $('#fecha_hasta').val());
+
+                    }
+                });
+
+
+
+
+            });
+        </script>
 
         <br>
         <br>
@@ -882,8 +1134,6 @@
     <?php
     } else {
     ?>
-
-
         <div class="card">
             <div class="card-content">
                 <div class="container mW alignCenter content">
@@ -892,20 +1142,48 @@
                 </div>
             </div>
         </div>
-
-
         <br>
         <br>
 
         <div class="container">
-
-
             <div class="card">
                 <div class="card-content">
+                    <!-- <div class="card mb-5">
+                        <div class="columns">
+
+                            <div class="column">
+                                <h1 class="is-size-5 has-text-weight-bold has-text-info m-3 mb-2    ">Filtros:</h1>
+                            </div>
+                        </div>
+                        <div class="columns">
+
+                            <div class="column ml-3">
+                                <p class="subtitle is-size-6 mb-1">Desde - hasta</p>
+                                <div class="field has-addons">
+                                    <div class="control">
+                                        <input class="input is-small" type="date" id="fecha_desde" name="fecha_desde" value="<?php echo date('Y-m-d') ?>">
+                                    </div>
+                                    <div class="control">
+                                        <input class="input is-small" type="date" id="fecha_hasta" name="fecha_hasta" value="<?php echo date('Y-m-d') ?>">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="column ml-3">
+                                <p class="subtitle is-size-6 mb-1">Desde - hasta</p>
+                                <div class="field has-addons">
+                                    <div class="control">
+                                        <input class="input is-small" type="date" id="fecha_desde" name="fecha_desde" value="<?php echo date('Y-m-d') ?>">
+                                    </div>
+                                    <div class="control">
+                                        <input class="input is-small" type="date" id="fecha_hasta" name="fecha_hasta" value="<?php echo date('Y-m-d') ?>">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div> -->
                     <div class="content">
                         <div class="columns is-vcentered is-mobile">
-
-
                         </div>
                         <div class="table-container">
                             <div>
@@ -1005,15 +1283,11 @@
             // window.location.href = id;
             // console.log(id);
             window.location.href = "registro/" + id;
-
-
-
-
         })
         $(document).on('click', '.eliminarRegistro', function() {
             var id = $(this).attr('id');
             // window.location.href = id;
-            console.log(id);
+            // console.log(id);
             Swal.fire({
                 title: '¿Estás seguro?',
                 text: "Barrarás el registro de este usuario, ¡No podrás revertir esto!",
@@ -1032,7 +1306,7 @@
                         method: "POST",
                         data: 'id=' + id + '&borrar_registro=true',
                         success: function(data) {
-                            console.log(data);
+                            // console.log(data);
                             if (data == 'ok') {
                                 Swal.fire(
                                     '¡Eliminado!',
@@ -1079,8 +1353,8 @@
     });
 </script>
 
-
 <script>
+    // $(function() {
     function openTab(evt, tabName) {
         var i, x, tablinks;
         x = document.getElementsByClassName("content-tab");
@@ -1096,6 +1370,7 @@
 
 
     }
+    // })
 </script>
 
 <script>

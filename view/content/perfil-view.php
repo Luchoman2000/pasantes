@@ -1,9 +1,10 @@
 <?php
 require_once './controller/perfil.controlador.php';
 $perfil = new PerfilControlador();
-
 $horario = $perfil->CtrGetHorario();
 $Pdata = $perfil->CtrGetDatosPersonales();
+$permite_cambio_clave = $perfil->CtrGetCoreConfig('permite_cambio_clave');
+
 // var_dump($Pdper);
 ?>
 <script src="<?php echo SERVERURL ?>src/js/perfil.js"></script>
@@ -19,22 +20,106 @@ $Pdata = $perfil->CtrGetDatosPersonales();
 <br>
 <br>
 
-
 <div class="container">
 	<div class="box">
 		<div class="card-content">
 			<div class="content">
-
 				<!-- Perfil de usuario -->
-				
-				<?php if ($_SESSION['rol'] != 'ADMINISTRADOR' && ($_SESSION['hor_id'] != null || $_SESSION['hor_id'] == 1)) {
+				<?php if ($permite_cambio_clave) :
+				?>
+					<div class="box">
+						<form id="ClaveForm" action="<?php echo SERVERURL ?>ajax/perfil.ajax.php" method="post">
+							
+							<label class="label has-text-info-dark title is-5 pb-4">Cambiar contraseña</label>
+							<div class="columns is-desktop">
+
+								<div class="column">
+									<div class="field ">
+										<div class="field-label"></div>
+										<div class="field-body">
+											<div class="field is-expanded">
+												<div class="field has-addons">
+													<p class="control">
+														<a class="button is-static">
+															Anterior
+														</a>
+													</p>
+													<p class="control is-expanded">
+														<input autocomplete="off" name="anteriorClave" id="anteriorClave" class="input" type="password" placeholder="Clave anterior">
+													</p>
+												</div>
+												<!-- <p class="help">Do not enter the first zero</p> -->
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="column">
+									<div class="field">
+										<div class="field-label"></div>
+										<div class="field-body">
+											<div class="field is-expanded">
+												<div class="field has-addons">
+													<p class="control">
+														<a class="button is-static">
+															Nueva
+														</a>
+													</p>
+													<p class="control is-expanded">
+														<input autocomplete="off" name="nuevaClave1" id="nuevaClave1" class="input" type="password" value="" placeholder="Nueva clave">
+													</p>
+												</div>
+												<!-- <p class="help">Do not enter the first zero</p> -->
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="column">
+									<div class="field">
+										<div class="field-label"></div>
+										<div class="field-body">
+											<div class="field is-expanded">
+												<div class="field has-addons">
+													<p class="control">
+														<a class="button is-static">
+															Repetir
+														</a>
+													</p>
+													<p class="control is-expanded">
+														<input autocomplete="off" name="nuevaClave2" id="nuevaClave2" class="input" type="password" value="" placeholder="Repita su clave">
+													</p>
+												</div>
+												<!-- <p class="help">Do not enter the first zero</p> -->
+											</div>
+										</div>
+									</div>
+								</div>
+
+							</div>
+
+							<div class="columns">
+								<div class="column">
+									<button type="submit" class="button is-success is-outlined btnCambiarClave">
+										<span class="icon">
+											<i class="fa fa-save"></i>
+										</span>
+										<span>Guardar</span>
+									</button>
+
+								</div>
+							</div>
+
+						</form>
+					</div>
+					<br>
+				<?php endif ?>
+
+				<?php if ($_SESSION['rol'] != 'ADMINISTRADOR' && ($_SESSION['hor_id'] != null || $_SESSION['hor_id'] == 1)) :
 				?>
 					<div class="box">
 						<fieldset disabled="disabled">
 							<label class="label has-text-info-dark title is-5 pb-4">Horario</label>
 
 							<div class="columns is-desktop">
-
 
 								<div class="column">
 									<div class="field ">
@@ -78,13 +163,14 @@ $Pdata = $perfil->CtrGetDatosPersonales();
 										</div>
 									</div>
 								</div>
+
 							</div>
 
 						</fieldset>
 					</div>
-				<?php } ?>
-				<br>
+				<?php endif ?>
 
+				<br>
 				<div class="box">
 
 
@@ -181,7 +267,7 @@ $Pdata = $perfil->CtrGetDatosPersonales();
 						</div>
 						<button type="submit" class="button is-success is-outlined btnGuardarPerfil">
 							<span class="icon">
-								<i class="fa fa-plus"></i>
+								<i class="fa fa-save"></i>
 							</span>
 							<span>Guardar</span>
 						</button>
@@ -191,7 +277,6 @@ $Pdata = $perfil->CtrGetDatosPersonales();
 		</div>
 	</div>
 </div>
-
 
 <br>
 <br>

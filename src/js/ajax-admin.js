@@ -201,7 +201,7 @@ $(document).on('click', '.eliminarUsuario', function () {
                 method: "POST",
                 data: 'id=' + id + '&borrar_usuario=true',
                 success: function (data) {
-                    console.log(data);
+                    // console.log(data);
                     if (data == 'ok') {
                         Swal.fire(
                             '¡Eliminado!',
@@ -241,7 +241,7 @@ $(document).on('click', '.eliminarPersonal', function () {
     var id = $(this).attr('id');
     Swal.fire({
         title: '¿Estás seguro?',
-        text: "Barrarás este usuario, ¡No podrás revertir esto!",
+        text: "Barrarás esta persona y todos los registros de este, ¡No podrás revertir esto!",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
@@ -256,7 +256,7 @@ $(document).on('click', '.eliminarPersonal', function () {
                 method: "POST",
                 data: 'id_personal=' + id + '&borrar_personal=true',
                 success: function (data) {
-                    console.log(data);
+                    // console.log(data);
                     if (data == 'ok') {
                         Swal.fire(
                             '¡Eliminado!',
@@ -307,7 +307,7 @@ $(document).on('click', '.eliminarHorario', function () {
                 method: "POST",
                 data: 'id_horario=' + id + '&borrar_horario=true',
                 success: function (data) {
-                    console.log(data);
+                    // console.log(data);
                     if (data == 'ok') {
                         Swal.fire(
                             '¡Eliminado!',
@@ -364,7 +364,7 @@ $(document).on('click', '.editarUsuario', function () {
         data: 'Uid=' + id_usuario + '&editar_usuario_select_personal=true',
         success: function (data) {
             // data = JSON.parse(data);
-            console.log(data);
+            // console.log(data);
             // console.log(data);
             $('.euNombre').html('');
             $('.euNombre').append(data);
@@ -394,7 +394,7 @@ $(document).on('click', '.editarUsuario', function () {
             // console.log(data);
             $('.euHorario').html('');
             $('.euHorario').append(data);
-            console.log(data);
+            // console.log(data);
             if ($('.euRol option:selected').text() == "ADMINISTRADOR") {
                 $('.euHorario').attr('disabled', true);
                 $('.euHorario').val("1");
@@ -501,10 +501,28 @@ $(document).on('click', '.editarHorario', function () {
     $('.mHorarioTitle').text('Editar horario');
     let id_horario = $(this).attr('id');
     var row = $(this).closest('tr');
-    var hora_inicio = row.children().eq(0).text();
-    var hora_inicio_almuerzo = row.children().eq(1).text();
-    var hora_fin_almuerzo = row.children().eq(2).text();
-    var hora_fin = row.children().eq(3).text();
+    var hora_inicio = row.children().eq(1).text();
+    var hora_inicio_almuerzo = row.children().eq(2).text();
+    var hora_fin_almuerzo = row.children().eq(3).text();
+    var hora_fin = row.children().eq(4).text();
+    // get horario info
+    fetch(SERVERURL + '/pasantes/ajax/admin.ajax.php?id_horario=' + id_horario + '&get_horario_info=true').then(function (response) {return response.json();
+    }).then(function (json) {
+        // console.log(json);
+        $('[name="h_entrada_c"]').val(json.hor_c_entrada);
+        $('[name="h_a_inicio_c"]').val(json.hor_c_a_salida);
+        $('[name="h_a_fin_c"]').val(json.hor_c_a_regreso);
+        $('[name="h_salida_c"]').val(json.hor_c_salida);
+        $('[name="h_limite"]').val(json.hor_limite_entrada);
+        if (json.hor_marcar_tarde == '0') {
+            $('#m_t_0').prop('checked', true);
+        } else if (json.hor_marcar_tarde == '1') {
+            $('#m_t_1').prop('checked', true);
+        } else if (json.hor_marcar_tarde == '2') {
+            $('#m_t_2').prop('checked', true);
+        }
+    });
+
 
     $('.hInicio').val("");
     $('.hInicio').val(moment(hora_inicio, 'HH:mm').format('HH:mm'));
@@ -657,7 +675,7 @@ $(document).on('submit', '#mUsuario', function (e) {
     u_valid = !u_valid_array.includes(false);
     if (u_valid) {
 
-        console.log($('.btnUsuarioForm').attr('id'));
+        // console.log($('.btnUsuarioForm').attr('id'));
 
 
         var formData = new FormData(document.getElementById("mUsuario"));
@@ -672,7 +690,7 @@ $(document).on('submit', '#mUsuario', function (e) {
         valido = validar(accion);
         // if (!valido) return true;
         // 
-        console.log(valido);
+        // console.log(valido);
         if (valido) {
             // debugger;
             var clave = $('.uNClave').val();
@@ -716,7 +734,7 @@ $(document).on('submit', '#mUsuario', function (e) {
                                     contentType: false,
                                     processData: false,
                                     success: function (data) {
-                                        console.log(data);
+                                        // console.log(data);
                                         if (data == 1) {
                                             Swal.fire(
                                                 '¡Guardado!',
@@ -774,7 +792,7 @@ $(document).on('submit', '#mUsuario', function (e) {
                         contentType: false,
                         processData: false,
                         success: function (data) {
-                            console.log(data);
+                            // console.log(data);
                             if (data == 1) {
                                 Swal.fire(
                                     '¡Guardado!',
@@ -822,7 +840,7 @@ $(document).on('submit', '#mUsuario', function (e) {
                     contentType: false,
                     processData: false,
                     success: function (data) {
-                        console.log(data);
+                        // console.log(data);
                         if (data == 1) {
                             Swal.fire(
                                 '¡Guardado!',
@@ -884,7 +902,7 @@ $(document).on('submit', '#mPersonal', function (e) {
         formData.append(accion, true);
 
         valido = validarPersonal(accion);
-        console.log(valido);
+        // console.log(valido);
         if (valido) {
 
             Swal.fire({
@@ -906,7 +924,7 @@ $(document).on('submit', '#mPersonal', function (e) {
                         contentType: false,
                         processData: false,
                         success: function (data) {
-                            console.log(data);
+                            // console.log(data);
                             if (data == 1) {
                                 Swal.fire(
                                     '¡Guardado!',
@@ -971,7 +989,7 @@ $(document).on('submit', '#mHorario', function (e) {
     formData.append(accion, true);
 
     valido = validarHorario(accion);
-    console.log(valido);
+    // console.log(valido);
     if (valido) {
 
         Swal.fire({
@@ -993,7 +1011,7 @@ $(document).on('submit', '#mHorario', function (e) {
                     contentType: false,
                     processData: false,
                     success: function (data) {
-                        console.log(data);
+                        // console.log(data);
                         if (data == 1) {
                             Swal.fire(
                                 '¡Guardado!',
@@ -1275,6 +1293,43 @@ function validarHorario(accion) {
     }
 }
 
+function toggle_permitir_cambio_clave() {
+    if ($('#checkbox_cambio_clave').is(':checked')) {
+
+
+        fetch(SERVERURL + '/pasantes/ajax/admin.ajax.php?toggleCambioPass=1').then(response => response.text()).then(result => {
+            if (result == "ok") {
+                Swal.fire(
+                    '¡Exito!',
+                    'Se habilito el cambio de clave',
+                    'success'
+                )
+            } else {
+                Swal.fire(
+                    '¡Error!',
+                    'No se habilito el cambio de clave',
+                    'error'
+                )
+            }
+        });
+    } else {
+        fetch(SERVERURL + '/pasantes/ajax/admin.ajax.php?toggleCambioPass=0').then(response => response.text()).then(result => {
+            if (result == "ok") {
+                Swal.fire(
+                    '¡Exito!',
+                    'Se deshabilito el cambio de clave',
+                    'success'
+                )
+            } else {
+                Swal.fire(
+                    '¡Error!',
+                    'No se habilito el cambio de clave',
+                    'error'
+                )
+            }
+        });
+    }
+}
 
 function togglePassword(id) {
     // var input = document.getElementById(id);
